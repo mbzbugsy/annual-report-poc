@@ -1,0 +1,5 @@
+{
+  "latex-workshop.latex.outDir": "%DIR%/../build",
+  "files.encoding": "utf8",
+  "editor.formatOnSave": false
+}

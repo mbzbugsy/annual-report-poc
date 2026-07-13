@@ -1,0 +1,24 @@
+\section{Finansiell översikt}
+
+Samtliga belopp är fiktiva och anges i MSEK.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Post & 2025 & 2024 \\
+\midrule
+\csvreader[
+  head to column names,
+  late after line=\\
+]{data/financials.csv}{}{
+  \metric & \yearcurrent & \yearprevious
+}
+\bottomrule
+\end{tabular}
+\caption{Fiktiv finansiell översikt}
+\end{table}
+
+Omsättningen ökade i detta exempel samtidigt som rörelseresultatet förbättrades.
+Förändringen speglar en kombination av organisk tillväxt och effektivare interna
+processer.
