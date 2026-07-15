@@ -55,6 +55,7 @@ class IncomeStatementRendererTests(unittest.TestCase):
             self.assertIn("Rörelsens intäkter", tex)
             self.assertIn("Rörelsens kostnader", tex)
             self.assertIn("Årets resultat", tex)
+            self.assertIn("{5 (19)}", tex)
             self.assertIn("120 000 000", tex)
 
     def test_successful_json_parsing_and_render_contains_all_rows(self) -> None:
@@ -124,6 +125,7 @@ class IncomeStatementRendererTests(unittest.TestCase):
             self.assertIn("111111-2222", tex)
             self.assertIn("2099-01-01", tex)
             self.assertIn("2098-01-01", tex)
+            self.assertIn("{5 (19)}", tex)
 
     def test_missing_required_income_statement_line_fails(self) -> None:
         lines = dict(VALID_LINES)

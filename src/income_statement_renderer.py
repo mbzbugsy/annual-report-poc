@@ -67,6 +67,8 @@ LAYOUT_ROWS: List[StatementRow] = [
     StatementRow("line", "netResult", "Årets resultat", "", style="total"),
 ]
 
+INCOME_STATEMENT_PAGE_INDICATOR = "5 (19)"
+
 def escape_latex(text: str) -> str:
     replacements = {
         "\\": "\\textbackslash{}",
@@ -244,6 +246,7 @@ def render_income_statement_tex(
                 "{Resultaträkning}"
                 f"{{{_render_period_label(metadata.current_reporting_period)}}}"
                 f"{{{_render_period_label(previous_period_label)}}}"
+                f"{{{escape_latex(INCOME_STATEMENT_PAGE_INDICATOR)}}}"
             ),
             *rendered_rows,
             "\\FinancialStatementEnd",

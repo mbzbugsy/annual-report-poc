@@ -2,33 +2,35 @@
 % Reuse these commands for statement pages (income, balance sheet, cash flow).
 
 \providecommand{\FinancialStatementPeriodLabel}[1]{\shortstack[c]{#1}}
-\providecommand{\FinancialStatementCompanyName}{}
-\providecommand{\FinancialStatementOrganizationNumber}{}
+\providecommand{\FinancialStatementCompanyHeader}{}
+\providecommand{\FinancialStatementPageIndicator}{}
 
 \fancypagestyle{financialstatement}{%
 \fancyhf{}
-\fancyhead[L]{\fontfamily{phv}\selectfont\small \FinancialStatementCompanyName}
-\fancyhead[R]{\fontfamily{phv}\selectfont\small \FinancialStatementOrganizationNumber}
-\fancyfoot[C]{\thepage}
+\fancyhead[L]{\fontfamily{phv}\selectfont\small \shortstack[l]{\FinancialStatementCompanyHeader}}
+\fancyhead[R]{\fontfamily{phv}\selectfont\small \FinancialStatementPageIndicator}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
 }
 
-\providecommand{\FinancialStatementBegin}[5]{%
-\gdef\FinancialStatementCompanyName{#1}
-\gdef\FinancialStatementOrganizationNumber{#2}
+\providecommand{\FinancialStatementBegin}[6]{%
+\gdef\FinancialStatementCompanyHeader{#1\\Org.nr #2}
+\gdef\FinancialStatementPageIndicator{#6}
 \clearpage
 \thispagestyle{financialstatement}
 \begingroup
 \fontfamily{phv}\selectfont
-\fontsize{9.3}{11.4}\selectfont
-\setlength{\heavyrulewidth}{0.42pt}
-\setlength{\lightrulewidth}{0.32pt}
-\setlength{\cmidrulewidth}{0.32pt}
-\setlength{\aboverulesep}{0.25ex}
-\setlength{\belowrulesep}{0.28ex}
-\vspace*{0.6mm}
+\fontsize{9.4}{11.9}\selectfont
+\setlength{\heavyrulewidth}{0.44pt}
+\setlength{\lightrulewidth}{0.34pt}
+\setlength{\cmidrulewidth}{0.34pt}
+\setlength{\aboverulesep}{0.40ex}
+\setlength{\belowrulesep}{0.44ex}
+\renewcommand{\arraystretch}{1.06}
+\vspace*{1.4mm}
 {\fontsize{12.3}{14.2}\selectfont\bfseries #3\par}
-\vspace{2.6mm}
-\begin{tabular}{>{\raggedright\arraybackslash}p{84mm}>{\raggedright\arraybackslash}p{11mm}@{\hspace{2.6mm}}r@{\hspace{3.2mm}}r}
+\vspace{3.2mm}
+\begin{tabular}{>{\raggedright\arraybackslash}p{77mm}>{\raggedright\arraybackslash}p{11mm}@{\hspace{2.4mm}}r@{\hspace{3.0mm}}r}
 \toprule
  & \textbf{Not} & \textbf{\FinancialStatementPeriodLabel{#4}} & \textbf{\FinancialStatementPeriodLabel{#5}} \\
 \midrule
@@ -41,12 +43,13 @@
 \clearpage
 }
 
-\providecommand{\FinancialStatementSpaceRow}{\addlinespace[3pt]}
-\providecommand{\FinancialStatementPreFinalTotalSpace}{\addlinespace[1pt]}
-\providecommand{\FinancialStatementSectionRow}[1]{\textbf{#1} &  &  &  \\\addlinespace[1pt]}
-\providecommand{\FinancialStatementNormalRow}[4]{#1 & #2 & #3 & #4 \\
+\providecommand{\FinancialStatementSpaceRow}{\addlinespace[4.6pt]}
+\providecommand{\FinancialStatementPreFinalTotalSpace}{\addlinespace[2.6pt]}
+\providecommand{\FinancialStatementSectionRow}[1]{\addlinespace[1.8pt]\textbf{#1} &  &  &  \\\addlinespace[1.3pt]}
+\providecommand{\FinancialStatementSubsectionRow}[1]{\addlinespace[1.8pt]\textit{#1} &  &  &  \\\addlinespace[1.3pt]}
+\providecommand{\FinancialStatementNormalRow}[4]{\rule{0pt}{11.7pt}#1 & #2 & #3 & #4 \\
 }
-\providecommand{\FinancialStatementSubtotalRow}[4]{\addlinespace[0.8pt]\cmidrule(lr){3-4}#1 & #2 & \textbf{#3} & \textbf{#4} \\
+\providecommand{\FinancialStatementSubtotalRow}[4]{\cmidrule(lr){3-4}#1 & #2 & \textbf{#3} & \textbf{#4} \\
 }
 \providecommand{\FinancialStatementTotalRow}[4]{\cmidrule(lr){3-4}\textbf{#1} & #2 & \textbf{#3} & \textbf{#4} \\
 }
