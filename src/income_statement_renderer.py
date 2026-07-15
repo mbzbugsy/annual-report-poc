@@ -6,6 +6,8 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from report_metadata import load_report_metadata
+
 
 class RenderError(Exception):
     pass
@@ -64,12 +66,6 @@ LAYOUT_ROWS: List[StatementRow] = [
     StatementRow("line", "taxForYear", "Skatt på årets resultat", "10"),
     StatementRow("line", "netResult", "Årets resultat", "", style="total"),
 ]
-
-DEFAULT_PERIOD_LABEL_CURRENT = "2025-01-01\n-2025-12-31"
-DEFAULT_PERIOD_LABEL_PREVIOUS = "2024-01-01\n-2024-12-31"
-INCOME_STATEMENT_COMPANY_NAME = "Omegapoint Malmö AB"
-INCOME_STATEMENT_ORGANIZATION_NUMBER = "556613-1339"
-
 
 def escape_latex(text: str) -> str:
     replacements = {
@@ -135,7 +131,7 @@ def _load_lines(json_path: Path) -> Dict[str, Dict[str, object]]:
 
 def _load_previous_period_fixture(previous_period_fixture_path: Optional[Path]) -> Dict[str, object]:
     if previous_period_fixture_path is None:
-        return {"periodLabel": DEFAULT_PERIOD_LABEL_PREVIOUS, "values": {}}
+        return {"periodLabel": None, "values": {}}
 
     if not previous_period_fixture_path.exists():
         raise RenderError(f"Previous-period fixture does not exist: {previous_period_fixture_path}")
@@ -151,7 +147,7 @@ def _load_previous_period_fixture(previous_period_fixture_path: Optional[Path]) 
 
     period_label = raw.get("periodLabel")
     if not isinstance(period_label, str) or not period_label.strip():
-        period_label = DEFAULT_PERIOD_LABEL_PREVIOUS
+        period_label = None
 
     return {
         "periodLabel": period_label,
@@ -168,7 +164,7 @@ def _format_optional_amount(value: Optional[Decimal]) -> str:
 def _render_period_label(label: str) -> str:
     lines = [escape_latex(part.strip()) for part in label.splitlines() if part.strip()]
     if not lines:
-        lines = [escape_latex(DEFAULT_PERIOD_LABEL_PREVIOUS.splitlines()[0])]
+        lines = [escape_latex("N/A")]
     return " \\\\ ".join(lines)
 
 
@@ -185,7 +181,9 @@ def render_income_statement_tex(
     json_path: Path,
     output_path: Path,
     previous_period_fixture_path: Optional[Path] = None,
+    metadata_path: Optional[Path] = None,
 ) -> str:
+    metadata = load_report_metadata(metadata_path)
     lines = _load_lines(json_path)
     previous_fixture = _load_previous_period_fixture(previous_period_fixture_path)
     previous_values = previous_fixture["values"]
@@ -232,16 +230,20 @@ def render_income_statement_tex(
                 f"\\FinancialStatementNormalRow{{{label}}}{{{note}}}{{{current_value}}}{{{previous_value}}}"
             )
 
+    previous_period_label = previous_fixture["periodLabel"]
+    if not isinstance(previous_period_label, str) or not previous_period_label.strip():
+        previous_period_label = metadata.previous_reporting_period
+
     tex = "\n".join(
         [
             "% AUTO-GENERATED FILE. DO NOT EDIT MANUALLY.",
             (
                 "\\FinancialStatementBegin"
-                f"{{{escape_latex(INCOME_STATEMENT_COMPANY_NAME)}}}"
-                f"{{{escape_latex(INCOME_STATEMENT_ORGANIZATION_NUMBER)}}}"
+                f"{{{escape_latex(metadata.company_name)}}}"
+                f"{{{escape_latex(metadata.organization_number)}}}"
                 "{Resultaträkning}"
-                f"{{{_render_period_label(DEFAULT_PERIOD_LABEL_CURRENT)}}}"
-                f"{{{_render_period_label(previous_fixture['periodLabel'])}}}"
+                f"{{{_render_period_label(metadata.current_reporting_period)}}}"
+                f"{{{_render_period_label(previous_period_label)}}}"
             ),
             *rendered_rows,
             "\\FinancialStatementEnd",

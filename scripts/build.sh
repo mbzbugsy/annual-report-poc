@@ -4,9 +4,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD="$ROOT/build"
 GENERATED_TEX="$ROOT/generated/income-statement.tex"
+GENERATED_METADATA_TEX="$ROOT/generated/report-metadata.tex"
 
 mkdir -p "$BUILD"
 cd "$ROOT"
+
+python3 tools/render_report_metadata_tex.py \
+  --input data/report_metadata.json \
+  --output "$GENERATED_METADATA_TEX"
 
 if [[ ! -f "$GENERATED_TEX" ]]; then
   mkdir -p "$ROOT/generated"
