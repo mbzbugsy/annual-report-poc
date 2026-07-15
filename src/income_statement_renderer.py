@@ -67,6 +67,8 @@ LAYOUT_ROWS: List[StatementRow] = [
 
 DEFAULT_PERIOD_LABEL_CURRENT = "2025-01-01\n-2025-12-31"
 DEFAULT_PERIOD_LABEL_PREVIOUS = "2024-01-01\n-2024-12-31"
+INCOME_STATEMENT_COMPANY_NAME = "Omegapoint Malmö AB"
+INCOME_STATEMENT_ORGANIZATION_NUMBER = "556613-1339"
 
 
 def escape_latex(text: str) -> str:
@@ -167,7 +169,7 @@ def _render_period_label(label: str) -> str:
     lines = [escape_latex(part.strip()) for part in label.splitlines() if part.strip()]
     if not lines:
         lines = [escape_latex(DEFAULT_PERIOD_LABEL_PREVIOUS.splitlines()[0])]
-    return "\\shortstack[r]{" + " \\\\ ".join(lines) + "}"
+    return " \\\\ ".join(lines)
 
 
 def _line_value(lines: Dict[str, Dict[str, object]], key: str) -> Optional[Decimal]:
@@ -193,12 +195,13 @@ def render_income_statement_tex(
     rendered_rows: List[str] = []
     for row in LAYOUT_ROWS:
         if row.kind == "space":
-            rendered_rows.append("\\addlinespace[3pt]")
+            rendered_rows.append("\\FinancialStatementSpaceRow")
             continue
 
         if row.kind == "section":
-            rendered_rows.append(f"\\textbf{{{escape_latex(row.display_label)}}} &  &  &  \\\\")
-            rendered_rows.append("\\addlinespace[1pt]")
+            rendered_rows.append(
+                f"\\FinancialStatementSectionRow{{{escape_latex(row.display_label)}}}"
+            )
             continue
 
         current_decimal = _line_value(lines, row.key)
@@ -216,47 +219,32 @@ def render_income_statement_tex(
 
         if row.style == "total":
             if row.key == "netResult":
-                rendered_rows.append("\\addlinespace[1pt]")
-            rendered_rows.append("\\cmidrule(lr){3-4}")
+                rendered_rows.append("\\FinancialStatementPreFinalTotalSpace")
             rendered_rows.append(
-                f"\\textbf{{{label}}} & {note} & \\textbf{{{current_value}}} & \\textbf{{{previous_value}}} \\\\" 
+                f"\\FinancialStatementTotalRow{{{label}}}{{{note}}}{{{current_value}}}{{{previous_value}}}"
             )
         elif row.style == "subtotal":
-            rendered_rows.append("\\addlinespace[0.8pt]")
-            rendered_rows.append("\\cmidrule(lr){3-4}")
             rendered_rows.append(
-                f"{label} & {note} & \\textbf{{{current_value}}} & \\textbf{{{previous_value}}} \\\\" 
+                f"\\FinancialStatementSubtotalRow{{{label}}}{{{note}}}{{{current_value}}}{{{previous_value}}}"
             )
         else:
-            rendered_rows.append(f"{label} & {note} & {current_value} & {previous_value} \\\\")
+            rendered_rows.append(
+                f"\\FinancialStatementNormalRow{{{label}}}{{{note}}}{{{current_value}}}{{{previous_value}}}"
+            )
 
     tex = "\n".join(
         [
             "% AUTO-GENERATED FILE. DO NOT EDIT MANUALLY.",
-            "\\clearpage",
-            "\\thispagestyle{fancy}",
-            "\\fancyhead[L]{\\fontfamily{phv}\\selectfont\\small Omegapoint Malmö AB}",
-            "\\fancyhead[R]{\\fontfamily{phv}\\selectfont\\small 556613-1339}",
-            "{",
-            "\\fontfamily{phv}\\selectfont",
-            "\\fontsize{9.3}{11.4}\\selectfont",
-            "\\setlength{\\heavyrulewidth}{0.42pt}",
-            "\\setlength{\\lightrulewidth}{0.32pt}",
-            "\\setlength{\\cmidrulewidth}{0.32pt}",
-            "\\setlength{\\aboverulesep}{0.25ex}",
-            "\\setlength{\\belowrulesep}{0.28ex}",
-            "\\vspace*{0.6mm}",
-            "{\\fontsize{12.3}{14.2}\\selectfont\\bfseries Resultaträkning\\par}",
-            "\\vspace{2.6mm}",
-            "\\begin{tabular}{>{\\raggedright\\arraybackslash}p{84mm}>{\\raggedright\\arraybackslash}p{11mm}@{\\hspace{2.6mm}}r@{\\hspace{3.2mm}}r}",
-            "\\toprule",
-                f" & \\textbf{{Not}} & \\textbf{{{_render_period_label(DEFAULT_PERIOD_LABEL_CURRENT).replace('[r]', '[c]')}}} & \\textbf{{{_render_period_label(previous_fixture['periodLabel']).replace('[r]', '[c]')}}} " + "\\\\",
-            "\\midrule",
+            (
+                "\\FinancialStatementBegin"
+                f"{{{escape_latex(INCOME_STATEMENT_COMPANY_NAME)}}}"
+                f"{{{escape_latex(INCOME_STATEMENT_ORGANIZATION_NUMBER)}}}"
+                "{Resultaträkning}"
+                f"{{{_render_period_label(DEFAULT_PERIOD_LABEL_CURRENT)}}}"
+                f"{{{_render_period_label(previous_fixture['periodLabel'])}}}"
+            ),
             *rendered_rows,
-            "\\bottomrule",
-            "\\end{tabular}",
-            "}",
-            "\\clearpage",
+            "\\FinancialStatementEnd",
             "",
         ]
     )
