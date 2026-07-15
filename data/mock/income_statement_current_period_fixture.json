@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "metadata": {
+    "purpose": "non-production synthetic test/build fixture",
+    "containsRealFinancialData": false,
+    "note": "Used to make clean-checkout and CI builds reproducible without source-data workbooks."
+  },
+  "source": {
+    "file": "NON_PRODUCTION_SYNTHETIC_CURRENT_PERIOD_FIXTURE",
+    "sheet": "N/A"
+  },
+  "lines": {
+    "revenue": {
+      "value": "120000000"
+    },
+    "otherOperatingIncome": {
+      "value": "2500000"
+    },
+    "totalIncome": {
+      "value": "122500000"
+    },
+    "costOfGoodsAndServices": {
+      "value": "-45000000"
+    },
+    "otherExternalCosts": {
+      "value": "-21000000"
+    },
+    "personnelCosts": {
+      "value": "-48000000"
+    },
+    "depreciationAndAmortization": {
+      "value": "-3200000"
+    },
+    "otherOperatingCosts": {
+      "value": "-1800000"
+    },
+    "totalOperatingCosts": {
+      "value": "-119000000"
+    },
+    "operatingResult": {
+      "value": "3500000"
+    },
+    "interestIncome": {
+      "value": "150000"
+    },
+    "interestCosts": {
+      "value": "-220000"
+    },
+    "netFinancialItems": {
+      "value": "-70000"
+    },
+    "resultAfterFinancialItems": {
+      "value": "3430000"
+    },
+    "appropriations": {
+      "value": "-900000"
+    },
+    "profitBeforeTax": {
+      "value": "2530000"
+    },
+    "taxForYear": {
+      "value": "-550000"
+    },
+    "netResult": {
+      "value": "1980000"
+    }
+  }
+}

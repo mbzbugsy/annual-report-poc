@@ -1,0 +1,25 @@
+{
+  "fixtureType": "non-production-visual-reference",
+  "note": "Synthetic previous-period values for visual-layout testing only. Replace with previous-year workbook import in production.",
+  "periodLabel": "20X4-01-01\n-20X4-12-31",
+  "values": {
+    "revenue": "118604211",
+    "otherOperatingIncome": "1276453",
+    "totalIncome": "119880664",
+    "costOfGoodsAndServices": "-11942011",
+    "otherExternalCosts": "-18630117",
+    "personnelCosts": "-77192660",
+    "depreciationAndAmortization": "-7421088",
+    "otherOperatingCosts": "-514220",
+    "totalOperatingCosts": "-115700096",
+    "operatingResult": "4180568",
+    "interestIncome": "205511",
+    "interestCosts": "-261722",
+    "netFinancialItems": "-56211",
+    "resultAfterFinancialItems": "4124357",
+    "appropriations": "-1350000",
+    "profitBeforeTax": "2774357",
+    "taxForYear": "-2147101",
+    "netResult": "627256"
+  }
+}
