@@ -24,7 +24,8 @@ VALID_METADATA = {
     "currentReportingPeriod": "2025-01-01\n-2025-12-31",
     "previousReportingPeriod": "2024-01-01\n-2024-12-31",
     "city": "Göteborg",
-    "reportYear": "2026",
+    "fiscalYear": "2025",
+    "documentYear": "2026",
 }
 
 
@@ -62,7 +63,7 @@ class ReportMetadataValidationTests(unittest.TestCase):
 
     def test_numeric_value_rejected(self) -> None:
         payload = dict(VALID_METADATA)
-        payload["reportYear"] = 2026
+        payload["fiscalYear"] = 2025
 
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "metadata.json"
@@ -71,7 +72,7 @@ class ReportMetadataValidationTests(unittest.TestCase):
             with self.assertRaises(ValueError) as ctx:
                 load_report_metadata(path)
 
-        self.assertIn("reportYear", str(ctx.exception))
+        self.assertIn("fiscalYear", str(ctx.exception))
         self.assertIn("expected non-empty string", str(ctx.exception))
 
     def test_empty_string_rejected(self) -> None:
@@ -113,6 +114,8 @@ class ReportMetadataValidationTests(unittest.TestCase):
         self.assertEqual(metadata.organization_number, VALID_METADATA["organizationNumber"])
         self.assertEqual(metadata.report_title, VALID_METADATA["reportTitle"])
         self.assertEqual(metadata.current_reporting_period, VALID_METADATA["currentReportingPeriod"])
+        self.assertEqual(metadata.fiscal_year, VALID_METADATA["fiscalYear"])
+        self.assertEqual(metadata.document_year, VALID_METADATA["documentYear"])
 
 
 if __name__ == "__main__":

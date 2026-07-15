@@ -14,7 +14,8 @@ class ReportMetadata:
     current_reporting_period: str
     previous_reporting_period: str
     city: str
-    report_year: str
+    fiscal_year: str
+    document_year: str
 
 
 REQUIRED_METADATA_FIELDS = {
@@ -25,7 +26,8 @@ REQUIRED_METADATA_FIELDS = {
     "currentReportingPeriod",
     "previousReportingPeriod",
     "city",
-    "reportYear",
+    "fiscalYear",
+    "documentYear",
 }
 
 
@@ -66,5 +68,6 @@ def load_report_metadata(metadata_path: Path | None = None) -> ReportMetadata:
         current_reporting_period=_require_non_empty_string("currentReportingPeriod"),
         previous_reporting_period=_require_non_empty_string("previousReportingPeriod"),
         city=_require_non_empty_string("city"),
-        report_year=_require_non_empty_string("reportYear"),
+        fiscal_year=_require_non_empty_string("fiscalYear"),
+        document_year=_require_non_empty_string("documentYear"),
     )

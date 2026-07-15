@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -21,7 +23,8 @@ class ReportShellCleanupTests(unittest.TestCase):
             "currentReportingPeriod",
             "previousReportingPeriod",
             "city",
-            "reportYear",
+            "fiscalYear",
+            "documentYear",
         ]:
             self.assertIn(field, metadata)
 
@@ -34,6 +37,32 @@ class ReportShellCleanupTests(unittest.TestCase):
         layout_source = (ROOT / "template" / "layout.tex").read_text(encoding="utf-8")
         self.assertIn("\\input{generated/report-metadata.tex}", layout_source)
         self.assertNotIn("\\newcommand{\\companyname}", layout_source)
+
+    def test_year_semantics_are_wired_correctly(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "report-metadata.tex"
+            subprocess.run(
+                [
+                    "python3",
+                    "tools/render_report_metadata_tex.py",
+                    "--input",
+                    "data/report_metadata.json",
+                    "--output",
+                    str(output),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+
+            generated_tex = output.read_text(encoding="utf-8")
+
+        layout_source = (ROOT / "template" / "layout.tex").read_text(encoding="utf-8")
+        title_page_source = (ROOT / "template" / "title-page.tex").read_text(encoding="utf-8")
+
+        self.assertIn("\\newcommand{\\fiscalyear}{2025}", generated_tex)
+        self.assertIn("\\newcommand{\\documentyear}{2026}", generated_tex)
+        self.assertIn("\\fancyhead[R]{\\fiscalyear}", layout_source)
+        self.assertIn("\\reportcity, \\documentyear", title_page_source)
 
 
 if __name__ == "__main__":

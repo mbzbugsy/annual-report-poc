@@ -6,5 +6,6 @@
   "currentReportingPeriod": "2025-01-01\n-2025-12-31",
   "previousReportingPeriod": "2024-01-01\n-2024-12-31",
   "city": "Göteborg",
-  "reportYear": "2026"
+  "fiscalYear": "2025",
+  "documentYear": "2026"
 }
