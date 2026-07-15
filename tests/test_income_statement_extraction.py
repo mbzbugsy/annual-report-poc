@@ -121,7 +121,7 @@ BASE_ROWS = [
     {"row": 13, "label": "Rörelseresultat", "prev": "intermediate", "curr": 15.0},
     {"row": 14, "label": "Resultat efter finansiella poster", "prev": "intermediate", "curr": 14.0},
     {"row": 15, "label": "Resultat före skatt", "prev": "intermediate", "curr": 14.0},
-    {"row": 16, "label": "Skatt på årets resultat", "prev": "intermediate", "curr": -3.0},
+    {"row": 16, "label": "Skatt", "prev": "intermediate", "curr": -3.0},
     {"row": 17, "label": "Årets resultat", "prev": "intermediate", "curr": 11.0},
 ]
 
