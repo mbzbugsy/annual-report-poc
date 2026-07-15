@@ -1,7 +1,16 @@
+# Build output
 build/
+
+# Generated artifacts
+generated/
+
+# Local source files (not version controlled)
+source-data/
+
+# macOS
+.DS_Store
+
 *.aux
-*.fdb_latexmk
-*.fls
 *.log
 *.out
 *.toc
