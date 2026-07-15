@@ -12,14 +12,35 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Python tests
+        run: python3 -m unittest discover -v -s tests -p 'test_*.py'
+
+      - name: Render synthetic income statement partial
+        run: |
+          mkdir -p generated
+          python3 tools/render_income_statement_tex.py \
+            --input data/mock/income_statement_current_period_fixture.json \
+            --output generated/income-statement.tex \
+            --previous-period-fixture data/mock/income_statement_previous_period_fixture.json
+
       - name: Build PDF
         uses: xu-cheng/latex-action@v3
         with:
           root_file: template/main.tex
-          args: -pdf -interaction=nonstopmode -halt-on-error
+          args: -pdf -interaction=nonstopmode -halt-on-error -outdir=build
+
+      - name: Move final PDF
+        run: |
+          mkdir -p build
+          mv -f build/main.pdf build/annual-report.pdf
 
       - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
           name: annual-report
-          path: main.pdf
+          path: build/annual-report.pdf
