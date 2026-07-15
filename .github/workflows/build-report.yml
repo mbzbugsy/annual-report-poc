@@ -20,9 +20,17 @@ jobs:
       - name: Run Python tests
         run: python3 -m unittest discover -v -s tests -p 'test_*.py'
 
+      - name: Create generated and build directories
+        run: mkdir -p generated build
+
+      - name: Render report metadata partial
+        run: |
+          python3 tools/render_report_metadata_tex.py \
+            --input data/report_metadata.json \
+            --output generated/report-metadata.tex
+
       - name: Render synthetic income statement partial
         run: |
-          mkdir -p generated build
           python3 tools/render_income_statement_tex.py \
             --input data/mock/income_statement_current_period_fixture.json \
             --output generated/income-statement.tex \

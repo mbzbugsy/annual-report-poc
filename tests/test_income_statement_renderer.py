@@ -13,6 +13,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from income_statement_renderer import RenderError, escape_latex, render_income_statement_tex
+from report_metadata import load_report_metadata
 
 
 VALID_LINES = {
@@ -64,13 +65,13 @@ class IncomeStatementRendererTests(unittest.TestCase):
             _write_json(input_json, VALID_LINES)
 
             tex = render_income_statement_tex(input_json, output_tex)
+            metadata = load_report_metadata()
 
             self.assertTrue(output_tex.exists())
             self.assertNotIn("\\input{template/financial-statement-layout.tex}", tex)
-            self.assertIn(
-                "\\FinancialStatementBegin{Omegapoint Malmö AB}{556613-1339}{Resultaträkning}",
-                tex,
-            )
+            self.assertIn("\\FinancialStatementBegin", tex)
+            self.assertIn(metadata.company_name, tex)
+            self.assertIn(metadata.organization_number, tex)
             self.assertNotIn("\\thispagestyle{fancy}", tex)
             self.assertNotIn("\\fancyhead[L]", tex)
             self.assertIn("\\FinancialStatementSectionRow", tex)
@@ -87,6 +88,42 @@ class IncomeStatementRendererTests(unittest.TestCase):
             self.assertIn("Resultat före skatt", tex)
             self.assertIn("Skatt på årets resultat", tex)
             self.assertIn("Årets resultat", tex)
+
+    def test_renderer_uses_custom_metadata_source_for_statement_header(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_json = tmp_path / "income.json"
+            output_tex = tmp_path / "income.tex"
+            metadata_json = tmp_path / "metadata.json"
+            _write_json(input_json, VALID_LINES)
+            metadata_json.write_text(
+                json.dumps(
+                    {
+                        "companyName": "Example Metadata AB",
+                        "organizationNumber": "111111-2222",
+                        "reportTitle": "Årsredovisning 2099",
+                        "reportSubtitle": "PoC",
+                        "currentReportingPeriod": "2099-01-01\\n-2099-12-31",
+                        "previousReportingPeriod": "2098-01-01\\n-2098-12-31",
+                        "city": "Malmö",
+                        "fiscalYear": "2099",
+                        "documentYear": "2100",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            tex = render_income_statement_tex(
+                input_json,
+                output_tex,
+                metadata_path=metadata_json,
+            )
+
+            self.assertIn("Example Metadata AB", tex)
+            self.assertIn("111111-2222", tex)
+            self.assertIn("2099-01-01", tex)
+            self.assertIn("2098-01-01", tex)
 
     def test_missing_required_income_statement_line_fails(self) -> None:
         lines = dict(VALID_LINES)
