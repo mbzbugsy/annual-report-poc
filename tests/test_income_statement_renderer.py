@@ -66,6 +66,16 @@ class IncomeStatementRendererTests(unittest.TestCase):
             tex = render_income_statement_tex(input_json, output_tex)
 
             self.assertTrue(output_tex.exists())
+            self.assertNotIn("\\input{template/financial-statement-layout.tex}", tex)
+            self.assertIn(
+                "\\FinancialStatementBegin{Omegapoint Malmö AB}{556613-1339}{Resultaträkning}",
+                tex,
+            )
+            self.assertNotIn("\\thispagestyle{fancy}", tex)
+            self.assertNotIn("\\fancyhead[L]", tex)
+            self.assertIn("\\FinancialStatementSectionRow", tex)
+            self.assertIn("\\FinancialStatementSubtotalRow", tex)
+            self.assertIn("\\FinancialStatementTotalRow", tex)
             self.assertIn("Resultaträkning", tex)
             self.assertIn("Nettoomsättning", tex)
             self.assertIn("Övriga rörelseintäkter", tex)
