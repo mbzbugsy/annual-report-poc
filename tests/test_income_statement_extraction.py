@@ -300,6 +300,22 @@ class IncomeStatementExtractionTests(unittest.TestCase):
             self.assertNotIn("totalOperatingCosts", result["lines"])
             self.assertNotIn("netFinancialItems", result["lines"])
 
+    def test_optional_mapping_ambiguous_duplicate_label_fails(self) -> None:
+        rows = [dict(row) for row in BASE_ROWS] + [
+            {"row": 40, "label": "Bokslutsdispositioner", "curr": 1.0},
+            {"row": 41, "label": "Bokslutsdispositioner", "curr": 2.0},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "optional-ambiguous.xlsx"
+            output = Path(tmp) / "out.json"
+            _xlsx_with_rr_sheet(workbook, rows)
+
+            with self.assertRaises(ExtractionError) as ctx:
+                extract_income_statement(workbook, output)
+
+            self.assertIn("Ambiguous label match", str(ctx.exception))
+
     def test_optional_mappings_are_extracted_when_present(self) -> None:
         rows = [dict(row) for row in BASE_ROWS] + [
             {"row": 21, "label": "Kostnad sålda varor och tjänster", "curr": -10.0},

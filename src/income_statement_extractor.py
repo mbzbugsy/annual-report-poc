@@ -20,6 +20,10 @@ class ExtractionError(Exception):
     pass
 
 
+class LabelNotFoundError(ExtractionError):
+    pass
+
+
 def _safe_source_path(path: Path) -> str:
     # Keep source metadata portable by avoiding absolute local paths.
     if path.is_absolute():
@@ -187,7 +191,7 @@ def _find_row_for_label(
             matches.append((row_index, cell.value_text))
 
     if not matches:
-        raise ExtractionError(
+        raise LabelNotFoundError(
             f"Required label not found. Accepted labels: {accepted_labels}"
         )
 
@@ -290,7 +294,7 @@ def extract_income_statement(
                 profile.label_anchor_column,
                 profile.value_column,
             )
-        except ExtractionError:
+        except LabelNotFoundError:
             if entry.required:
                 raise
             continue
