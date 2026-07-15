@@ -76,6 +76,8 @@ class IncomeStatementRendererTests(unittest.TestCase):
             self.assertIn("\\FinancialStatementSectionRow", tex)
             self.assertIn("\\FinancialStatementSubtotalRow", tex)
             self.assertIn("\\FinancialStatementTotalRow", tex)
+            self.assertIn("\\FinancialStatementPreFinalTotalSpace", tex)
+            self.assertNotIn("\\FinancialStatementPreNetResultSpace", tex)
             self.assertIn("Resultaträkning", tex)
             self.assertIn("Nettoomsättning", tex)
             self.assertIn("Övriga rörelseintäkter", tex)

@@ -219,7 +219,7 @@ def render_income_statement_tex(
 
         if row.style == "total":
             if row.key == "netResult":
-                rendered_rows.append("\\FinancialStatementPreNetResultSpace")
+                rendered_rows.append("\\FinancialStatementPreFinalTotalSpace")
             rendered_rows.append(
                 f"\\FinancialStatementTotalRow{{{label}}}{{{note}}}{{{current_value}}}{{{previous_value}}}"
             )
