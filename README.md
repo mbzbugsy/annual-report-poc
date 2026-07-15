@@ -90,6 +90,26 @@ Notes:
 - This is a read-only extraction over local files in `source-data/`.
 - The extractor uses workbook profile settings from `src/income_statement_profile.py`.
 
+## Run the full income-statement vertical slice
+
+Run:
+
+```bash
+python3 tools/build_income_statement_slice.py
+```
+
+Output:
+
+```text
+build/annual-report.pdf
+```
+
+Notes:
+
+- JSON and LaTeX intermediates are written to `generated/`.
+- Previous-period values for visual comparison are sourced from the synthetic fixture `data/mock/income_statement_previous_period_fixture.json`.
+- The fixture is temporary and must be replaced later by a dedicated previous-year workbook import.
+
 ## Suggested first agent test
 
 Ask the agent:

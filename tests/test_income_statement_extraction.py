@@ -288,6 +288,103 @@ class IncomeStatementExtractionTests(unittest.TestCase):
 
             self.assertIn("Required label not found", str(ctx.exception))
 
+    def test_optional_mappings_absent_do_not_fail_extraction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "optional-missing.xlsx"
+            output = Path(tmp) / "out.json"
+            _xlsx_with_rr_sheet(workbook, BASE_ROWS)
+
+            result = extract_income_statement(workbook, output)
+
+            self.assertNotIn("costOfGoodsAndServices", result["lines"])
+            self.assertNotIn("totalOperatingCosts", result["lines"])
+            self.assertNotIn("netFinancialItems", result["lines"])
+
+    def test_optional_mappings_are_extracted_when_present(self) -> None:
+        rows = [dict(row) for row in BASE_ROWS] + [
+            {"row": 21, "label": "Kostnad sålda varor och tjänster", "curr": -10.0},
+            {"row": 22, "label": "Övriga externa kostnader", "curr": -20.0},
+            {"row": 23, "label": "Personalkostnader", "curr": -30.0},
+            {"row": 24, "label": "Av-/Nedskrivningar", "curr": -5.0},
+            {"row": 25, "label": "Övriga rörelsekostnader", "curr": -1.0},
+            {"row": 26, "label": "Rörelsens kostnader", "curr": -66.0},
+            {"row": 34, "label": "Ränteintäkter", "curr": 9.0},
+            {"row": 35, "label": "Räntekostnader", "curr": -4.0},
+            {"row": 38, "label": "Bokslutsdispositioner", "curr": 0.0},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "optional-present.xlsx"
+            output = Path(tmp) / "out.json"
+            _xlsx_with_rr_sheet(workbook, rows)
+
+            result = extract_income_statement(workbook, output)
+
+            self.assertEqual(result["lines"]["costOfGoodsAndServices"]["value"], "-10.0")
+            self.assertEqual(result["lines"]["totalOperatingCosts"]["value"], "-66.0")
+            self.assertEqual(result["lines"]["appropriations"]["value"], "0.0")
+
+    def test_authoritative_total_operating_costs_value_wins_over_component_sum(self) -> None:
+        rows = [
+            {"row": 10, "label": "Nettoomsättning", "curr": 200.0},
+            {"row": 11, "label": "Övriga rörelseintäkter", "curr": 20.0},
+            {"row": 12, "label": "Totala intäkter", "curr": 220.0},
+            {"row": 13, "label": "Rörelseresultat", "curr": 50.0},
+            {"row": 14, "label": "Resultat efter finansiella poster", "curr": 44.0},
+            {"row": 15, "label": "Resultat före skatt", "curr": 44.0},
+            {"row": 16, "label": "Skatt", "curr": -9.0},
+            {"row": 17, "label": "Årets resultat", "curr": 35.0},
+            {"row": 20, "label": "Rörelsens kostnader"},
+            {"row": 21, "label": "Kostnad sålda varor och tjänster", "curr": -10.0},
+            {"row": 22, "label": "Övriga externa kostnader", "curr": -20.0},
+            {"row": 23, "label": "Personalkostnader", "curr": -30.0},
+            {"row": 24, "label": "Av-/Nedskrivningar", "curr": -5.0},
+            {"row": 25, "label": "Övriga rörelsekostnader", "curr": -1.0},
+            {"row": 26, "label": "Rörelsens kostnader", "curr": -70.0},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "authoritative-total-costs.xlsx"
+            output = Path(tmp) / "out.json"
+            _xlsx_with_rr_sheet(workbook, rows)
+
+            result = extract_income_statement(workbook, output)
+
+            self.assertEqual(result["lines"]["totalOperatingCosts"]["value"], "-70.0")
+            self.assertEqual(result["lines"]["totalOperatingCosts"]["sourceTrace"]["valueCell"], "D26")
+
+    def test_net_financial_items_is_derived_from_interest_rows(self) -> None:
+        rows = [
+            {"row": 10, "label": "Nettoomsättning", "curr": 100.0},
+            {"row": 11, "label": "Övriga rörelseintäkter", "curr": 10.0},
+            {"row": 12, "label": "Totala intäkter", "curr": 110.0},
+            {"row": 13, "label": "Rörelseresultat", "curr": 40.0},
+            {"row": 14, "label": "Resultat efter finansiella poster", "curr": 33.0},
+            {"row": 15, "label": "Resultat före skatt", "curr": 33.0},
+            {"row": 16, "label": "Skatt", "curr": -7.0},
+            {"row": 17, "label": "Årets resultat", "curr": 26.0},
+            {"row": 30, "label": "Resultat från finansiella poster"},
+            {"row": 34, "label": "Ränteintäkter", "curr": 8.0},
+            {"row": 35, "label": "Räntekostnader", "curr": -3.0},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "net-fin-derived.xlsx"
+            output = Path(tmp) / "out.json"
+            _xlsx_with_rr_sheet(workbook, rows)
+
+            result = extract_income_statement(workbook, output)
+
+            self.assertEqual(result["lines"]["netFinancialItems"]["value"], "5.0")
+            self.assertEqual(
+                result["lines"]["netFinancialItems"]["sourceTrace"]["derivedFrom"],
+                ["interestIncome", "interestCosts"],
+            )
+            self.assertIn(
+                "section row has no authoritative numeric value in column D",
+                result["lines"]["netFinancialItems"]["sourceTrace"]["derivationNote"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

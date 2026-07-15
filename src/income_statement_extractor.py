@@ -172,6 +172,7 @@ def _find_row_for_label(
     sheet: SheetData,
     accepted_labels: List[str],
     label_anchor_column: str,
+    value_column: str,
 ) -> Tuple[int, str]:
     normalized_accept = {_normalize_label(label): label for label in accepted_labels}
     matches: List[Tuple[int, str]] = []
@@ -192,6 +193,15 @@ def _find_row_for_label(
 
     unique_rows = sorted({row for row, _ in matches})
     if len(unique_rows) > 1:
+        rows_with_value = []
+        for row_index, raw_label in matches:
+            value_cell = _get_cell_data(sheet, row_index, value_column)
+            if value_cell is not None and value_cell.value_text.strip() != "":
+                rows_with_value.append((row_index, raw_label))
+
+        if len(rows_with_value) == 1:
+            return rows_with_value[0]
+
         raise ExtractionError(
             "Ambiguous label match. "
             f"Accepted labels: {accepted_labels}. Matched rows: {unique_rows}"
@@ -273,11 +283,17 @@ def extract_income_statement(
 
     lines: Dict[str, object] = {}
     for entry in profile.line_mappings:
-        row_index, matched_label = _find_row_for_label(
-            sheet_data,
-            entry.accepted_labels,
-            profile.label_anchor_column,
-        )
+        try:
+            row_index, matched_label = _find_row_for_label(
+                sheet_data,
+                entry.accepted_labels,
+                profile.label_anchor_column,
+                profile.value_column,
+            )
+        except ExtractionError:
+            if entry.required:
+                raise
+            continue
 
         value_cell_ref = f"{profile.value_column}{row_index}"
 
@@ -293,6 +309,17 @@ def extract_income_statement(
             "sourceTrace": {
                 "valueCell": value_cell_ref,
                 "valueIsFormula": value_is_formula,
+            },
+        }
+
+    if {"interestIncome", "interestCosts"}.issubset(lines):
+        net_financial_items = Decimal(lines["interestIncome"]["value"]) + Decimal(lines["interestCosts"]["value"])
+        lines["netFinancialItems"] = {
+            "label": "Resultat från finansiella poster",
+            "value": str(net_financial_items),
+            "sourceTrace": {
+                "derivedFrom": ["interestIncome", "interestCosts"],
+                "derivationNote": "Derived because section row has no authoritative numeric value in column D.",
             },
         }
 
