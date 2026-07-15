@@ -29,8 +29,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--sheet",
-        default="RR sammanställning",
-        help="Sheet name to parse",
+        help="Optional sheet name override. If omitted, profile default is used.",
     )
     return parser.parse_args()
 

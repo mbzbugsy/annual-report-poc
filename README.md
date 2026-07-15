@@ -1,6 +1,6 @@
 # OP Annual Report PoC
 
-A small proof of concept for generating a PDF annual report from LaTeX, structured content files, and CSV data.
+A small proof of concept for generating a PDF annual report from LaTeX, structured content files, CSV data, and a focused Excel extraction slice.
 
 ## Purpose
 
@@ -19,17 +19,21 @@ All values and names in this repository are fictional.
 .
 ├── AGENTS.md
 ├── README.md
-├── assets/
 ├── content/
 ├── data/
+├── generated/
 ├── scripts/
+├── source-data/
+├── src/
 └── template/
 ```
 
 - `template/` contains layout and document structure.
 - `content/` contains editable report text.
 - `data/` contains fictional financial figures.
-- `assets/` contains images and logos.
+- `source-data/` contains local real source files used for extraction experiments (git-ignored).
+- `src/` contains extraction logic and mapping profiles.
+- `generated/` contains generated extraction outputs.
 - `scripts/` contains build helpers.
 
 ## Prerequisites
@@ -65,6 +69,27 @@ The resulting PDF will be written to:
 build/annual-report.pdf
 ```
 
+## Run the income-statement extractor (RR slice)
+
+The current extraction slice reads selected income-statement labels from the real workbook and writes normalized JSON.
+
+Run:
+
+```bash
+python3 tools/extract_income_statement.py
+```
+
+Output:
+
+```text
+generated/income-statement.json
+```
+
+Notes:
+
+- This is a read-only extraction over local files in `source-data/`.
+- The extractor uses workbook profile settings from `src/income_statement_profile.py`.
+
 ## Suggested first agent test
 
 Ask the agent:
@@ -83,5 +108,5 @@ Then review:
 - Replace fictional content with approved test material.
 - Decide how Excel data should be imported.
 - Add validation for required fields.
-- Add CI build and PDF artifact generation.
+- Extend CI checks beyond PDF build as extraction scope grows.
 - Add branch protection in the target DevOps environment.

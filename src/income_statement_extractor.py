@@ -19,6 +19,13 @@ DOC_REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationship
 class ExtractionError(Exception):
     pass
 
+
+def _safe_source_path(path: Path) -> str:
+    # Keep source metadata portable by avoiding absolute local paths.
+    if path.is_absolute():
+        return path.name
+    return path.as_posix()
+
 @dataclass
 class CellData:
     value_text: str
@@ -227,39 +234,42 @@ def extract_income_statement(
     if not workbook_path.exists():
         raise ExtractionError(f"Workbook does not exist: {workbook_path}")
 
-    with zipfile.ZipFile(workbook_path) as zf:
-        workbook_xml = "xl/workbook.xml"
-        workbook_rels = "xl/_rels/workbook.xml.rels"
-        if workbook_xml not in zf.namelist() or workbook_rels not in zf.namelist():
-            raise ExtractionError(f"Invalid .xlsx structure: {workbook_path}")
+    try:
+        with zipfile.ZipFile(workbook_path) as zf:
+            workbook_xml = "xl/workbook.xml"
+            workbook_rels = "xl/_rels/workbook.xml.rels"
+            if workbook_xml not in zf.namelist() or workbook_rels not in zf.namelist():
+                raise ExtractionError(f"Invalid .xlsx structure: {workbook_path}")
 
-        wb_root = ET.fromstring(zf.read(workbook_xml))
-        rel_root = ET.fromstring(zf.read(workbook_rels))
-        rel_map = {
-            rel.attrib["Id"]: rel.attrib["Target"]
-            for rel in rel_root.findall(f"{{{REL_NS}}}Relationship")
-        }
+            wb_root = ET.fromstring(zf.read(workbook_xml))
+            rel_root = ET.fromstring(zf.read(workbook_rels))
+            rel_map = {
+                rel.attrib["Id"]: rel.attrib["Target"]
+                for rel in rel_root.findall(f"{{{REL_NS}}}Relationship")
+            }
 
-        target_sheet_path: Optional[str] = None
-        for sheet in wb_root.find(_ns("sheets")):
-            if sheet.attrib.get("name") != active_sheet_name:
-                continue
-            rid = sheet.attrib.get(f"{{{DOC_REL_NS}}}id")
-            if rid and rid in rel_map:
-                target_sheet_path = rel_map[rid]
-                break
+            target_sheet_path: Optional[str] = None
+            for sheet in wb_root.find(_ns("sheets")):
+                if sheet.attrib.get("name") != active_sheet_name:
+                    continue
+                rid = sheet.attrib.get(f"{{{DOC_REL_NS}}}id")
+                if rid and rid in rel_map:
+                    target_sheet_path = rel_map[rid]
+                    break
 
-        if target_sheet_path is None:
-            raise ExtractionError(f"Expected sheet not found: {active_sheet_name}")
+            if target_sheet_path is None:
+                raise ExtractionError(f"Expected sheet not found: {active_sheet_name}")
 
-        if not target_sheet_path.startswith("xl/"):
-            target_sheet_path = f"xl/{target_sheet_path}"
+            if not target_sheet_path.startswith("xl/"):
+                target_sheet_path = f"xl/{target_sheet_path}"
 
-        if target_sheet_path not in zf.namelist():
-            raise ExtractionError(f"Sheet XML not found for {active_sheet_name}: {target_sheet_path}")
+            if target_sheet_path not in zf.namelist():
+                raise ExtractionError(f"Sheet XML not found for {active_sheet_name}: {target_sheet_path}")
 
-        shared_strings = _parse_shared_strings(zf)
-        sheet_data = _read_sheet_data(zf, target_sheet_path, shared_strings)
+            shared_strings = _parse_shared_strings(zf)
+            sheet_data = _read_sheet_data(zf, target_sheet_path, shared_strings)
+    except zipfile.BadZipFile as exc:
+        raise ExtractionError(f"Invalid or corrupt XLSX file: {workbook_path}") from exc
 
     lines: Dict[str, object] = {}
     for entry in profile.line_mappings:
@@ -289,7 +299,7 @@ def extract_income_statement(
     payload = {
         "schemaVersion": "1.0",
         "source": {
-            "file": str(workbook_path),
+            "file": _safe_source_path(workbook_path),
             "sheet": active_sheet_name,
         },
         "extractionBasis": {

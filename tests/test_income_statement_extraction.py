@@ -121,7 +121,7 @@ BASE_ROWS = [
     {"row": 13, "label": "Rörelseresultat", "prev": "intermediate", "curr": 15.0},
     {"row": 14, "label": "Resultat efter finansiella poster", "prev": "intermediate", "curr": 14.0},
     {"row": 15, "label": "Resultat före skatt", "prev": "intermediate", "curr": 14.0},
-    {"row": 16, "label": "Skatt", "prev": "intermediate", "curr": -3.0},
+    {"row": 16, "label": "Skatt på årets resultat", "prev": "intermediate", "curr": -3.0},
     {"row": 17, "label": "Årets resultat", "prev": "intermediate", "curr": 11.0},
 ]
 
@@ -139,8 +139,20 @@ class IncomeStatementExtractionTests(unittest.TestCase):
             self.assertEqual(result["lines"]["revenue"]["value"], "110.0")
             self.assertTrue(result["lines"]["revenue"]["sourceTrace"]["valueIsFormula"])
             self.assertEqual(result["lines"]["revenue"]["sourceTrace"]["valueCell"], "D10")
+            self.assertEqual(result["source"]["file"], workbook.name)
             self.assertIsNone(result["period"]["reportingPeriod"])
             self.assertTrue(output.exists())
+
+    def test_corrupt_xlsx_zip_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            workbook = Path(tmp) / "corrupt.xlsx"
+            output = Path(tmp) / "out.json"
+            workbook.write_text("this is not a zip", encoding="utf-8")
+
+            with self.assertRaises(ExtractionError) as ctx:
+                extract_income_statement(workbook, output)
+
+            self.assertIn("Invalid or corrupt XLSX file", str(ctx.exception))
 
     def test_missing_workbook_file_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

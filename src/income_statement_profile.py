@@ -32,7 +32,7 @@ WORKBOOK_PROFILE = IncomeStatementWorkbookProfile(
             ["Resultat efter finansiella poster", "Resultat efter finansiella poste"],
         ),
         IncomeStatementLineMapping("profitBeforeTax", ["Resultat före skatt"]),
-        IncomeStatementLineMapping("taxForYear", ["Skatt på årets resultat", "Skatt"]),
+        IncomeStatementLineMapping("taxForYear", ["Skatt på årets resultat"]),
         IncomeStatementLineMapping("netResult", ["Årets resultat"]),
     ],
 )
