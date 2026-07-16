@@ -13,7 +13,7 @@
 \renewcommand{\footrulewidth}{0pt}
 }
 
-\providecommand{\FinancialStatementBegin}[6]{%
+\providecommand{\FinancialStatementBeginCore}[6]{%
 \gdef\FinancialStatementCompanyHeader{#1\\Org.nr #2}
 \gdef\FinancialStatementPageIndicator{#6}
 \clearpage
@@ -28,12 +28,23 @@
 \setlength{\belowrulesep}{0.44ex}
 \renewcommand{\arraystretch}{1.06}
 \vspace*{1.4mm}
+\if\relax\detokenize{#3}\relax
+\else
 {\fontsize{12.3}{14.2}\selectfont\bfseries #3\par}
 \vspace{3.2mm}
+\fi
 \begin{tabular}{>{\raggedright\arraybackslash}p{77mm}>{\raggedright\arraybackslash}p{11mm}@{\hspace{2.4mm}}r@{\hspace{3.0mm}}r}
 \toprule
  & \textbf{Not} & \textbf{\FinancialStatementPeriodLabel{#4}} & \textbf{\FinancialStatementPeriodLabel{#5}} \\
 \midrule
+}
+
+\providecommand{\FinancialStatementBegin}[6]{%
+\FinancialStatementBeginCore{#1}{#2}{#3}{#4}{#5}{#6}
+}
+
+\providecommand{\FinancialStatementBeginContinuation}[5]{%
+\FinancialStatementBeginCore{#1}{#2}{}{#3}{#4}{#5}
 }
 
 \providecommand{\FinancialStatementEnd}{%
@@ -46,6 +57,7 @@
 \providecommand{\FinancialStatementSpaceRow}{\addlinespace[4.6pt]}
 \providecommand{\FinancialStatementPreFinalTotalSpace}{\addlinespace[2.6pt]}
 \providecommand{\FinancialStatementSectionRow}[1]{\addlinespace[1.8pt]\textbf{#1} &  &  &  \\\addlinespace[1.3pt]}
+\providecommand{\FinancialStatementSectionRowWithNote}[2]{\addlinespace[1.8pt]\textbf{#1} & #2 &  &  \\\addlinespace[1.3pt]}
 \providecommand{\FinancialStatementSubsectionRow}[1]{\addlinespace[1.8pt]\textit{#1} &  &  &  \\\addlinespace[1.3pt]}
 \providecommand{\FinancialStatementNormalRow}[4]{\rule{0pt}{11.7pt}#1 & #2 & #3 & #4 \\
 }

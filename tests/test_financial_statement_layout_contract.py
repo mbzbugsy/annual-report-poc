@@ -28,6 +28,15 @@ class FinancialStatementLayoutContractTests(unittest.TestCase):
         self.assertIn("\\renewcommand{\\headrulewidth}{0pt}", source)
         self.assertNotIn("\\fancyfoot[C]{\\thepage}", source)
 
+    def test_generic_continuation_begin_macro_exists(self) -> None:
+        source = (ROOT / "template" / "financial-statement-layout.tex").read_text(encoding="utf-8")
+        self.assertIn("\\providecommand{\\FinancialStatementBeginContinuation}[5]", source)
+        self.assertIn("\\FinancialStatementBeginCore{#1}{#2}{}{#3}{#4}{#5}", source)
+
+    def test_generic_section_row_with_note_exists(self) -> None:
+        source = (ROOT / "template" / "financial-statement-layout.tex").read_text(encoding="utf-8")
+        self.assertIn("\\providecommand{\\FinancialStatementSectionRowWithNote}[2]", source)
+
 
 if __name__ == "__main__":
     unittest.main()

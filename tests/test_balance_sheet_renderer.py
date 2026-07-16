@@ -45,6 +45,42 @@ class BalanceSheetRendererTests(unittest.TestCase):
             self.assertIn("{2025-12-31}", tex)
             self.assertIn("{20X4-12-31}", tex)
 
+    def test_continuation_page_omits_repeated_title(self) -> None:
+        current_fixture = ROOT / "data/mock/balance_sheet_current_period_fixture.json"
+        previous_fixture = ROOT / "data/mock/balance_sheet_previous_period_fixture.json"
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_tex = Path(tmp) / "balance.tex"
+            tex = render_balance_sheet_tex(
+                current_fixture,
+                output_tex,
+                previous_period_fixture_path=previous_fixture,
+            )
+
+            self.assertEqual(tex.count("{Balansräkning}"), 1)
+            self.assertIn("\\FinancialStatementBeginContinuation", tex)
+            self.assertIn(
+                "\\FinancialStatementBeginContinuation{Omegapoint Malmö AB}{556613-1339}{2025-12-31}{20X4-12-31}{7 (19)}",
+                tex,
+            )
+            self.assertIn("\\FinancialStatementSectionRow{EGET KAPITAL OCH SKULDER}", tex)
+
+    def test_eget_kapital_has_note_and_summa_has_no_note(self) -> None:
+        current_fixture = ROOT / "data/mock/balance_sheet_current_period_fixture.json"
+        previous_fixture = ROOT / "data/mock/balance_sheet_previous_period_fixture.json"
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_tex = Path(tmp) / "balance.tex"
+            tex = render_balance_sheet_tex(
+                current_fixture,
+                output_tex,
+                previous_period_fixture_path=previous_fixture,
+            )
+
+            self.assertIn("\\FinancialStatementSectionRowWithNote{Eget kapital}{20, 21}", tex)
+            self.assertIn("\\FinancialStatementTotalRow{Summa eget kapital}{}", tex)
+            self.assertNotIn("\\FinancialStatementTotalRow{Summa eget kapital}{20, 21}", tex)
+
     def test_balance_sheet_uses_single_balance_dates_in_column_headings(self) -> None:
         current_fixture = ROOT / "data/mock/balance_sheet_current_period_fixture.json"
         previous_fixture = ROOT / "data/mock/balance_sheet_previous_period_fixture.json"
@@ -170,6 +206,8 @@ class BalanceSheetRendererTests(unittest.TestCase):
             self.assertGreater(idx_assets_total, idx_assets)
             self.assertGreater(idx_equity, idx_assets_total)
             self.assertGreater(idx_total_equity, idx_equity)
+
+            self.assertIn("90 820 709", tex)
 
     def test_explicit_two_page_break_exists(self) -> None:
         current_fixture = ROOT / "data/mock/balance_sheet_current_period_fixture.json"

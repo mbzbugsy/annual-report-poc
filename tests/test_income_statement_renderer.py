@@ -58,6 +58,22 @@ class IncomeStatementRendererTests(unittest.TestCase):
             self.assertIn("{5 (19)}", tex)
             self.assertIn("120 000 000", tex)
 
+    def test_income_statement_title_remains_resultatrakning(self) -> None:
+        fixture_current = ROOT / "data/mock/income_statement_current_period_fixture.json"
+        fixture_previous = ROOT / "data/mock/income_statement_previous_period_fixture.json"
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output_tex = Path(tmp) / "income.tex"
+            tex = render_income_statement_tex(
+                fixture_current,
+                output_tex,
+                previous_period_fixture_path=fixture_previous,
+            )
+
+            self.assertIn("\\FinancialStatementBegin", tex)
+            self.assertIn("{Resultaträkning}", tex)
+            self.assertNotIn("\\FinancialStatementBeginContinuation", tex)
+
     def test_successful_json_parsing_and_render_contains_all_rows(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)

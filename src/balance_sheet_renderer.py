@@ -20,7 +20,7 @@ class StatementRow:
     display_label: str = ""
     note: str = ""
     indent_mm: int = 0
-    style: str = "normal"  # normal|subtotal|total|subsection
+    style: str = "normal"  # normal|subtotal|total|subsection|section-with-note
 
 
 REQUIRED_KEYS = [
@@ -91,7 +91,7 @@ ASSET_ROWS: List[StatementRow] = [
 
 EQUITY_LIABILITIES_ROWS: List[StatementRow] = [
     StatementRow("section", display_label="EGET KAPITAL OCH SKULDER"),
-    StatementRow("section", display_label="Eget kapital"),
+    StatementRow("section", display_label="Eget kapital", note="20, 21", style="section-with-note"),
     StatementRow("section", display_label="Bundet eget kapital", style="subsection"),
     StatementRow("line", "shareCapital", "Aktiekapital", "", indent_mm=2),
     StatementRow("line", "reserveFund", "Reservfond", "", indent_mm=2),
@@ -101,7 +101,7 @@ EQUITY_LIABILITIES_ROWS: List[StatementRow] = [
     StatementRow("line", "retainedEarnings", "Balanserad vinst eller förlust", "", indent_mm=2),
     StatementRow("line", "profitForYear", "Årets resultat", "", indent_mm=2),
     StatementRow("line", "totalUnrestrictedEquity", "", "", style="subtotal"),
-    StatementRow("line", "totalEquity", "Summa eget kapital", "20, 21", style="total"),
+    StatementRow("line", "totalEquity", "Summa eget kapital", "", style="total"),
     StatementRow("space"),
     StatementRow("section", display_label="Kortfristiga skulder"),
     StatementRow("line", "advancesFromCustomers", "Förskott från kunder", "", indent_mm=2),
@@ -269,10 +269,18 @@ def _render_rows(
             continue
 
         if row.kind == "section":
-            row_command = "FinancialStatementSubsectionRow" if row.style == "subsection" else "FinancialStatementSectionRow"
-            rendered_rows.append(
-                f"\\{row_command}{{{escape_latex(row.display_label)}}}"
-            )
+            if row.style == "subsection":
+                rendered_rows.append(
+                    f"\\FinancialStatementSubsectionRow{{{escape_latex(row.display_label)}}}"
+                )
+            elif row.style == "section-with-note":
+                rendered_rows.append(
+                    f"\\FinancialStatementSectionRowWithNote{{{escape_latex(row.display_label)}}}{{{escape_latex(row.note)}}}"
+                )
+            else:
+                rendered_rows.append(
+                    f"\\FinancialStatementSectionRow{{{escape_latex(row.display_label)}}}"
+                )
             continue
 
         current_amount = format_amount(current_values[row.key])
@@ -359,10 +367,9 @@ def render_balance_sheet_tex(
             "\\FinancialStatementEnd",
             "% Explicit statement boundary between assets and equity/liabilities pages.",
             (
-                "\\FinancialStatementBegin"
+                "\\FinancialStatementBeginContinuation"
                 f"{{{escape_latex(metadata.company_name)}}}"
                 f"{{{escape_latex(metadata.organization_number)}}}"
-                "{Balansräkning}"
                 f"{{{_render_period_label(current_balance_date_label)}}}"
                 f"{{{_render_period_label(previous_balance_date_label)}}}"
                 f"{{{escape_latex(EQUITY_LIABILITIES_PAGE_INDICATOR)}}}"
