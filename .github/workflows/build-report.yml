@@ -36,6 +36,19 @@ jobs:
             --output generated/income-statement.tex \
             --previous-period-fixture data/mock/income_statement_previous_period_fixture.json
 
+      - name: Render synthetic balance sheet partial
+        run: |
+          python3 tools/render_balance_sheet_tex.py \
+            --input data/mock/balance_sheet_current_period_fixture.json \
+            --previous-period-fixture data/mock/balance_sheet_previous_period_fixture.json \
+            --output generated/balance-sheet.tex
+
+      - name: Verify generated partials exist
+        run: |
+          test -f generated/report-metadata.tex
+          test -f generated/income-statement.tex
+          test -f generated/balance-sheet.tex
+
       - name: Build PDF
         uses: xu-cheng/latex-action@v3
         with:
