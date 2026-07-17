@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "metadata": {
+    "purpose": "non-production synthetic test/build fixture",
+    "containsRealFinancialData": false,
+    "note": "Synthetic balance-sheet values used for layout testing. Do not use in production."
+  },
+  "source": {
+    "file": "NON_PRODUCTION_SYNTHETIC_CURRENT_PERIOD_FIXTURE",
+    "sheet": "N/A"
+  },
+  "balanceDateLabel": "2025-12-31",
+  "lines": {
+    "goodwill": {"value": "15432109"},
+    "machineryTechnicalInstallations": {"value": "2845000"},
+    "equipmentToolsInstallations": {"value": "9674321"},
+    "sharesInGroupCompanies": {"value": "4321987"},
+    "otherLongTermSecurities": {"value": "1897654"},
+    "otherLongTermReceivables": {"value": "2543210"},
+    "totalFinancialFixedAssets": {"value": "8762851"},
+    "totalFixedAssets": {"value": "36714281"},
+    "tradeReceivables": {"value": "21654321"},
+    "receivablesFromGroupCompanies": {"value": "3897654"},
+    "otherReceivables": {"value": "1456789"},
+    "accruedUnbilledRevenue": {"value": "18876543"},
+    "prepaidExpensesAccruedIncome": {"value": "2789012"},
+    "totalShortTermReceivables": {"value": "48674319"},
+    "cashAndBank": {"value": "5432109"},
+    "totalCurrentAssets": {"value": "54106428"},
+    "totalAssets": {"value": "90820709"},
+
+    "shareCapital": {"value": "120000"},
+    "reserveFund": {"value": "100000"},
+    "totalRestrictedEquity": {"value": "220000"},
+    "retainedEarnings": {"value": "35123456"},
+    "profitForYear": {"value": "1987654"},
+    "totalUnrestrictedEquity": {"value": "37111110"},
+    "totalEquity": {"value": "37331110"},
+    "advancesFromCustomers": {"value": "1876543"},
+    "tradePayables": {"value": "9321456"},
+    "liabilitiesToGroupCompanies": {"value": "7421987"},
+    "currentTaxLiabilities": {"value": "1654321"},
+    "otherLiabilities": {"value": "22456789"},
+    "accruedExpensesDeferredIncome": {"value": "10758503"},
+    "totalShortTermLiabilities": {"value": "53489599"},
+    "totalEquityAndLiabilities": {"value": "90820709"}
+  }
+}
