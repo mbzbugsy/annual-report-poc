@@ -357,8 +357,15 @@ def _line_resolved(value: Decimal, trace: Dict[str, object]) -> Dict[str, object
 
 
 def _canonical_property_by_account(profile: BalanceSheetWorkbookProfile) -> Dict[str, str]:
-    out = {code.upper(): prop for code, prop in profile.canonical_equity_account_mappings.items() if prop != "equitySheetTotal"}
-    out.update({code.upper(): prop for code, prop in profile.additional_canonical_equity_mappings.items()})
+    out: Dict[str, str] = {}
+    for code, prop in profile.canonical_equity_account_mappings.items():
+        if prop == "equitySheetTotal":
+            continue
+        out[code.upper()] = prop
+    for code, prop in profile.additional_canonical_equity_mappings.items():
+        if prop == "equitySheetTotal":
+            continue
+        out[code.upper()] = prop
     return out
 
 
@@ -608,11 +615,11 @@ def extract_balance_sheet(
     mapped_accounts: List[Dict[str, object]] = []
     unmapped_accounts: List[Dict[str, object]] = []
 
-    for account_code, property_name in profile.canonical_equity_account_mappings.items():
-        if property_name == "equitySheetTotal":
-            continue
+    canonical_property_by_account = _canonical_property_by_account(profile)
 
-        duplicate_rows = canonical_duplicate_rows_by_code.get(account_code.upper())
+    for account_code, property_name in canonical_property_by_account.items():
+
+        duplicate_rows = canonical_duplicate_rows_by_code.get(account_code)
         if duplicate_rows:
             unresolved_found = True
             lines[property_name] = _line_unresolved(
@@ -637,7 +644,7 @@ def extract_balance_sheet(
             )
             continue
 
-        canonical = canonical_rows_by_code.get(account_code.upper())
+        canonical = canonical_rows_by_code.get(account_code)
         method = "code_exact"
         if canonical is None:
             aliases = {_normalize_text(alias) for alias in profile.canonical_equity_description_aliases.get(property_name, [])}
@@ -749,8 +756,7 @@ def extract_balance_sheet(
                 }
             )
 
-    covered_codes = {code.upper() for code in profile.canonical_equity_account_mappings if code != "20SE"}
-    covered_codes.update(code.upper() for code in profile.additional_canonical_equity_mappings)
+    covered_codes = set(canonical_property_by_account.keys())
 
     for row_payload in equity_rows:
         if row_payload["classification"] != "canonical output/account-total row":
@@ -782,7 +788,7 @@ def extract_balance_sheet(
                 }
             )
 
-    property_by_account = _canonical_property_by_account(profile)
+    property_by_account = canonical_property_by_account
 
     restricted_line = _resolve_br_subtotal_line(
         br_sheet,
@@ -882,6 +888,19 @@ def extract_balance_sheet(
             }
         )
 
+    unresolved_found = True
+    diagnostics.append(
+        {
+            "code": "BALANCE_DATE_LABEL_UNRESOLVED",
+            "severity": "review_required",
+            "message": "balanceDateLabel extraction is not implemented for workbook-driven extraction.",
+            "context": {
+                "field": "balanceDateLabel",
+                "policy": "keep explicit null and block status=ok until validated metadata adapter is implemented",
+            },
+        }
+    )
+
     status = "review_required" if unresolved_found or any(d["severity"] == "review_required" for d in diagnostics) else "ok"
 
     payload: Dict[str, object] = {
@@ -895,7 +914,7 @@ def extract_balance_sheet(
                 "incomeStatement": profile.workbook_sheet_income,
             },
         },
-        "balanceDate": None,
+        "balanceDateLabel": None,
         "lines": lines,
         "equity": {
             "mappedAccounts": mapped_accounts,

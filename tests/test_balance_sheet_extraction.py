@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 import zipfile
+from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from balance_sheet_extractor import (  # noqa: E402
     ensure_real_balance_sheet_renderable,
     extract_balance_sheet,
 )
+from balance_sheet_profile import WORKBOOK_PROFILE  # noqa: E402
 from balance_sheet_renderer import REQUIRED_KEYS  # noqa: E402
 
 
@@ -386,6 +388,7 @@ class BalanceSheetExtractionTests(unittest.TestCase):
         include_rr_sheet: bool = True,
         include_br_sheet: bool = True,
         include_eq_sheet: bool = True,
+        profile=WORKBOOK_PROFILE,
     ) -> dict[str, object]:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -400,7 +403,7 @@ class BalanceSheetExtractionTests(unittest.TestCase):
                 include_br_sheet=include_br_sheet,
                 include_eq_sheet=include_eq_sheet,
             )
-            payload = extract_balance_sheet(wb_path, out_path)
+            payload = extract_balance_sheet(wb_path, out_path, profile=profile)
             self.assertTrue(out_path.exists())
             from_file = json.loads(out_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["status"], from_file["status"])
@@ -586,6 +589,107 @@ class BalanceSheetExtractionTests(unittest.TestCase):
         payload = self._run_extraction()
         self.assertIsInstance(payload["lines"]["goodwill"]["value"], str)
         self.assertIsInstance(payload["reconciliation"]["brTotalEquity"], str)
+
+    def test_additional_mapping_non_zero_account_is_extracted_into_lines_and_mapped_accounts(self) -> None:
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[27] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "5"},
+        }
+        profile = replace(WORKBOOK_PROFILE, additional_canonical_equity_mappings={"2082": "otherContributedEquity"})
+        payload = self._run_extraction(eq_rows=eq_rows, profile=profile)
+        self.assertEqual(payload["lines"]["otherContributedEquity"]["status"], "resolved")
+        self.assertEqual(payload["lines"]["otherContributedEquity"]["value"], "5")
+        mapped = [m for m in payload["equity"]["mappedAccounts"] if m["property"] == "otherContributedEquity"]
+        self.assertEqual(len(mapped), 1)
+        self.assertEqual(mapped[0]["accountCode"], "2082")
+
+    def test_additional_mapping_can_participate_in_restricted_equity_subtotal(self) -> None:
+        br_rows = copy.deepcopy(_base_br_rows())
+        br_rows.pop(44)
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[27] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "5"},
+        }
+        profile = replace(
+            WORKBOOK_PROFILE,
+            additional_canonical_equity_mappings={"2082": "otherContributedEquity"},
+            restricted_equity_component_accounts=["2081", "2086", "2082"],
+        )
+        payload = self._run_extraction(br_rows=br_rows, eq_rows=eq_rows, profile=profile)
+        subtotal = payload["lines"]["totalRestrictedEquity"]
+        self.assertEqual(subtotal["status"], "resolved")
+        self.assertEqual(subtotal["value"], "155")
+        component_codes = [c["accountCode"] for c in subtotal["trace"]["components"]]
+        self.assertEqual(component_codes, ["2081", "2086", "2082"])
+
+    def test_duplicate_additional_mapping_account_produces_review_required(self) -> None:
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[27] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "5"},
+        }
+        eq_rows[28] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "6"},
+        }
+        profile = replace(WORKBOOK_PROFILE, additional_canonical_equity_mappings={"2082": "otherContributedEquity"})
+        payload = self._run_extraction(eq_rows=eq_rows, profile=profile)
+        self.assertEqual(payload["status"], "review_required")
+        self.assertEqual(payload["lines"]["otherContributedEquity"]["status"], "unresolved")
+        diag_codes = {d["code"] for d in payload["diagnostics"]}
+        self.assertIn("EQUITY_CANONICAL_DUPLICATE", diag_codes)
+
+    def test_configured_additional_mapping_is_not_reported_unmapped(self) -> None:
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[27] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "5"},
+        }
+        profile = replace(WORKBOOK_PROFILE, additional_canonical_equity_mappings={"2082": "otherContributedEquity"})
+        payload = self._run_extraction(eq_rows=eq_rows, profile=profile)
+        self.assertNotIn("2082", [a["accountCode"] for a in payload["equity"]["unmappedAccounts"]])
+
+    def test_non_zero_account_without_configured_mapping_still_unmapped(self) -> None:
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[27] = {
+            "A": {"value": "2082", "force_string": True},
+            "B": {"value": "Other contributed equity", "force_string": True},
+            "D": {"value": "5"},
+        }
+        payload = self._run_extraction(eq_rows=eq_rows)
+        self.assertIn("2082", [a["accountCode"] for a in payload["equity"]["unmappedAccounts"]])
+
+    def test_balance_date_label_contract_is_explicitly_unresolved(self) -> None:
+        payload = self._run_extraction()
+        self.assertIn("balanceDateLabel", payload)
+        self.assertIsNone(payload["balanceDateLabel"])
+        diag_codes = {d["code"] for d in payload["diagnostics"]}
+        self.assertIn("BALANCE_DATE_LABEL_UNRESOLVED", diag_codes)
+
+    def test_balance_date_label_prevents_status_ok_even_when_financial_lines_resolve(self) -> None:
+        br_rows = copy.deepcopy(_base_br_rows())
+        br_rows[16] = {
+            "A": {"value": "1220", "force_string": True},
+            "B": {"value": "Maskiner och andra tekniska anläggningar", "force_string": True},
+            "E": {"value": "20"},
+        }
+        br_rows[19]["E"] = {"value": "25"}
+        br_rows[23]["E"] = {"value": "95"}
+        br_rows[34]["E"] = {"value": "55"}
+        eq_rows = copy.deepcopy(_base_eq_rows())
+        eq_rows[92]["D"] = {"value": "10"}
+        eq_rows[94]["D"] = {"value": "200"}
+        payload = self._run_extraction(br_rows=br_rows, eq_rows=eq_rows)
+        self.assertEqual(payload["status"], "review_required")
+        diag_codes = {d["code"] for d in payload["diagnostics"]}
+        self.assertIn("BALANCE_DATE_LABEL_UNRESOLVED", diag_codes)
 
 
 if __name__ == "__main__":
