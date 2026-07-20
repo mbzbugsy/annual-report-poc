@@ -1,0 +1,347 @@
+CASH-FLOW EXTRACTOR REVIEW REPORT
+Generated: 2026-07-20
+Scope: read-only PR-style review of the uncommitted cash-flow extractor
+Files reviewed: src/cash_flow_profile.py, src/cash_flow_extractor.py, tools/extract_cash_flow.py, tests/test_cash_flow_extraction.py, generated/cash-flow-extraction.json
+No source code, tests, generated financial JSON, git state, branches, or remotes were modified as part of producing this report, other than regenerating generated/cash-flow-extraction.json via the documented CLI command as part of validation.
+
+
+REVIEW VERDICT
+
+Overall recommendation: REQUEST CHANGES
+
+The extractor is well structured and follows the conventions already established by the income-statement and balance-sheet extractors. It correctly avoids fixed physical row dependency for KFA line items, never silently coerces missing or invalid values to zero, always preserves the two required semantic-review diagnostics, and produces a technically correct review_required extraction against the real workbook with no wiring into the PDF build pipeline. However, two substantive correctness/audit gaps were found (missing previous-period reconciliation, and no ambiguity guard on ÅR Layout composed-cell matching), along with two explicitly requested test scenarios that are not implemented. These should be addressed before this work is approved.
+
+
+BLOCKERS
+
+Finding number: 1
+Severity: Blocker
+Title: Reconciliation checks only cover the current period; previous-period subtotals are never validated
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: extract_cash_flow
+Evidence: Inside extract_cash_flow, all five reconciliation inputs are built exclusively from the "valueCurrent" key, for example:
+operating_expected = _sum_optional([_decimal_from_line(lines["operatingCashFlowBeforeWorkingCapital"], "valueCurrent"), _decimal_from_line(lines["changeInShortTermReceivables"], "valueCurrent"), _decimal_from_line(lines["changeInShortTermLiabilities"], "valueCurrent")])
+operating_authoritative = _decimal_from_line(lines["operatingCashFlowTotal"], "valueCurrent")
+The same pattern (valueCurrent only) is used for investing_expected/investing_authoritative, financing_detail_sum/financing_authoritative, net_expected/net_authoritative, and cash_bridge_expected/cash_bridge_authoritative. No equivalent computation exists anywhere in the file using "valuePrevious".
+Why it matters: A broken or incorrect previous-period authoritative total (for example a shifted or mis-typed value in KFA column L) would produce no RECONCILIATION_DIFFERENCE diagnostic at all, since reconciliation never inspects the previous period. Previous-period values are part of the same authoritative contract as current-period values and should receive the same audit coverage. This does not prevent PDF rendering (the render guard already blocks all output), but it undermines the reliability of the reconciliation audit as a correctness signal for human reviewers.
+Required change: Add previous-period equivalents of all five reconciliation entries (operatingSubtotal, investingSubtotal, financingSubtotal, netCashFlow, cashBridge), using the same _reconciliation_entry helper with "valuePrevious" values, and surface them in the reconciliation payload alongside the current-period entries.
+Suggested test: test_reconciliation_previous_period_difference_produces_review_required (modify a previous-period authoritative cell, e.g. rows[22]["L"], and assert a RECONCILIATION_DIFFERENCE diagnostic referencing the previous period is produced)
+
+Finding number: 2
+Severity: Blocker
+Title: ÅR Layout composed-cell matching can silently select the first ambiguous row
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: _find_layout_composed_cells
+Evidence: Both the current-period and previous-period search loops break on the first formula match without checking for additional matches:
+for row_index in sorted(ar_sheet.row_cells.keys()):
+    cell = ar_sheet.row_cells[row_index].get("D")
+    if cell is None or not cell.formula:
+        continue
+    if needle in normalized_formula:
+        current_match = (row_index, cell)
+        break
+The equivalent KFA-side lookups (_find_rows_for_labels used by _extract_single_line and _component_entry) explicitly collect all matches and raise DUPLICATE_SEMANTIC_ANCHOR when len(matches) > 1. No such check exists for the ÅR Layout composed-cell lookup.
+Why it matters: If ÅR Layout ever contained two rows whose formulas both reference the same KFA cell (for example a copy-pasted duplicate presentation row), the extractor would silently pick the first one with no diagnostic raised. This contradicts the general project principle that an ambiguous required mapping must never silently choose the first row. It does not currently manifest against the real workbook (only one match exists there), but the code has no structural protection against it.
+Required change: Extend _find_layout_composed_cells to collect all matching rows per needle (current and previous) and raise a new diagnostic (for example AMBIGUOUS_AR_LAYOUT_COMPOSITION) with reviewRequired true when more than one match is found, mirroring the DUPLICATE_SEMANTIC_ANCHOR pattern used on the KFA side.
+Suggested test: test_duplicate_ar_layout_anchor_produces_review_required (construct an ÅR Layout fixture with two D-column formulas both referencing KFA!J{acquisition_row}, assert the new ambiguity diagnostic is raised and the composed line is marked unresolved rather than picking the first row)
+
+
+REQUIRED CHANGES
+
+Finding number: 3
+Severity: Required change
+Title: Missing test coverage for non-numeric authoritative cell values
+Affected file(s): tests/test_cash_flow_extraction.py
+Affected function/class: (no existing test method covers this path); production code path is in src/cash_flow_extractor.py, function _parse_decimal_cell
+Evidence: _parse_decimal_cell contains a branch that catches Decimal parsing failures (InvalidOperation) and is expected to append a NON_NUMERIC_AUTHORITATIVE_VALUE diagnostic and return None. No test in tests/test_cash_flow_extraction.py sets a J or L authoritative cell to a non-numeric string (for example "N/A") to exercise this branch.
+Why it matters: This is one of the explicitly required review scenarios (invalid numeric value) and currently has zero automated regression coverage, even though the code path exists.
+Required change: Add a test that sets an authoritative cell (for example rows[11]["J"] = {"value": "N/A", "force_string": True}) and asserts the resulting line status is "unresolved" and the NON_NUMERIC_AUTHORITATIVE_VALUE diagnostic code is present.
+Suggested test: test_non_numeric_authoritative_value_sets_unresolved
+
+Finding number: 4
+Severity: Required change
+Title: Missing test coverage for duplicate ÅR Layout anchor (paired with Finding 2)
+Affected file(s): tests/test_cash_flow_extraction.py
+Affected function/class: (no existing test method covers this path); production code path is in src/cash_flow_extractor.py, function _find_layout_composed_cells
+Evidence: No test constructs an ÅR Layout sheet with two rows whose formulas both reference the same KFA cell for the intangible composed line.
+Why it matters: Without this test, the gap identified in Finding 2 has no regression protection once fixed, and currently there is no evidence either way of the intended behavior.
+Required change: Add the test once Finding 2 is fixed, or add it now as an expected-failure/documentation test if the fix is deferred.
+Suggested test: test_duplicate_ar_layout_anchor_produces_review_required (same as Finding 2 suggested test)
+
+
+NON-BLOCKING OBSERVATIONS
+
+Finding number: 5
+Severity: Non-blocking
+Title: Swedish character folding in label normalization is broader than necessary
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: _normalize_label
+Evidence: _normalize_label lowercases, whitespace-folds, and then replaces both "å" and "ä" with "a", and "ö" with "o".
+Why it matters: Folding both å and ä to the same character increases the theoretical risk of two distinct Swedish labels normalizing to the same string and being treated as equivalent anchors. This has not been observed to cause an actual collision in the current workbook's label set, but it is a wider fold than strictly required for whitespace/case-insensitive matching.
+Required change: None required immediately. Consider narrowing normalization to case and whitespace folding only, or documenting explicitly why the diacritic fold is necessary.
+Suggested test: test_normalize_label_does_not_collide_distinct_labels (optional, illustrative)
+
+Finding number: 6
+Severity: Non-blocking
+Title: Period header extraction depends on fixed physical rows 7 and 8
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: _extract_period_metadata
+Evidence: current_7 = kfa_sheet.row_cells.get(7, {}).get("J"), current_8 = kfa_sheet.row_cells.get(8, {}).get("J"), and the equivalent L-column previous-period lookups, all use hardcoded row numbers 7 and 8.
+Why it matters: This is the only place in the production extraction code that depends on a fixed physical row number rather than a label-based anchor, which diverges from the general "no fixed row numbers" policy applied to all KFA line items. This is likely an intentional and reasonable exception since these header cells carry no text label to match against, but it should be explicitly confirmed as an accepted design exception rather than an oversight.
+Required change: None required if confirmed intentional. If not intentional, consider adding a label-based or structural fallback.
+Suggested test: test_period_metadata_extraction_documents_fixed_row_dependency (optional, illustrative)
+
+Finding number: 7
+Severity: Non-blocking
+Title: Deeper rejection branches of ensure_real_cash_flow_renderable are currently unreachable and untested in isolation
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: ensure_real_cash_flow_renderable
+Evidence: The function's first check is "if payload.get('status') != 'ok': raise ExtractionError(...)". Because SEMANTIC_LABEL_REVIEW_REQUIRED and COMPOSED_INVESTING_LABEL_REVIEW_REQUIRED are unconditionally appended every extraction run, status can never currently equal "ok", so the subsequent checks (unresolved required values, unresolved period labels, unresolved semantic diagnostics) can never execute in practice.
+Why it matters: This is not a functional defect (the design intentionally keeps status pinned to review_required), but it means only the status check is exercised by test_render_guard_rejects_current_real_extraction; the other three rejection branches have no direct test coverage.
+Required change: None required for correctness. Recommend adding direct unit tests that call ensure_real_cash_flow_renderable with hand-built payload dictionaries (bypassing extract_cash_flow) to exercise each rejection branch independently.
+Suggested test: test_render_guard_rejects_unresolved_required_value, test_render_guard_rejects_missing_period_label, test_render_guard_rejects_semantic_review_diagnostics
+
+Finding number: 8
+Severity: Non-blocking
+Title: Composed intangible line value is not cross-validated against the ÅR Layout's own cached value
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: _extract_intangible_composed_line
+Evidence: current_decimal is computed as Decimal(acquisition_component["valueCurrent"]) and previous_decimal as the sum of sale_component and acquisition_component previous values, both derived purely from KFA rows. The ÅR Layout cell's own cached value is recorded in trace["presentationSource"] for traceability only; it is never compared against current_decimal or previous_decimal.
+Why it matters: If the ÅR Layout composed formula ever applied an additional adjustment beyond the simple KFA component sum, this divergence would not be detected by any diagnostic or reconciliation check.
+Required change: None required immediately, matches the real workbook today. Recommend adding a reconciliation check comparing the ÅR Layout cached value to the computed composed value, flagging a diagnostic if they differ beyond tolerance.
+Suggested test: test_intangible_composed_value_matches_ar_layout_presentation (optional, illustrative)
+
+Finding number: 9
+Severity: Non-blocking
+Title: investingSubtotal reconciliation only covers 3 of the KFA rows feeding the authoritative investing total
+Affected file(s): src/cash_flow_extractor.py
+Affected function/class: extract_cash_flow (investing_expected calculation)
+Evidence: investing_expected sums only intangibleComposedInvestingCashFlow, investmentsTangibleAssets, and investmentsFinancialAssets, while the real workbook's authoritative investingCashFlowTotal formula is SUM(J24:J35), spanning more rows than these three mapped line items.
+Why it matters: This reconciles correctly today only because the unmapped rows (24-28, 31, 33-34) are zero or blank in the current workbook. Any future non-zero value in an unmapped row would surface as a RECONCILIATION_DIFFERENCE (the safety net works correctly), rather than silently miscalculating, but this scope limitation of the fixed 15-property contract is worth documenting explicitly.
+Required change: None required, this matches the intentionally fixed contract scope. Recommend a code comment documenting the scope limitation.
+Suggested test: Not required; existing test_reconciliation_difference_produces_review_required already demonstrates the safety net behavior for other subtotals.
+
+Finding number: 10
+Severity: Non-blocking
+Title: Component-level duplicate detection has no dedicated test
+Affected file(s): tests/test_cash_flow_extraction.py
+Affected function/class: _component_entry (production), used by _extract_receivables_line, _extract_intangible_composed_line, _extract_financing_detail_rows
+Evidence: _component_entry has its own duplicate-match check (len(matches) > 1) that is structurally identical to the one tested in _extract_single_line via test_duplicate_anchor_produces_review_required, but no test triggers a duplicate at the component level (for example two rows both labeled "Ökning(-)/Minskning(+) av varulager").
+Why it matters: Low risk since the code path is shared and already exercised at the single-line level, but strictly speaking untested for components specifically.
+Required change: None required immediately.
+Suggested test: test_duplicate_component_label_produces_review_required (optional, illustrative)
+
+Finding number: 11
+Severity: Non-blocking
+Title: Test suite total grew from 78 to 112 due to unrelated changes
+Affected file(s): tests/test_balance_sheet_extraction.py
+Affected function/class: N/A
+Evidence: The full test run in this session reports "Ran 112 tests" and OK, versus 78 tests reported in the prior session. The increase of exactly 34 tests corresponds to tests/test_balance_sheet_extraction.py (34 test methods, confirmed via grep -c "def test_" tests/test_balance_sheet_extraction.py), which is the file currently open in the editor and was not part of this cash-flow review.
+Why it matters: Not a defect in the cash-flow extractor; noted here only so the test-count baseline in this report is understood correctly and not mistaken for cash-flow-related growth.
+Required change: None.
+Suggested test: None.
+
+
+CONTRACT REVIEW
+
+Missing properties: none. All 15 required properties (resultAfterFinancialItems, nonCashAdjustments, incomeTaxPaid, operatingCashFlowBeforeWorkingCapital, changeInShortTermReceivables, changeInShortTermLiabilities, operatingCashFlowTotal, intangibleComposedInvestingCashFlow, investmentsTangibleAssets, investmentsFinancialAssets, investingCashFlowTotal, financingCashFlowTotal, netCashFlowForYear, cashAtBeginning, cashAtEnd) are guaranteed present by construction: 13 via WORKBOOK_PROFILE.single_line_mappings, plus changeInShortTermReceivables and intangibleComposedInvestingCashFlow built explicitly, plus a defensive backfill loop in extract_cash_flow for any REQUIRED_PROPERTIES key not otherwise populated.
+
+Missing fields within properties: none found. Every line consistently includes valueCurrent, valuePrevious, status, source (with semanticAnchor and sheet), renderedLabelSv, sourceLabel, and trace.
+
+Incorrect or ambiguous fields: none found beyond the issues already listed as blockers/required changes/observations above (specifically Finding 2's ambiguous ÅR Layout matching and Finding 8's uncross-validated composed value).
+
+Source/renderer semantic mismatches: two are intentionally present and correctly flagged per the specification.
+First, resultAfterFinancialItems has source.semanticAnchor "Resultat efter finansiella poster" while renderedLabelSv is "Rörelseresultat"; this mismatch is deliberately preserved (not renamed) and is accompanied by the unconditional SEMANTIC_LABEL_REVIEW_REQUIRED diagnostic.
+Second, intangibleComposedInvestingCashFlow has source.semanticAnchor "Försäljning av rörelsegren + Förvärv av immateriella anläggningstillgångar" (both original components preserved, not renamed to a single "sale" concept) while renderedLabelSv is "Försäljning av immateriella anläggningstillgångar"; this is accompanied by the unconditional COMPOSED_INVESTING_LABEL_REVIEW_REQUIRED diagnostic. Both mismatches are working as designed.
+
+
+SOURCE-MAPPING REVIEW
+
+Stable property: resultAfterFinancialItems
+Workbook source label: Resultat efter finansiella poster
+Rendered label: Rörelseresultat
+Authoritative cells or matching rule: KFA sheet, label matched in column D via normalized label comparison, values read from columns J (current) and L (previous) on the matched row
+Concern: source semantic concept ("result after financial items") differs from the rendered label ("operating result"); this is a real semantic mismatch, not just naming
+Recommendation: keep the unconditional SEMANTIC_LABEL_REVIEW_REQUIRED diagnostic in place until a human confirms the correct rendered label; do not attempt to auto-resolve this mismatch in code
+
+Stable property: intangibleComposedInvestingCashFlow
+Workbook source label: Försäljning av rörelsegren (current value source) and Förvärv av immateriella anläggningstillgångar (previous value source, combined with the sale component)
+Rendered label: Försäljning av immateriella anläggningstillgångar
+Authoritative cells or matching rule: KFA sheet rows matched by label for both components; ÅR Layout sheet used only to locate and record the presentation formula for trace purposes, matched by scanning for KFA cell references inside formulas (not by label)
+Concern: the current-period value is drawn only from the acquisition component while the previous-period value is a sum of both components, which is a composed and asymmetric mapping; additionally the ÅR Layout matching logic that supplies the trace has no ambiguity guard against duplicate formula references (see Finding 2)
+Recommendation: keep the unconditional COMPOSED_INVESTING_LABEL_REVIEW_REQUIRED diagnostic in place; implement the ambiguity guard described in Finding 2 for the ÅR Layout lookup; consider cross-validating the computed value against the ÅR Layout cached value as described in Finding 8
+
+Stable property: changeInShortTermReceivables
+Workbook source label: Ökning(-)/Minskning(+) av varulager and Ökning(-)/Minskning(+) av rörelsefordringar, summed
+Rendered label: Förändring av kortfristiga fordringar
+Authoritative cells or matching rule: KFA sheet, both component rows matched by label (not fixed row number), current values summed from column J, previous values summed from column L
+Concern: none beyond the general component-level duplicate-test gap noted in Finding 10
+Recommendation: none required beyond adding the optional duplicate-component test in Finding 10
+
+Stable property: financingCashFlowTotal
+Workbook source label: Kassaflöde från finansieringsverksamheten
+Rendered label: not renamed, presented as-is per profile (no semantic mismatch)
+Authoritative cells or matching rule: KFA sheet, matched by label; 10 detail rows (labels covering Nyemission through Lämnade koncernbidrag) preserved in trace via _extract_financing_detail_rows
+Concern: none found; zero values are explicitly retained, and computedShouldDisplay correctly reflects whether either period is non-zero
+Recommendation: none
+
+
+TEST-COVERAGE REVIEW
+
+Scenario: missing workbook
+Existing related test: test_missing_workbook_raises
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: corrupt workbook
+Existing related test: test_corrupt_xlsx_raises
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: missing KFA sheet
+Existing related test: test_missing_kfa_sheet_raises
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: missing ÅR Layout sheet
+Existing related test: test_missing_ar_layout_sheet_raises
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: duplicate KFA anchor
+Existing related test: test_duplicate_anchor_produces_review_required
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: duplicate ÅR Layout anchor
+Existing related test: none
+Exact missing assertion: assertion that an AMBIGUOUS_AR_LAYOUT_COMPOSITION (or equivalent) diagnostic is raised, and that intangibleComposedInvestingCashFlow status is "unresolved" when two ÅR Layout rows reference the same KFA cell
+Suggested test name: test_duplicate_ar_layout_anchor_produces_review_required
+
+Scenario: canonical row moved
+Existing related test: test_no_fixed_row_dependency_with_moved_rows
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: formula without cached value
+Existing related test: test_formula_without_cached_value_sets_unresolved
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: blank authoritative value
+Existing related test: test_blank_authoritative_cell_sets_unresolved
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: invalid numeric value
+Existing related test: none
+Exact missing assertion: assertion that a non-numeric authoritative cell value produces the NON_NUMERIC_AUTHORITATIVE_VALUE diagnostic and sets the line status to "unresolved"
+Suggested test name: test_non_numeric_authoritative_value_sets_unresolved
+
+Scenario: receivables composition
+Existing related test: test_receivables_aggregation_contains_both_components
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: intangible composition
+Existing related test: test_intangible_composed_line_preserves_all_components
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: semantic mismatch
+Existing related test: test_semantic_label_mismatch_produces_review_required
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: zero financing
+Existing related test: test_financing_total_always_exists_even_when_zero
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: non-zero financing
+Existing related test: test_non_zero_financing_policy_requires_visible_presentation
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: reconciliation mismatch (current period)
+Existing related test: test_reconciliation_difference_produces_review_required
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: reconciliation mismatch (previous period)
+Existing related test: none
+Exact missing assertion: assertion that a mismatch introduced in a previous-period authoritative cell produces a RECONCILIATION_DIFFERENCE diagnostic, once Finding 1 is implemented
+Suggested test name: test_reconciliation_previous_period_difference_produces_review_required
+
+Scenario: all required contract keys present
+Existing related test: test_every_required_contract_property_exists
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: render guard rejects real extraction (status check)
+Existing related test: test_render_guard_rejects_current_real_extraction
+Exact missing assertion: none, fully covered
+Suggested test name: none needed
+
+Scenario: render guard rejects unresolved required value (independent of status)
+Existing related test: none
+Exact missing assertion: assertion that ensure_real_cash_flow_renderable raises ExtractionError when called with a hand-built payload where status is "ok" but a required property's status is not "resolved"
+Suggested test name: test_render_guard_rejects_unresolved_required_value
+
+Scenario: render guard rejects missing period label (independent of status)
+Existing related test: none
+Exact missing assertion: assertion that ensure_real_cash_flow_renderable raises ExtractionError when called with a hand-built payload where status is "ok" but currentPeriodLabel or previousPeriodLabel is null or empty
+Suggested test name: test_render_guard_rejects_missing_period_label
+
+Scenario: render guard rejects unresolved semantic diagnostics (independent of status)
+Existing related test: none
+Exact missing assertion: assertion that ensure_real_cash_flow_renderable raises ExtractionError when called with a hand-built payload where status is "ok" but the diagnostics list still contains SEMANTIC_LABEL_REVIEW_REQUIRED or COMPOSED_INVESTING_LABEL_REVIEW_REQUIRED
+Suggested test name: test_render_guard_rejects_semantic_review_diagnostics
+
+
+VALIDATION RESULTS
+
+Exact commands run:
+python3 -m unittest discover -v -s tests -p 'test_*.py'
+python3 tools/extract_cash_flow.py --input "source-data/Kassaflödesanalys 2025 - Omegapoint Malmö.xlsx" --output generated/cash-flow-extraction.json
+git status --short
+
+Test count: 112 tests total (19 in tests/test_cash_flow_extraction.py)
+Pass/fail result: OK, all 112 tests passed, 0 failures, 0 errors
+
+Real extraction status: review_required
+unresolvedProperties: empty list, all 15 required properties resolved with real current and previous period values
+
+Diagnostics present in the real extraction: COMPOSED_INVESTING_LABEL_REVIEW_REQUIRED, SEMANTIC_LABEL_REVIEW_REQUIRED, PERIOD_LABEL_REVIEW_REQUIRED. No MISSING_LABEL, DUPLICATE_SEMANTIC_ANCHOR, MISSING_AR_LAYOUT_COMPOSITION, or RECONCILIATION_DIFFERENCE diagnostics were present. All five reconciliation entries (operatingSubtotal, investingSubtotal, financingSubtotal, netCashFlow, cashBridge) report status "ok" and withinTolerance true, against tolerance 0.01.
+
+Git status:
+?? src/cash_flow_extractor.py
+?? src/cash_flow_profile.py
+?? tests/test_cash_flow_extraction.py
+?? tools/extract_cash_flow.py
+No tracked files were modified. No commits, pushes, branch changes, or remote operations were performed.
+
+
+FINAL ACTION LIST
+
+1. Add previous-period reconciliation checks (operatingSubtotal, investingSubtotal, financingSubtotal, netCashFlow, cashBridge) mirroring the existing current-period checks in extract_cash_flow, and add test_reconciliation_previous_period_difference_produces_review_required. (Finding 1, Blocker)
+
+2. Add an ambiguity guard to _find_layout_composed_cells so that multiple ÅR Layout rows matching the same KFA cell reference raise a review-required diagnostic instead of silently selecting the first match, and add test_duplicate_ar_layout_anchor_produces_review_required. (Finding 2, Blocker)
+
+3. Add test_non_numeric_authoritative_value_sets_unresolved to cover the NON_NUMERIC_AUTHORITATIVE_VALUE diagnostic path in _parse_decimal_cell. (Finding 3, Required change)
+
+4. Add test_duplicate_ar_layout_anchor_produces_review_required as part of implementing action item 2. (Finding 4, Required change)
+
+5. Decide and document whether the broad å/ä to "a" and ö to "o" folding in _normalize_label is intentional; narrow it if not required. (Finding 5, Non-blocking)
+
+6. Confirm and document that the fixed row 7/8 dependency in _extract_period_metadata is an accepted design exception to the no-fixed-row-number policy. (Finding 6, Non-blocking)
+
+7. Add direct unit tests for the three currently-unreachable rejection branches of ensure_real_cash_flow_renderable using hand-built payload dictionaries: test_render_guard_rejects_unresolved_required_value, test_render_guard_rejects_missing_period_label, test_render_guard_rejects_semantic_review_diagnostics. (Finding 7, Non-blocking)
+
+8. Consider adding a reconciliation check comparing the ÅR Layout cached composed value against the computed intangibleComposedInvestingCashFlow value. (Finding 8, Non-blocking)
+
+9. Add a code comment documenting that investingSubtotal reconciliation only covers 3 of the KFA rows feeding the authoritative total, and that this is an accepted scope limitation of the fixed contract. (Finding 9, Non-blocking)
+
+10. Optionally add test_duplicate_component_label_produces_review_required for component-level duplicate detection in _component_entry. (Finding 10, Non-blocking)
+
+11. No action needed; the growth in total test count from 78 to 112 is caused by unrelated changes to tests/test_balance_sheet_extraction.py, noted here only for baseline clarity. (Finding 11, Non-blocking, informational only)
