@@ -64,6 +64,46 @@ class ReportShellCleanupTests(unittest.TestCase):
         self.assertIn("\\fancyhead[R]{\\fiscalyear}", layout_source)
         self.assertIn("\\reportcity, \\documentyear", title_page_source)
 
+    def test_income_slice_cli_requires_explicit_source_type(self) -> None:
+        result = subprocess.run(
+            [
+                "python3",
+                "tools/build_income_statement_slice.py",
+                "--previous-period-source",
+                "/tmp/does-not-matter.json",
+            ],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("--previous-period-source-type", result.stderr)
+
+    def test_income_slice_cli_rejects_unsupported_source_type(self) -> None:
+        result = subprocess.run(
+            [
+                "python3",
+                "tools/build_income_statement_slice.py",
+                "--previous-period-source",
+                "/tmp/does-not-matter.json",
+                "--previous-period-source-type",
+                "fixture_json",
+            ],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid choice", result.stderr)
+
+    def test_readme_real_pipeline_example_clarifies_synthetic_comparison_mode(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("--previous-period-source-type real_extract", readme)
+        self.assertIn("--previous-period-source-type synthetic_fixture", readme)
+        self.assertIn("does not produce a fully real two-period report", readme)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -105,7 +105,17 @@ Use this when you want to extract from the real local workbook in `source-data/`
 Run:
 
 ```bash
-python3 tools/build_income_statement_slice.py
+python3 tools/build_income_statement_slice.py \
+  --previous-period-source /tmp/previous-period-source.json \
+  --previous-period-source-type real_extract
+```
+
+For synthetic comparison data (explicitly non-production):
+
+```bash
+python3 tools/build_income_statement_slice.py \
+  --previous-period-source data/mock/income_statement_previous_period_fixture.json \
+  --previous-period-source-type synthetic_fixture
 ```
 
 Output:
@@ -117,8 +127,15 @@ build/annual-report.pdf
 Notes:
 
 - JSON and LaTeX intermediates are written to `generated/`.
-- Previous-period values for visual comparison are sourced from the synthetic fixture `data/mock/income_statement_previous_period_fixture.json`.
-- The fixture is temporary and must be replaced later by a dedicated previous-year workbook import.
+- Previous-period source is explicit and required in this command; there is no silent fallback.
+- `synthetic_fixture` classification is allowed for testing but does not produce a fully real two-period report.
+- Replace synthetic comparison data with a real previous-period source for production workflows.
+
+Real-mode build status contract:
+
+- `INCOME_STATEMENT_MODE=real ./scripts/build.sh` validates real provenance/hash, builds the PDF, and then writes/refreshed `generated/income-statement.real.build-status.json`.
+- The same build-status contract applies whether real mode is run directly via `scripts/build.sh` or indirectly via `tools/build_income_statement_slice.py`.
+- Failed real-mode builds leave no `status: succeeded` real build-status file behind.
 
 ## Suggested first agent test
 
