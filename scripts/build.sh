@@ -8,6 +8,7 @@ GENERATED_REAL_INCOME_TEX="$ROOT/generated/income-statement.real.tex"
 GENERATED_REAL_INCOME_PROVENANCE="$ROOT/generated/income-statement.real.provenance.json"
 GENERATED_REAL_BUILD_STATUS="$ROOT/generated/income-statement.real.build-status.json"
 GENERATED_BALANCE_TEX="$ROOT/generated/balance-sheet.tex"
+GENERATED_CASH_FLOW_TEX="$ROOT/generated/cash-flow.tex"
 GENERATED_METADATA_TEX="$ROOT/generated/report-metadata.tex"
 INCOME_MODE="${INCOME_STATEMENT_MODE:-synthetic}"
 
@@ -48,6 +49,12 @@ if [[ ! -f "$GENERATED_BALANCE_TEX" ]]; then
     --output generated/balance-sheet.tex \
     --previous-period-fixture data/mock/balance_sheet_previous_period_fixture.json
 fi
+
+# Intentionally regenerate the synthetic cash-flow partial on every build.
+python3 tools/render_cash_flow_tex.py \
+  --input data/mock/cash_flow_fixture.json \
+  --output "$GENERATED_CASH_FLOW_TEX" \
+  --metadata data/report_metadata.json
 
 latexmk \
   -pdf \

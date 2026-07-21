@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0",
+  "fixtureType": "synthetic_cash_flow",
+  "status": "ok",
+  "period": {
+    "currentPeriodLabel": "2025-01-01\n-2025-12-31",
+    "previousPeriodLabel": "2024-01-01\n-2024-12-31"
+  },
+  "lines": {
+    "resultAfterFinancialItems": {
+      "status": "resolved",
+      "valueCurrent": "2197354",
+      "valuePrevious": "4779891"
+    },
+    "nonCashAdjustments": {
+      "status": "resolved",
+      "valueCurrent": "8056443",
+      "valuePrevious": "8087268"
+    },
+    "incomeTaxPaid": {
+      "status": "resolved",
+      "valueCurrent": "-2088792",
+      "valuePrevious": "-1660613"
+    },
+    "operatingCashFlowBeforeWorkingCapital": {
+      "status": "resolved",
+      "valueCurrent": "8165005",
+      "valuePrevious": "11206546"
+    },
+    "changeInShortTermReceivables": {
+      "status": "resolved",
+      "valueCurrent": "-9134738",
+      "valuePrevious": "-8268549"
+    },
+    "changeInShortTermLiabilities": {
+      "status": "resolved",
+      "valueCurrent": "4626338",
+      "valuePrevious": "-8706849"
+    },
+    "operatingCashFlowTotal": {
+      "status": "resolved",
+      "valueCurrent": "3656605",
+      "valuePrevious": "-5768852"
+    },
+    "intangibleComposedInvestingCashFlow": {
+      "status": "resolved",
+      "valueCurrent": "0",
+      "valuePrevious": "-2218956"
+    },
+    "investmentsTangibleAssets": {
+      "status": "resolved",
+      "valueCurrent": "-174420",
+      "valuePrevious": "0"
+    },
+    "investmentsFinancialAssets": {
+      "status": "resolved",
+      "valueCurrent": "0",
+      "valuePrevious": "6894432"
+    },
+    "investingCashFlowTotal": {
+      "status": "resolved",
+      "valueCurrent": "-174420",
+      "valuePrevious": "4675476"
+    },
+    "financingCashFlowTotal": {
+      "status": "resolved",
+      "valueCurrent": "0",
+      "valuePrevious": "0"
+    },
+    "netCashFlowForYear": {
+      "status": "resolved",
+      "valueCurrent": "3482185",
+      "valuePrevious": "-1093376"
+    },
+    "cashAtBeginning": {
+      "status": "resolved",
+      "valueCurrent": "-2777602",
+      "valuePrevious": "-1684226"
+    },
+    "cashAtEnd": {
+      "status": "resolved",
+      "valueCurrent": "704583",
+      "valuePrevious": "-2777602"
+    }
+  }
+}
