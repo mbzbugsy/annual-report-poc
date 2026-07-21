@@ -70,6 +70,17 @@ Path(a.output).write_text('BALANCE_PARTIAL\\n', encoding='utf-8')
         )
 
         self._write_executable(
+            tmp / "tools" / "render_cash_flow_tex.py",
+            """#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--input');p.add_argument('--output');p.add_argument('--metadata');a=p.parse_args()
+Path(a.output).parent.mkdir(parents=True, exist_ok=True)
+Path(a.output).write_text('CASH_FLOW_PARTIAL\\n', encoding='utf-8')
+""",
+        )
+
+        self._write_executable(
             tmp / "bin" / "latexmk",
             """#!/usr/bin/env bash
 set -euo pipefail
@@ -90,6 +101,7 @@ printf 'PDF' > "$outdir/main.pdf"
         (tmp / "data" / "mock" / "income_statement_previous_period_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "data" / "mock" / "balance_sheet_current_period_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "data" / "mock" / "balance_sheet_previous_period_fixture.json").write_text("{}\n", encoding="utf-8")
+        (tmp / "data" / "mock" / "cash_flow_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "template" / "main.tex").write_text("% test\n", encoding="utf-8")
 
         return tmp
@@ -567,6 +579,78 @@ exit 0
                 (root / "generated" / "income-statement.tex").read_text(encoding="utf-8"),
                 "SYNTHETIC_INCOME_PARTIAL\n",
             )
+
+    def test_cash_flow_render_failure_cannot_compile_stale_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = self._setup_fake_workspace(Path(tmp_dir))
+            stale_marker = "STALE_CASH_FLOW\n"
+            (root / "generated" / "cash-flow.tex").write_text(stale_marker, encoding="utf-8")
+
+            self._write_executable(
+                root / "tools" / "render_cash_flow_tex.py",
+                """#!/usr/bin/env python3
+import sys
+print('ERROR: cash-flow render failed', file=sys.stderr)
+raise SystemExit(1)
+""",
+            )
+
+            self._write_executable(
+                root / "bin" / "latexmk",
+                """#!/usr/bin/env bash
+set -euo pipefail
+touch build/latexmk.invoked
+outdir=''
+while [[ $# -gt 0 ]]; do
+  if [[ "$1" == "-outdir="* ]]; then
+    outdir="${1#-outdir=}"
+  fi
+  shift
+done
+mkdir -p "$outdir"
+printf 'PDF' > "$outdir/main.pdf"
+""",
+            )
+
+            result = self._run_build(root)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("cash-flow render failed", result.stderr)
+            self.assertEqual((root / "generated" / "cash-flow.tex").read_text(encoding="utf-8"), stale_marker)
+            self.assertFalse((root / "build" / "latexmk.invoked").exists())
+            self.assertFalse((root / "build" / "annual-report.pdf").exists())
+
+    def test_real_income_mode_still_renders_synthetic_cash_flow_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = self._setup_fake_workspace(Path(tmp_dir))
+            (root / "generated" / "income-statement.real.tex").write_text("REAL_VALIDATED\n", encoding="utf-8")
+            self._write_real_provenance(root, classification="real_extract")
+
+            # If this marker appears, a real cash-flow extractor was called unexpectedly.
+            real_extractor_marker = root / "generated" / "real-cash-flow-extractor.invoked"
+            self._write_executable(
+                root / "tools" / "extract_cash_flow.py",
+                f"""#!/usr/bin/env python3
+from pathlib import Path
+Path({str(real_extractor_marker)!r}).write_text('invoked\n', encoding='utf-8')
+raise SystemExit(99)
+""",
+            )
+
+            result = self._run_build(root, mode="real")
+
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            cash_flow = root / "generated" / "cash-flow.tex"
+            self.assertTrue(cash_flow.exists())
+            self.assertEqual(cash_flow.read_text(encoding="utf-8"), "CASH_FLOW_PARTIAL\n")
+            self.assertFalse(real_extractor_marker.exists())
+
+            build_status = self._load_build_status(root)
+            provenance = self._load_provenance(root)
+            self.assertEqual(build_status["status"], "succeeded")
+            self.assertEqual(build_status["mode"], "real")
+            self.assertEqual(build_status["runId"], provenance["runId"])
+            self.assertEqual(build_status["realPartialSha256"], provenance["realPartialSha256"])
 
     def test_synthetic_render_failure_cannot_compile_stale_shared_real_partial(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

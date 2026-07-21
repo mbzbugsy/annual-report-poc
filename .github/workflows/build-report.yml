@@ -43,11 +43,19 @@ jobs:
             --previous-period-fixture data/mock/balance_sheet_previous_period_fixture.json \
             --output generated/balance-sheet.tex
 
+      - name: Render synthetic cash-flow partial
+        run: |
+          python3 tools/render_cash_flow_tex.py \
+            --input data/mock/cash_flow_fixture.json \
+            --output generated/cash-flow.tex \
+            --metadata data/report_metadata.json
+
       - name: Verify generated partials exist
         run: |
           test -f generated/report-metadata.tex
           test -f generated/income-statement.tex
           test -f generated/balance-sheet.tex
+          test -f generated/cash-flow.tex
 
       - name: Build PDF
         uses: xu-cheng/latex-action@v3
