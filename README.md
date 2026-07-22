@@ -137,6 +137,52 @@ Real-mode build status contract:
 - The same build-status contract applies whether real mode is run directly via `scripts/build.sh` or indirectly via `tools/build_income_statement_slice.py`.
 - Failed real-mode builds leave no `status: succeeded` real build-status file behind.
 
+## Extract management report from DOCX (deterministic JSON contracts)
+
+The management-report extractor reads the local Word source and writes two JSON artifacts:
+
+- ordered raw DOCX block contract
+- validated semantic management-report contract
+
+Run:
+
+```bash
+python3 tools/extract_management_report.py \
+  --input source-data/12_Förvaltningsberättelse_2025.docx \
+  --metadata data/report_metadata.json \
+  --raw-output generated/management-report-raw.json \
+  --semantic-output generated/management-report.json
+```
+
+Output:
+
+- `generated/management-report-raw.json`
+- `generated/management-report.json`
+
+Contract notes:
+
+- Output is deterministic for identical input bytes and metadata.
+- No wall-clock extraction timestamp is emitted.
+- Source evidence includes filename, SHA-256, and DOCX core-property timestamps.
+- Raw contract preserves physical paragraph/table order, runs, styles, break markers, table shapes, and source trace.
+- Semantic contract maps required headings/sections deterministically and records explicit exclusions for:
+  - internal template/helper instructions
+  - post-report note-update material after explicit boundary detection
+- Semantic policy is fail-closed for meaningful unsupported content (for example hidden text, tracked changes, field codes, and text boxes with content).
+- Decorative non-text drawing/pict constructs are preserved as reviewable semantic diagnostics:
+  - `UNSUPPORTED_DECORATIVE_DRAWING_PRESENT`
+  - `UNSUPPORTED_DECORATIVE_PICT_PRESENT`
+- The current source policy marks semantic status as `review_required` with `EQUITY_DISPOSITION_SOURCE_AUTHORITY_UNRESOLVED` until equity/disposition authority is formally approved.
+- The extractor does not render LaTeX and does not require the signed PDF.
+
+Output promotion behavior:
+
+- The CLI stages raw and semantic JSON in temporary files under each destination directory.
+- Final files are promoted only after both contracts are successfully built and serialized.
+- Promotion order is raw then semantic using `os.replace` per file (same-filesystem atomic for each file).
+- If the process is interrupted between promotions, consumers must compare `semantic.rawContractSha256` with the actual raw file hash to detect a mismatch.
+- On failure before promotion, existing final raw/semantic files are left unchanged and staging files are cleaned up.
+
 ## Suggested first agent test
 
 Ask the agent:
