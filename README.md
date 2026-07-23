@@ -161,6 +161,41 @@ Output:
 - `generated/management-report-raw.json`
 - `generated/management-report.json`
 
+## Extract notes workbook contracts (deterministic JSON contracts)
+
+The notes extractor reads the local notes workbook and writes two JSON artifacts:
+
+- ordered raw workbook contract
+- validated semantic notes contract (canonical notes 1-28)
+
+Run:
+
+```bash
+python3 tools/extract_notes.py \
+  --input source-data/Not\ uppgifterna.xlsx \
+  --metadata data/report_metadata.json \
+  --mapping data/notes_mapping.json \
+  --management-contract generated/management-report.json \
+  --raw-output generated/notes-workbook-raw.json \
+  --semantic-output generated/notes-semantic.json
+```
+
+Output:
+
+- `generated/notes-workbook-raw.json`
+- `generated/notes-semantic.json`
+
+Contract notes:
+
+- Output is deterministic for identical input bytes and mapping policy.
+- Source evidence includes workbook filename and SHA-256.
+- Raw contract preserves worksheet order/visibility, freeze panes, hidden rows/columns, merged ranges, data validations, comments, hyperlinks, drawing anchors, and external links.
+- Formula policy is fail-closed in authoritative mapped ranges when cached values are missing.
+- External-reference formulas with cached values are preserved with review-required diagnostics.
+- Semantic contract enforces canonical notes 1-28 and validates metadata consistency (company identity and reporting period evidence).
+- If management contract input is omitted, narrative notes that rely on excluded post-report blocks remain review-required.
+- The CLI stages raw and semantic outputs in temporary files and only promotes final outputs after both contracts are successfully produced.
+
 ## Render management report LaTeX (pages 2-4)
 
 Render deterministic management-report pages from the extracted semantic+raw contracts:
