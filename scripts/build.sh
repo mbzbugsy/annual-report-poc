@@ -14,14 +14,27 @@ GENERATED_MANAGEMENT_RAW_JSON="$ROOT/generated/management-report-raw.json"
 GENERATED_MANAGEMENT_JSON="$ROOT/generated/management-report.json"
 GENERATED_MANAGEMENT_TEX="$ROOT/generated/management-report.tex"
 GENERATED_MANAGEMENT_PROVENANCE="$ROOT/generated/management-report.provenance.json"
+GENERATED_NOTES_RAW_JSON="$ROOT/generated/notes-workbook-raw.json"
+GENERATED_NOTES_JSON="$ROOT/generated/notes.json"
+GENERATED_NOTES_TEX="$ROOT/generated/notes.tex"
+GENERATED_NOTES_PROVENANCE="$ROOT/generated/notes.provenance.json"
 MANAGEMENT_REAL_DOCX="$ROOT/source-data/12_Förvaltningsberättelse_2025.docx"
 MANAGEMENT_SYNTHETIC_DOCX="$ROOT/data/mock/management_report_fixture.docx"
 MANAGEMENT_PREVIEW_OVERRIDE="$ROOT/data/mock/management_report_page4_preview_override.json"
 MANAGEMENT_MODE="${MANAGEMENT_REPORT_MODE:-real}"
 INCOME_MODE="${INCOME_STATEMENT_MODE:-synthetic}"
+NOTES_REAL_WORKBOOK="$ROOT/source-data/Not uppgifterna.xlsx"
+NOTES_SYNTHETIC_WORKBOOK="$ROOT/data/mock/notes_workbook_fixture.xlsx"
+NOTES_OVERRIDE="$ROOT/data/mock/notes_preview_overrides.json"
+NOTES_MAPPING="$ROOT/data/notes_mapping.json"
+NOTES_MODE="${NOTES_MODE:-real}"
 
 mkdir -p "$BUILD"
 cd "$ROOT"
+
+cleanup_notes_outputs() {
+  rm -f "$GENERATED_NOTES_TEX" "$GENERATED_NOTES_PROVENANCE"
+}
 
 python3 tools/render_report_metadata_tex.py \
   --input data/report_metadata.json \
@@ -78,6 +91,77 @@ if [[ ! -f "$GENERATED_MANAGEMENT_TEX" ]]; then
 fi
 if [[ ! -f "$GENERATED_MANAGEMENT_PROVENANCE" ]]; then
   echo "ERROR: missing generated management-report provenance: $GENERATED_MANAGEMENT_PROVENANCE" >&2
+  exit 1
+fi
+
+case "$NOTES_MODE" in
+  real)
+    if [[ ! -f "$NOTES_REAL_WORKBOOK" ]]; then
+      echo "ERROR: missing notes workbook for real mode: $NOTES_REAL_WORKBOOK" >&2
+      cleanup_notes_outputs
+      exit 1
+    fi
+    NOTES_INPUT_WORKBOOK="$NOTES_REAL_WORKBOOK"
+    ;;
+  synthetic)
+    if [[ ! -f "$NOTES_SYNTHETIC_WORKBOOK" ]]; then
+      echo "ERROR: missing notes workbook fixture for synthetic mode: $NOTES_SYNTHETIC_WORKBOOK" >&2
+      cleanup_notes_outputs
+      exit 1
+    fi
+    NOTES_INPUT_WORKBOOK="$NOTES_SYNTHETIC_WORKBOOK"
+    ;;
+  *)
+    echo "ERROR: unsupported NOTES_MODE value '$NOTES_MODE'" >&2
+    cleanup_notes_outputs
+    exit 1
+    ;;
+esac
+
+rm -f "$GENERATED_NOTES_RAW_JSON" "$GENERATED_NOTES_JSON" "$GENERATED_NOTES_TEX" "$GENERATED_NOTES_PROVENANCE"
+
+if ! python3 tools/extract_notes.py \
+  --input "$NOTES_INPUT_WORKBOOK" \
+  --metadata "$ROOT/data/report_metadata.json" \
+  --mapping "$NOTES_MAPPING" \
+  --management-contract "$GENERATED_MANAGEMENT_JSON" \
+  --raw-output "$GENERATED_NOTES_RAW_JSON" \
+  --semantic-output "$GENERATED_NOTES_JSON"; then
+  cleanup_notes_outputs
+  exit 1
+fi
+
+if ! python3 tools/render_notes_tex.py \
+  --semantic-input "$GENERATED_NOTES_JSON" \
+  --raw-input "$GENERATED_NOTES_RAW_JSON" \
+  --metadata "$ROOT/data/report_metadata.json" \
+  --mapping "$NOTES_MAPPING" \
+  --management-contract "$GENERATED_MANAGEMENT_JSON" \
+  --override "$NOTES_OVERRIDE" \
+  --output "$GENERATED_NOTES_TEX" \
+  --provenance-output "$GENERATED_NOTES_PROVENANCE"; then
+  cleanup_notes_outputs
+  exit 1
+fi
+
+if [[ ! -f "$GENERATED_NOTES_RAW_JSON" ]]; then
+  echo "ERROR: missing generated notes raw contract: $GENERATED_NOTES_RAW_JSON" >&2
+  cleanup_notes_outputs
+  exit 1
+fi
+if [[ ! -f "$GENERATED_NOTES_JSON" ]]; then
+  echo "ERROR: missing generated notes semantic contract: $GENERATED_NOTES_JSON" >&2
+  cleanup_notes_outputs
+  exit 1
+fi
+if [[ ! -f "$GENERATED_NOTES_TEX" ]]; then
+  echo "ERROR: missing generated notes TeX partial: $GENERATED_NOTES_TEX" >&2
+  cleanup_notes_outputs
+  exit 1
+fi
+if [[ ! -f "$GENERATED_NOTES_PROVENANCE" ]]; then
+  echo "ERROR: missing generated notes provenance: $GENERATED_NOTES_PROVENANCE" >&2
+  cleanup_notes_outputs
   exit 1
 fi
 

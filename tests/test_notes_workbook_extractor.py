@@ -72,6 +72,7 @@ def _xlsx_fixture(
     malformed_workbook_xml: bool = False,
     malformed_worksheet_xml: bool = False,
     include_meaningful_object_rel: bool = False,
+    workbook_date1904: str | None = None,
 ) -> None:
     content_types = """<?xml version='1.0' encoding='UTF-8'?>
 <Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'>
@@ -93,8 +94,13 @@ def _xlsx_fixture(
 </Relationships>
 """
 
-    workbook_xml = """<?xml version='1.0' encoding='UTF-8'?>
+    workbook_pr = ""
+    if workbook_date1904 is not None:
+        workbook_pr = f"<workbookPr date1904='{workbook_date1904}'/>"
+
+    workbook_xml = f"""<?xml version='1.0' encoding='UTF-8'?>
 <workbook xmlns='http://schemas.openxmlformats.org/spreadsheetml/2006/main' xmlns:r='http://schemas.openxmlformats.org/officeDocument/2006/relationships'>
+  {workbook_pr}
   <calcPr calcId='190029'/>
   <sheets>
     <sheet name='Sheet1' sheetId='1' r:id='rId1'/>
@@ -222,6 +228,28 @@ def _xlsx_fixture(
 
 
 class NotesWorkbookExtractorTests(unittest.TestCase):
+    def test_workbook_date_system_defaults_to_excel_1900(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            workbook = tmp_path / "fixture.xlsx"
+            mapping = tmp_path / "mapping.json"
+            _xlsx_fixture(workbook, workbook_date1904=None)
+            _default_mapping(mapping)
+
+            result = extract_notes_workbook_raw(workbook, mapping)
+            self.assertEqual(result["workbook"]["dateSystem"]["mode"], "excel_1900")
+
+    def test_workbook_date_system_reads_excel_1904_flag(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            workbook = tmp_path / "fixture.xlsx"
+            mapping = tmp_path / "mapping.json"
+            _xlsx_fixture(workbook, workbook_date1904="1")
+            _default_mapping(mapping)
+
+            result = extract_notes_workbook_raw(workbook, mapping)
+            self.assertEqual(result["workbook"]["dateSystem"]["mode"], "excel_1904")
+
     def test_preserves_sheet_order_visibility_and_core_counts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)

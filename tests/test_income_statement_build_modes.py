@@ -22,6 +22,7 @@ class IncomeStatementBuildModeTests(unittest.TestCase):
         (tmp / "tools").mkdir(parents=True, exist_ok=True)
         (tmp / "src").mkdir(parents=True, exist_ok=True)
         (tmp / "data" / "mock").mkdir(parents=True, exist_ok=True)
+        (tmp / "source-data").mkdir(parents=True, exist_ok=True)
         (tmp / "template").mkdir(parents=True, exist_ok=True)
         (tmp / "generated").mkdir(parents=True, exist_ok=True)
         (tmp / "bin").mkdir(parents=True, exist_ok=True)
@@ -105,6 +106,30 @@ Path(a.provenance_output).write_text('{"schemaVersion":"2.0"}\\n', encoding='utf
         )
 
         self._write_executable(
+            tmp / "tools" / "extract_notes.py",
+            """#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--input');p.add_argument('--metadata');p.add_argument('--mapping');p.add_argument('--management-contract');p.add_argument('--raw-output');p.add_argument('--semantic-output');a=p.parse_args()
+Path(a.raw_output).parent.mkdir(parents=True, exist_ok=True)
+Path(a.raw_output).write_text('{"source":{"file":"data/mock/notes_workbook_fixture.xlsx","sha256":"abc"}}\\n', encoding='utf-8')
+Path(a.semantic_output).write_text('{"status":"review_required","rawContractSha256":"abc"}\\n', encoding='utf-8')
+""",
+        )
+
+        self._write_executable(
+            tmp / "tools" / "render_notes_tex.py",
+            """#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--semantic-input');p.add_argument('--raw-input');p.add_argument('--metadata');p.add_argument('--mapping');p.add_argument('--management-contract');p.add_argument('--override');p.add_argument('--output');p.add_argument('--provenance-output');a=p.parse_args()
+Path(a.output).parent.mkdir(parents=True, exist_ok=True)
+Path(a.output).write_text('NOTES_PARTIAL\\n', encoding='utf-8')
+Path(a.provenance_output).write_text('{"schemaVersion":"1.0"}\\n', encoding='utf-8')
+""",
+        )
+
+        self._write_executable(
             tmp / "bin" / "latexmk",
             """#!/usr/bin/env bash
 set -euo pipefail
@@ -128,6 +153,9 @@ printf 'PDF' > "$outdir/main.pdf"
         (tmp / "data" / "mock" / "cash_flow_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "data" / "mock" / "management_report_fixture.docx").write_text("fixture\n", encoding="utf-8")
         (tmp / "data" / "mock" / "management_report_page4_preview_override.json").write_text("{}\n", encoding="utf-8")
+        (tmp / "data" / "mock" / "notes_workbook_fixture.xlsx").write_bytes(b"PK\x03\x04")
+        (tmp / "data" / "mock" / "notes_preview_overrides.json").write_text("{}\n", encoding="utf-8")
+        (tmp / "data" / "notes_mapping.json").write_text("{}\n", encoding="utf-8")
         (tmp / "template" / "main.tex").write_text("% test\n", encoding="utf-8")
 
         return tmp
@@ -148,6 +176,7 @@ printf 'PDF' > "$outdir/main.pdf"
         env = os.environ.copy()
         env["PATH"] = f"{root / 'bin'}:{env['PATH']}"
         env["MANAGEMENT_REPORT_MODE"] = "synthetic"
+        env["NOTES_MODE"] = "synthetic"
         if mode is None:
             env.pop("INCOME_STATEMENT_MODE", None)
         else:

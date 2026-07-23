@@ -16,6 +16,7 @@ class ManagementReportBuildWiringTests(unittest.TestCase):
 
     def _run_build(self, workspace: Path, mode: str | None = None) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
+        env["NOTES_MODE"] = "synthetic"
         if mode is None:
             env.pop("MANAGEMENT_REPORT_MODE", None)
         else:
@@ -132,15 +133,21 @@ class ManagementReportBuildWiringTests(unittest.TestCase):
             self.assertTrue((workspace / "generated/management-report.json").exists())
             self.assertTrue((workspace / "generated/management-report.tex").exists())
             self.assertTrue((workspace / "generated/management-report.provenance.json").exists())
+            self.assertTrue((workspace / "generated/notes-workbook-raw.json").exists())
+            self.assertTrue((workspace / "generated/notes.json").exists())
+            self.assertTrue((workspace / "generated/notes.tex").exists())
+            self.assertTrue((workspace / "generated/notes.provenance.json").exists())
             self.assertTrue((workspace / "build/annual-report.pdf").exists())
 
             page_count = self._page_count(workspace / "build/annual-report.pdf")
-            self.assertEqual(page_count, 8)
+            self.assertEqual(page_count, 19)
 
             page5 = self._extract_page_text(workspace / "build/annual-report.pdf", 5)
             page8 = self._extract_page_text(workspace / "build/annual-report.pdf", 8)
+            page9 = self._extract_page_text(workspace / "build/annual-report.pdf", 9)
             self.assertIn("Resultaträkning", page5)
             self.assertIn("Kassaflödesanalys", page8)
+            self.assertIn("Not 1", page9)
 
     def test_forced_extractor_failure_stops_before_latexmk(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
