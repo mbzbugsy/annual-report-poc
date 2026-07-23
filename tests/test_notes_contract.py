@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -403,24 +404,84 @@ class NotesContractTests(unittest.TestCase):
             self.assertIn("rangeDispositions", str(ctx.exception))
 
     def test_note4_supporting_range_not_in_render_tables(self) -> None:
-        mapping = ROOT / "data" / "notes_mapping.json"
-        metadata = ROOT / "data" / "report_metadata.json"
-        management = ROOT / "generated" / "management-report.json"
-        raw = json.loads((ROOT / "generated" / "notes-workbook-raw.json").read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            management_raw = tmp_path / "management-report-raw.json"
+            management_semantic = tmp_path / "management-report.json"
+            notes_raw = tmp_path / "notes-workbook-raw.json"
+            notes_semantic = tmp_path / "notes.json"
 
-        contract = build_semantic_notes_contract(
-            raw_contract=raw,
-            mapping_path=mapping,
-            metadata_path=metadata,
-            management_contract_path=management,
-        )
+            mgmt_extract = subprocess.run(
+                [
+                    "python3",
+                    "tools/extract_management_report.py",
+                    "--input",
+                    "data/mock/management_report_fixture.docx",
+                    "--metadata",
+                    "data/report_metadata.json",
+                    "--raw-output",
+                    str(management_raw),
+                    "--semantic-output",
+                    str(management_semantic),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(mgmt_extract.returncode, 0, msg=mgmt_extract.stderr)
 
-        note4 = next(note for note in contract["notes"] if note["noteNumber"] == 4)
-        render_ranges = {(item["sheet"], item["range"]) for item in note4["renderTables"]}
-        supporting_ranges = {(item["sheet"], item["range"]) for item in note4["supportingEvidence"]}
+            notes_extract = subprocess.run(
+                [
+                    "python3",
+                    "tools/extract_notes.py",
+                    "--input",
+                    "data/mock/notes_workbook_fixture.xlsx",
+                    "--metadata",
+                    "data/report_metadata.json",
+                    "--mapping",
+                    "data/notes_mapping.json",
+                    "--management-contract",
+                    str(management_semantic),
+                    "--raw-output",
+                    str(notes_raw),
+                    "--semantic-output",
+                    str(notes_semantic),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(notes_extract.returncode, 0, msg=notes_extract.stderr)
 
-        self.assertEqual(render_ranges, {("Operationell leasing del 2", "A1:D23")})
-        self.assertEqual(supporting_ranges, {("Operationell leasing del 1", "A1:X172")})
+            raw = json.loads(notes_raw.read_text(encoding="utf-8"))
+            contract = build_semantic_notes_contract(
+                raw_contract=raw,
+                mapping_path=ROOT / "data" / "notes_mapping.json",
+                metadata_path=ROOT / "data" / "report_metadata.json",
+                management_contract_path=management_semantic,
+            )
+
+            note4 = next(note for note in contract["notes"] if note["noteNumber"] == 4)
+            render_ranges = {(item["sheet"], item["range"]) for item in note4["renderTables"]}
+            supporting_ranges = {(item["sheet"], item["range"]) for item in note4["supportingEvidence"]}
+
+            self.assertEqual(render_ranges, {("Operationell leasing del 2", "A1:D23")})
+            self.assertNotIn(("Operationell leasing del 1", "A1:X172"), render_ranges)
+            self.assertEqual(supporting_ranges, {("Operationell leasing del 1", "A1:X172")})
+
+            supporting_item = next(item for item in note4["supportingEvidence"] if item["sheet"] == "Operationell leasing del 1")
+            self.assertEqual(supporting_item["disposition"], "supporting_evidence")
+            self.assertEqual(supporting_item["reason"], "evidence_not_signed_reference_display_table")
+
+            disposition_item = next(
+                item
+                for item in note4["sourceRangeDispositions"]
+                if item["sheet"] == "Operationell leasing del 1" and item["range"] == "A1:X172"
+            )
+            self.assertEqual(disposition_item["disposition"], "supporting_evidence")
+            self.assertEqual(disposition_item["reason"], "evidence_not_signed_reference_display_table")
 
     def test_metadata_only_identity_allows_unrelated_org_numbers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
