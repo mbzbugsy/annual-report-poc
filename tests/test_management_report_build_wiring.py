@@ -105,8 +105,7 @@ class ManagementReportBuildWiringTests(unittest.TestCase):
                 ignore=shutil.ignore_patterns(".git", "build", "generated", "__pycache__", ".pytest_cache"),
             )
             real_docx = workspace / "source-data/12_Förvaltningsberättelse_2025.docx"
-            backup = workspace / "source-data/12_Förvaltningsberättelse_2025.docx.bak"
-            real_docx.rename(backup)
+            real_docx.unlink(missing_ok=True)
 
             result = self._run_build(workspace)
 

@@ -427,7 +427,7 @@ class ManagementReportRendererTests(unittest.TestCase):
 
         expected_escaped = "Body  text, punctuation: () [] !? \\& 100\\% \\#1 \\_x\\_ \\{value\\} \\$"
         self.assertIn(expected_escaped, result.output_text)
-        self.assertNotIn("Body text, punctuation", result.output_text)
+        self.assertNotIn(body_text, result.output_text)
 
     def test_failed_rerun_removes_stale_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
