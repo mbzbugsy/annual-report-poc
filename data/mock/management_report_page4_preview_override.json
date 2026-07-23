@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0",
+  "sourceType": "signed_reference_preview_override",
+  "approvalScope": "poc_preview_only",
+  "companyName": "Omegapoint Malmö AB",
+  "organizationNumber": "556613-1339",
+  "currentReportingPeriod": "2025-01-01\n-2025-12-31",
+  "coveredDiagnosticCodes": [
+    "EQUITY_DISPOSITION_SOURCE_AUTHORITY_UNRESOLVED"
+  ],
+  "coveredSourceBlockIds": [
+    "equityAndProfitDisposition.table"
+  ],
+  "overriddenFields": [
+    "changesInEquity.heading",
+    "changesInEquity.columns",
+    "changesInEquity.rows",
+    "profitDisposition.heading",
+    "profitDisposition.intro",
+    "profitDisposition.lines",
+    "profitDisposition.dispositionLead",
+    "profitDisposition.disposalLines",
+    "profitDisposition.closingStatement"
+  ],
+  "signedReference": {
+    "file": "source-data/Omegapoint-Malmo-AB-Arsredovisning-2025-signed-14411061.pdf",
+    "sha256": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+    "pageIndicators": [
+      "4 (19)"
+    ]
+  },
+  "changesInEquity": {
+    "heading": "Förändringar i eget kapital",
+    "columns": [
+      "Aktiekapital",
+      "Reservfond",
+      "Balanserat resultat",
+      "Årets resultat",
+      "Totalt"
+    ],
+    "rows": [
+      {
+        "label": "Belopp vid årets ingång",
+        "values": [
+          "120 000",
+          "100 000",
+          "37 728 232",
+          "252 733",
+          "38 200 965"
+        ]
+      },
+      {
+        "label": "Balanseras i ny räkning",
+        "values": [
+          "",
+          "",
+          "252 733",
+          "-252 733",
+          "0"
+        ]
+      },
+      {
+        "label": "Årets resultat",
+        "values": [
+          "",
+          "",
+          "",
+          "33 325",
+          "33 325"
+        ]
+      },
+      {
+        "label": "Belopp vid årets utgång",
+        "values": [
+          "120 000",
+          "100 000",
+          "37 980 965",
+          "33 325",
+          "38 234 290"
+        ]
+      }
+    ]
+  },
+  "profitDisposition": {
+    "heading": "Förslag till vinstdisposition",
+    "intro": "Styrelsen föreslår att till förfogande stående vinstmedel (kronor):",
+    "lines": [
+      {
+        "label": "balanserad vinst",
+        "amount": "37 980 965"
+      },
+      {
+        "label": "årets vinst",
+        "amount": "33 325"
+      },
+      {
+        "label": "",
+        "amount": "38 014 290"
+      }
+    ],
+    "dispositionLead": "disponeras så att",
+    "disposalLines": [
+      {
+        "label": "i ny räkning överföres",
+        "amount": "38 014 290"
+      },
+      {
+        "label": "",
+        "amount": "38 014 290"
+      }
+    ],
+    "closingStatement": "Företagets resultat och ställning i övrigt framgår av efterföljande resultat- och balansräkning samt kassaflödesanalys med noter."
+  }
+}

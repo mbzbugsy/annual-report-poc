@@ -81,6 +81,30 @@ Path(a.output).write_text('CASH_FLOW_PARTIAL\\n', encoding='utf-8')
         )
 
         self._write_executable(
+            tmp / "tools" / "extract_management_report.py",
+            """#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--input');p.add_argument('--metadata');p.add_argument('--raw-output');p.add_argument('--semantic-output');a=p.parse_args()
+Path(a.raw_output).parent.mkdir(parents=True, exist_ok=True)
+Path(a.raw_output).write_text('{"source":{"file":"data/mock/management_report_fixture.docx","sha256":"abc"}}\\n', encoding='utf-8')
+Path(a.semantic_output).write_text('{"status":"review_required","rawContractSha256":"abc"}\\n', encoding='utf-8')
+""",
+        )
+
+        self._write_executable(
+            tmp / "tools" / "render_management_report_tex.py",
+            """#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--semantic-input');p.add_argument('--raw-input');p.add_argument('--metadata');p.add_argument('--override');p.add_argument('--output');p.add_argument('--provenance-output');a=p.parse_args()
+Path(a.output).parent.mkdir(parents=True, exist_ok=True)
+Path(a.output).write_text('MANAGEMENT_PARTIAL\\n', encoding='utf-8')
+Path(a.provenance_output).write_text('{"schemaVersion":"2.0"}\\n', encoding='utf-8')
+""",
+        )
+
+        self._write_executable(
             tmp / "bin" / "latexmk",
             """#!/usr/bin/env bash
 set -euo pipefail
@@ -102,6 +126,8 @@ printf 'PDF' > "$outdir/main.pdf"
         (tmp / "data" / "mock" / "balance_sheet_current_period_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "data" / "mock" / "balance_sheet_previous_period_fixture.json").write_text("{}\n", encoding="utf-8")
         (tmp / "data" / "mock" / "cash_flow_fixture.json").write_text("{}\n", encoding="utf-8")
+        (tmp / "data" / "mock" / "management_report_fixture.docx").write_text("fixture\n", encoding="utf-8")
+        (tmp / "data" / "mock" / "management_report_page4_preview_override.json").write_text("{}\n", encoding="utf-8")
         (tmp / "template" / "main.tex").write_text("% test\n", encoding="utf-8")
 
         return tmp
@@ -121,6 +147,7 @@ printf 'PDF' > "$outdir/main.pdf"
     def _run_build(self, root: Path, mode: str | None = None) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         env["PATH"] = f"{root / 'bin'}:{env['PATH']}"
+        env["MANAGEMENT_REPORT_MODE"] = "synthetic"
         if mode is None:
             env.pop("INCOME_STATEMENT_MODE", None)
         else:

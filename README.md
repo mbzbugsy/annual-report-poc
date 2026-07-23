@@ -76,6 +76,8 @@ Synthetic fixtures used for clean/mock build:
 
 - `data/mock/income_statement_current_period_fixture.json`
 - `data/mock/income_statement_previous_period_fixture.json`
+- `data/mock/management_report_fixture.docx` (synthetic extractor input, used only with `MANAGEMENT_REPORT_MODE=synthetic`)
+- `data/mock/management_report_page4_preview_override.json` (required explicit preview override for equity/disposition block)
 
 ## Run the income-statement extractor (RR slice)
 
@@ -159,6 +161,34 @@ Output:
 - `generated/management-report-raw.json`
 - `generated/management-report.json`
 
+## Render management report LaTeX (pages 2-4)
+
+Render deterministic management-report pages from the extracted semantic+raw contracts:
+
+```bash
+python3 tools/render_management_report_tex.py \
+  --semantic-input generated/management-report.json \
+  --raw-input generated/management-report-raw.json \
+  --metadata data/report_metadata.json \
+  --override data/mock/management_report_page4_preview_override.json \
+  --output generated/management-report.tex \
+  --provenance-output generated/management-report.provenance.json
+```
+
+Output:
+
+- `generated/management-report.tex`
+- `generated/management-report.provenance.json`
+
+Contract notes:
+
+- Narrative and multi-year overview are rendered from the semantic management-report contract.
+- Equity/profit-disposition rendering is fail-closed and requires committed explicit preview override.
+- Override contract must declare:
+  - `sourceType = signed_reference_preview_override`
+  - `approvalScope = poc_preview_only`
+  - signed reference SHA-256 for `source-data/Omegapoint-Malmo-AB-Arsredovisning-2025-signed-14411061.pdf`
+
 Contract notes:
 
 - Output is deterministic for identical input bytes and metadata.
@@ -174,6 +204,12 @@ Contract notes:
   - `UNSUPPORTED_DECORATIVE_PICT_PRESENT`
 - The current source policy marks semantic status as `review_required` with `EQUITY_DISPOSITION_SOURCE_AUTHORITY_UNRESOLVED` until equity/disposition authority is formally approved.
 - The extractor does not render LaTeX and does not require the signed PDF.
+
+Build mode policy:
+
+- `MANAGEMENT_REPORT_MODE=real` (default) requires `source-data/12_Förvaltningsberättelse_2025.docx`, runs `tools/extract_management_report.py`, and fails closed on missing/invalid inputs.
+- `MANAGEMENT_REPORT_MODE=synthetic` runs the same extractor against `data/mock/management_report_fixture.docx`.
+- No committed semantic JSON fixture is copied into `generated/` by default build or CI.
 
 Output promotion behavior:
 
