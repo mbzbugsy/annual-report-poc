@@ -45,6 +45,7 @@ def _full_mapping(path: Path) -> None:
             "tableShapes": [{"range": note_range, "rowCount": 1, "colCount": 2}],
         }
         authority_status = "workbook_direct"
+        authority_mode = "direct_workbook"
         diagnostics = []
         if idx in (1, 27, 28):
             source = {
@@ -53,6 +54,7 @@ def _full_mapping(path: Path) -> None:
                 "exclusionKey": "postReportNoteUpdateContent",
             }
             authority_status = "review_required"
+            authority_mode = "full_note_preview_override"
             diagnostics = ["NOTE_TEXT_SOURCE_REQUIRED"]
         notes.append(
             {
@@ -60,6 +62,7 @@ def _full_mapping(path: Path) -> None:
                 "noteNumber": idx,
                 "title": title,
                 "authorityStatus": authority_status,
+                "authorityMode": authority_mode,
                 "diagnosticCodes": diagnostics,
                 "source": source,
             }

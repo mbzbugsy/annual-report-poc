@@ -246,6 +246,32 @@ Build mode policy:
 - `MANAGEMENT_REPORT_MODE=synthetic` runs the same extractor against `data/mock/management_report_fixture.docx`.
 - No committed semantic JSON fixture is copied into `generated/` by default build or CI.
 
+Notes mode policy:
+
+- `NOTES_MODE=real` (default) requires `source-data/Not uppgifterna.xlsx`, runs `tools/extract_notes.py`, and fails closed on missing/invalid inputs.
+- `NOTES_MODE=synthetic` runs the same extractor against `data/mock/notes_workbook_fixture.xlsx`.
+- Notes rendering requires explicit preview override authority from `data/mock/notes_preview_overrides.json`.
+- No committed notes semantic JSON fixture is copied into `generated/` by default build or CI.
+
+Render notes LaTeX (pages 9-19):
+
+```bash
+python3 tools/render_notes_tex.py \
+  --semantic-input generated/notes.json \
+  --raw-input generated/notes-workbook-raw.json \
+  --metadata data/report_metadata.json \
+  --mapping data/notes_mapping.json \
+  --management-contract generated/management-report.json \
+  --override data/mock/notes_preview_overrides.json \
+  --output generated/notes.tex \
+  --provenance-output generated/notes.provenance.json
+```
+
+Output:
+
+- `generated/notes.tex`
+- `generated/notes.provenance.json`
+
 Output promotion behavior:
 
 - The CLI stages raw and semantic JSON in temporary files under each destination directory.

@@ -48,6 +48,7 @@ def _base_mapping_payload() -> dict:
             "tableShapes": [{"range": note_range, "rowCount": 1, "colCount": 2}],
         }
         authority = "workbook_direct"
+        authority_mode = "direct_workbook"
         diagnostics = []
         if idx in (1, 27, 28):
             source = {
@@ -56,6 +57,7 @@ def _base_mapping_payload() -> dict:
                 "exclusionKey": "postReportNoteUpdateContent",
             }
             authority = "review_required"
+            authority_mode = "full_note_preview_override"
             diagnostics = ["NOTE_TEXT_SOURCE_REQUIRED"]
         notes.append(
             {
@@ -63,6 +65,7 @@ def _base_mapping_payload() -> dict:
                 "noteNumber": idx,
                 "title": title,
                 "authorityStatus": authority,
+                "authorityMode": authority_mode,
                 "diagnosticCodes": diagnostics,
                 "source": source,
             }
@@ -378,6 +381,47 @@ def _management_contract(path: Path, *, placeholder: bool = False) -> None:
 
 
 class NotesContractTests(unittest.TestCase):
+    def test_strict_range_disposition_mode_requires_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            mapping = p / "mapping.json"
+            metadata = p / "metadata.json"
+
+            def mutate(payload: dict) -> None:
+                payload["sourceRangeDispositionVersion"] = "1.0"
+
+            _mapping_file(mapping, mutate=mutate)
+            _metadata_file(metadata)
+
+            with self.assertRaises(NotesContractError) as ctx:
+                build_semantic_notes_contract(
+                    raw_contract=_raw_contract(include_identity_sheet=False),
+                    mapping_path=mapping,
+                    metadata_path=metadata,
+                    management_contract_path=None,
+                )
+            self.assertIn("rangeDispositions", str(ctx.exception))
+
+    def test_note4_supporting_range_not_in_render_tables(self) -> None:
+        mapping = ROOT / "data" / "notes_mapping.json"
+        metadata = ROOT / "data" / "report_metadata.json"
+        management = ROOT / "generated" / "management-report.json"
+        raw = json.loads((ROOT / "generated" / "notes-workbook-raw.json").read_text(encoding="utf-8"))
+
+        contract = build_semantic_notes_contract(
+            raw_contract=raw,
+            mapping_path=mapping,
+            metadata_path=metadata,
+            management_contract_path=management,
+        )
+
+        note4 = next(note for note in contract["notes"] if note["noteNumber"] == 4)
+        render_ranges = {(item["sheet"], item["range"]) for item in note4["renderTables"]}
+        supporting_ranges = {(item["sheet"], item["range"]) for item in note4["supportingEvidence"]}
+
+        self.assertEqual(render_ranges, {("Operationell leasing del 2", "A1:D23")})
+        self.assertEqual(supporting_ranges, {("Operationell leasing del 1", "A1:X172")})
+
     def test_metadata_only_identity_allows_unrelated_org_numbers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(tmp)

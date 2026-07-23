@@ -17,6 +17,18 @@ class NotesContractError(Exception):
 IDENTITY_MODE_METADATA_ONLY = "metadata_only"
 IDENTITY_MODE_APPROVED_ANCHOR = "approved_anchor"
 
+ALLOWED_RANGE_DISPOSITIONS = {
+    "render_content",
+    "supporting_evidence",
+    "reconciliation_evidence",
+    "excluded_internal_template_content",
+}
+ALLOWED_RENDER_AUTHORITY_MODES = {
+    "direct_workbook",
+    "hybrid_workbook_preview_override",
+    "full_note_preview_override",
+}
+
 
 CANONICAL_NOTE_TITLES = [
     "Redovisnings- och värderingsprinciper",
@@ -274,6 +286,14 @@ def _validate_canonical_mapping(notes: List[Dict[str, Any]]) -> None:
             raise NotesContractError(
                 f"Canonical title mismatch for note {index}: expected '{expected_title}', got '{title}'"
             )
+        authority_mode = note.get("authorityMode")
+        if not isinstance(authority_mode, str) or authority_mode not in ALLOWED_RENDER_AUTHORITY_MODES:
+            raise NotesContractError(
+                f"Canonical note {index} must define one authorityMode in {sorted(ALLOWED_RENDER_AUTHORITY_MODES)}"
+            )
+        authority_modes = note.get("authorityModes")
+        if authority_modes is not None:
+            raise NotesContractError("authorityModes is not supported; use exactly one authorityMode per note")
 
     if seen_numbers != set(range(1, 29)):
         missing = sorted(set(range(1, 29)).difference(seen_numbers))
@@ -296,6 +316,10 @@ def _collect_table_from_range(worksheet: Dict[str, Any], range_ref: str) -> Dict
                 "coordinate": coordinate,
                 "text": displayed if isinstance(displayed, str) else "",
                 "valueType": value_type if isinstance(value_type, str) else "empty",
+                "rawValue": cell.get("rawValue") if isinstance(cell, dict) else None,
+                "cachedValue": cell.get("cachedValue") if isinstance(cell, dict) else None,
+                "formula": cell.get("formula") if isinstance(cell, dict) else None,
+                "numberFormat": cell.get("numberFormat") if isinstance(cell, dict) else None,
             }
         )
         source_refs.append(
@@ -620,8 +644,178 @@ def _extract_source_references(source: Dict[str, Any]) -> List[Dict[str, str]]:
     return refs
 
 
+def _range_key(sheet: str, range_ref: str) -> str:
+    return f"{sheet}:{range_ref}"
+
+
+def _range_dimensions(range_ref: str) -> Tuple[int, int]:
+    coordinates = _expand_range(range_ref)
+    if not coordinates:
+        raise NotesContractError(f"Empty range is not allowed: {range_ref}")
+    first_col, first_row = _split_cell_ref(coordinates[0])
+    last_col, last_row = _split_cell_ref(coordinates[-1])
+    row_count = last_row - first_row + 1
+    col_count = _column_to_number(last_col) - _column_to_number(first_col) + 1
+    return row_count, col_count
+
+
+def _table_shape_map_for_source(source: Dict[str, Any], source_refs: List[Dict[str, str]]) -> Dict[str, Dict[str, int]]:
+    shape_map: Dict[str, Dict[str, int]] = {}
+    source_type = source.get("sourceType")
+    table_shapes = source.get("tableShapes")
+    if not isinstance(table_shapes, list):
+        return shape_map
+
+    if source_type == "workbook_range":
+        sheet = source.get("sheet")
+        if not isinstance(sheet, str):
+            return shape_map
+        for shape in table_shapes:
+            if not isinstance(shape, dict):
+                continue
+            range_ref = shape.get("range")
+            row_count = shape.get("rowCount")
+            col_count = shape.get("colCount")
+            if isinstance(range_ref, str) and isinstance(row_count, int) and isinstance(col_count, int):
+                shape_map[_range_key(sheet, range_ref)] = {"rowCount": row_count, "colCount": col_count}
+        return shape_map
+
+    if source_type == "workbook_multi_range":
+        for shape in table_shapes:
+            if not isinstance(shape, dict):
+                continue
+            range_ref = shape.get("range")
+            row_count = shape.get("rowCount")
+            col_count = shape.get("colCount")
+            if not (isinstance(range_ref, str) and isinstance(row_count, int) and isinstance(col_count, int)):
+                continue
+
+            candidates = [
+                ref for ref in source_refs
+                if ref.get("range") == range_ref
+            ]
+            if len(candidates) != 1:
+                raise NotesContractError(
+                    f"Ambiguous or missing table shape mapping for range {range_ref} in workbook_multi_range"
+                )
+            sheet = candidates[0].get("sheet")
+            if isinstance(sheet, str):
+                shape_map[_range_key(sheet, range_ref)] = {"rowCount": row_count, "colCount": col_count}
+        return shape_map
+
+    return shape_map
+
+
+def _extract_range_dispositions(
+    *,
+    note_number: int,
+    source: Dict[str, Any],
+    source_refs: List[Dict[str, str]],
+    shape_map: Dict[str, Dict[str, int]],
+    require_explicit: bool,
+) -> Dict[str, Dict[str, Any]]:
+    entries = source.get("rangeDispositions")
+    if not source_refs:
+        if entries:
+            raise NotesContractError(f"Note {note_number} defines rangeDispositions without mapped source ranges")
+        return {}
+
+    if not isinstance(entries, list) or not entries:
+        if require_explicit:
+            raise NotesContractError(f"Note {note_number} must define non-empty source.rangeDispositions")
+        fallback: Dict[str, Dict[str, Any]] = {}
+        for ref in source_refs:
+            sheet = ref["sheet"]
+            range_ref = ref["range"]
+            key = _range_key(sheet, range_ref)
+            shape = shape_map.get(key)
+            inferred_rows, inferred_cols = _range_dimensions(range_ref)
+            expected_rows = shape["rowCount"] if shape is not None else inferred_rows
+            expected_cols = shape["colCount"] if shape is not None else inferred_cols
+            fallback[key] = {
+                "sheet": sheet,
+                "range": range_ref,
+                "disposition": "render_content",
+                "expectedRowCount": expected_rows,
+                "expectedColCount": expected_cols,
+            }
+        return fallback
+
+    source_keys = {
+        _range_key(ref["sheet"], ref["range"])
+        for ref in source_refs
+    }
+
+    disposition_map: Dict[str, Dict[str, Any]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise NotesContractError(f"Note {note_number} rangeDispositions entries must be objects")
+
+        sheet = entry.get("sheet")
+        range_ref = entry.get("range")
+        disposition = entry.get("disposition")
+        expected_rows = entry.get("expectedRowCount")
+        expected_cols = entry.get("expectedColCount")
+
+        if not isinstance(sheet, str) or not isinstance(range_ref, str):
+            raise NotesContractError(f"Note {note_number} rangeDispositions entries require sheet and range")
+        if not isinstance(disposition, str) or disposition not in ALLOWED_RANGE_DISPOSITIONS:
+            raise NotesContractError(f"Note {note_number} has invalid range disposition: {disposition}")
+        if not isinstance(expected_rows, int) or not isinstance(expected_cols, int):
+            raise NotesContractError(f"Note {note_number} rangeDispositions entries require expectedRowCount and expectedColCount")
+
+        key = _range_key(sheet, range_ref)
+        if key in disposition_map:
+            raise NotesContractError(f"Note {note_number} source range has multiple dispositions: {key}")
+        if key not in source_keys:
+            raise NotesContractError(f"Note {note_number} rangeDispositions contains unknown range: {key}")
+
+        inferred_rows, inferred_cols = _range_dimensions(range_ref)
+        if (expected_rows, expected_cols) != (inferred_rows, inferred_cols):
+            raise NotesContractError(
+                f"Note {note_number} rangeDispositions shape mismatch for {key}: "
+                f"expected {expected_rows}x{expected_cols}, inferred {inferred_rows}x{inferred_cols}"
+            )
+
+        shape = shape_map.get(key)
+        if disposition == "render_content" and shape is not None:
+            if shape["rowCount"] != expected_rows or shape["colCount"] != expected_cols:
+                raise NotesContractError(
+                    f"Note {note_number} approved render range changed shape for {key}: "
+                    f"mapping tableShape {shape['rowCount']}x{shape['colCount']} vs disposition {expected_rows}x{expected_cols}"
+                )
+
+        disposition_map[key] = dict(entry)
+
+    missing = sorted(source_keys.difference(disposition_map.keys()))
+    if missing:
+        raise NotesContractError(f"Note {note_number} mapped source ranges missing disposition: {missing}")
+
+    render_ranges = [
+        (entry["sheet"], entry["range"])
+        for entry in disposition_map.values()
+        if entry.get("disposition") == "render_content"
+    ]
+    for idx, (sheet_a, range_a) in enumerate(render_ranges):
+        cells_a = set(_expand_range(range_a))
+        for sheet_b, range_b in render_ranges[idx + 1:]:
+            if sheet_a != sheet_b:
+                continue
+            if cells_a.intersection(_expand_range(range_b)):
+                raise NotesContractError(
+                    f"Note {note_number} has overlapping render_content ranges on {sheet_a}: {range_a} and {range_b}"
+                )
+
+    return disposition_map
+
+
 def _note_status_from_authority(authority_status: str) -> str:
-    if authority_status == "workbook_direct":
+    if authority_status in {
+        "workbook_direct",
+        "direct_workbook",
+        "hybrid_workbook_preview_override",
+        "full_note_preview_override",
+    }:
         return "renderable"
     if authority_status == "blocked":
         return "blocked"
@@ -658,6 +852,7 @@ def build_semantic_notes_contract(
     if expected_raw_contract_sha256 is not None and expected_raw_contract_sha256 != raw_hash:
         raise NotesContractError("Provided raw contract sha256 does not match raw contract bytes")
     mapping_hash = _sha256_bytes(mapping_path.read_bytes())
+    require_explicit_range_dispositions = isinstance(mapping_policy.get("sourceRangeDispositionVersion"), str)
 
     company_identity_evidence, top_level_diagnostics = _identity_validation(
         raw_contract=raw_contract,
@@ -689,8 +884,23 @@ def build_semantic_notes_contract(
             raise NotesContractError(f"Note {note_number} missing source object")
 
         note_diagnostics: List[Dict[str, Any]] = []
+        authority_mode = note.get("authorityMode")
+        if not isinstance(authority_mode, str) or authority_mode not in ALLOWED_RENDER_AUTHORITY_MODES:
+            raise NotesContractError(f"Note {note_number} missing valid authorityMode")
         source_refs = _extract_source_references(source)
+        shape_map = _table_shape_map_for_source(source, source_refs)
+        range_dispositions = _extract_range_dispositions(
+            note_number=note_number,
+            source=source,
+            source_refs=source_refs,
+            shape_map=shape_map,
+            require_explicit=require_explicit_range_dispositions,
+        )
         tables: List[Dict[str, Any]] = []
+        render_tables: List[Dict[str, Any]] = []
+        supporting_evidence: List[Dict[str, Any]] = []
+        reconciliation_evidence: List[Dict[str, Any]] = []
+        excluded_internal_evidence: List[Dict[str, Any]] = []
         formulas_used: List[Dict[str, str]] = []
         paragraphs: List[Dict[str, Any]] = []
 
@@ -706,6 +916,9 @@ def build_semantic_notes_contract(
         for ref in source_refs:
             sheet_name = ref["sheet"]
             range_ref = ref["range"]
+            range_key = _range_key(sheet_name, range_ref)
+            disposition_entry = range_dispositions[range_key]
+            disposition = disposition_entry["disposition"]
             worksheet = worksheets_by_name.get(sheet_name)
             if worksheet is None:
                 raise NotesContractError(f"Missing required worksheet for note {note_number}: {sheet_name}")
@@ -718,6 +931,36 @@ def build_semantic_notes_contract(
                     "rows": table["rows"],
                 }
             )
+
+            expected_rows = disposition_entry["expectedRowCount"]
+            expected_cols = disposition_entry["expectedColCount"]
+            if len(table["rows"]) != expected_rows:
+                raise NotesContractError(
+                    f"Malformed table shape for note {note_number} range {range_ref}: expected {expected_rows} rows"
+                )
+            for row in table["rows"]:
+                if len(row["cells"]) != expected_cols:
+                    raise NotesContractError(
+                        f"Malformed table shape for note {note_number} range {range_ref}: expected {expected_cols} columns"
+                    )
+
+            range_payload = {
+                "sheet": sheet_name,
+                "range": range_ref,
+                "rows": table["rows"],
+                "disposition": disposition,
+                "reason": disposition_entry.get("reason"),
+            }
+            if disposition == "render_content":
+                render_tables.append(range_payload)
+            elif disposition == "supporting_evidence":
+                supporting_evidence.append(range_payload)
+            elif disposition == "reconciliation_evidence":
+                reconciliation_evidence.append(range_payload)
+            elif disposition == "excluded_internal_template_content":
+                excluded_internal_evidence.append(range_payload)
+            else:
+                raise NotesContractError(f"Unsupported source disposition '{disposition}' in note {note_number}")
 
             for shape in source.get("tableShapes", []):
                 if not isinstance(shape, dict):
@@ -800,7 +1043,14 @@ def build_semantic_notes_contract(
         authority_status = note.get("authorityStatus", "review_required")
         if not isinstance(authority_status, str):
             authority_status = "review_required"
+        if authority_mode == "direct_workbook" and note_diagnostics:
+            raise NotesContractError(
+                f"Note {note_number} direct_workbook mode cannot have unresolved diagnostics: "
+                f"{[d.get('code') for d in note_diagnostics]}"
+            )
         status = _note_status_from_authority(authority_status)
+        if authority_mode in {"direct_workbook", "hybrid_workbook_preview_override", "full_note_preview_override"} and status != "blocked":
+            status = "renderable"
         if any(d.get("code") == "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED" for d in note_diagnostics):
             status = "review_required"
 
@@ -815,8 +1065,20 @@ def build_semantic_notes_contract(
                 "noteNumber": note_number,
                 "order": note_number,
                 "paragraphs": paragraphs,
+                "renderParagraphs": list(paragraphs),
                 "reconciliationRequirements": reconciliations,
+                "renderTables": render_tables,
+                "supportingEvidence": supporting_evidence,
+                "reconciliationEvidence": reconciliation_evidence,
+                "excludedInternalEvidence": excluded_internal_evidence,
+                "sourceRangeDispositions": [
+                    range_dispositions[_range_key(ref["sheet"], ref["range"])]
+                    for ref in source_refs
+                ],
                 "renderability": renderability,
+                "renderAuthority": {
+                    "mode": authority_mode,
+                },
                 "sourceReferences": source_refs,
                 "sourceType": source.get("sourceType", "unknown"),
                 "status": status,
@@ -1041,6 +1303,7 @@ def build_semantic_notes_contract(
             "sha256": mapping_hash,
             "policyVersion": mapping_policy.get("policyVersion"),
             "notesSchemaVersion": mapping_policy.get("notesSchemaVersion"),
+            "sourceRangeDispositionVersion": mapping_policy.get("sourceRangeDispositionVersion"),
             "reportingEntityIdentity": identity_policy,
             "mappedRangeContentPolicy": mapped_range_content_policy,
             "unsupportedContentPolicy": mapping_policy.get("unsupportedContentPolicy"),

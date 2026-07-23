@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MANAGEMENT_REPORT_MODE: synthetic
+      NOTES_MODE: synthetic
 
     steps:
       - name: Check out repository
@@ -70,6 +71,28 @@ jobs:
             --output generated/cash-flow.tex \
             --metadata data/report_metadata.json
 
+      - name: Extract notes contracts from synthetic XLSX fixture
+        run: |
+          python3 tools/extract_notes.py \
+            --input data/mock/notes_workbook_fixture.xlsx \
+            --metadata data/report_metadata.json \
+            --mapping data/notes_mapping.json \
+            --management-contract generated/management-report.json \
+            --raw-output generated/notes-workbook-raw.json \
+            --semantic-output generated/notes.json
+
+      - name: Render notes pages 9-19 partial
+        run: |
+          python3 tools/render_notes_tex.py \
+            --semantic-input generated/notes.json \
+            --raw-input generated/notes-workbook-raw.json \
+            --metadata data/report_metadata.json \
+            --mapping data/notes_mapping.json \
+            --management-contract generated/management-report.json \
+            --override data/mock/notes_preview_overrides.json \
+            --output generated/notes.tex \
+            --provenance-output generated/notes.provenance.json
+
       - name: Verify generated partials exist
         run: |
           test -f generated/management-report-raw.json
@@ -80,6 +103,10 @@ jobs:
           test -f generated/income-statement.tex
           test -f generated/balance-sheet.tex
           test -f generated/cash-flow.tex
+          test -f generated/notes-workbook-raw.json
+          test -f generated/notes.json
+          test -f generated/notes.tex
+          test -f generated/notes.provenance.json
 
       - name: Build PDF
         uses: xu-cheng/latex-action@v3

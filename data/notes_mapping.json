@@ -14,12 +14,15 @@
         "required": false,
         "sourceType": "management_contract_excluded_content"
       },
-      "title": "Redovisnings- och värderingsprinciper"
+      "title": "Redovisnings- och värderingsprinciper",
+      "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 2,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 2,
       "reconciliationRequirements": [
         {
@@ -30,48 +33,58 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "C",
-          "E"
-        ],
         "required": true,
-        "sheet": "Nettoomsättning per rörelsegren",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 5,
-            "range": "A1:E39",
-            "rowCount": 39
+            "sheet": "Nettoomsättning per rörelsegren",
+            "range": "A1:E39"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Nettoomsättning per rörelsegren",
+            "range": "A1:E39",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 39,
+            "expectedColCount": 5
+          }
+        ]
       },
-      "title": "Nettoomsättningens fördelning"
+      "title": "Nettoomsättningens fördelning",
+      "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 3,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 3,
       "reconciliationRequirements": [],
       "source": {
-        "periodColumns": [
-          "B",
-          "D"
-        ],
         "required": true,
-        "sheet": "Revisionsarvode",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 52,
-            "range": "A1:AZ36",
-            "rowCount": 36
+            "sheet": "Revisionsarvode",
+            "range": "A1:AZ36"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Revisionsarvode",
+            "range": "A1:AZ36",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 36,
+            "expectedColCount": 52
+          }
+        ]
       },
-      "title": "Arvode till revisorer"
+      "title": "Arvode till revisorer",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
@@ -102,14 +115,34 @@
             "range": "A1:D23",
             "sheet": "Operationell leasing del 2"
           }
+        ],
+        "rangeDispositions": [
+          {
+            "sheet": "Operationell leasing del 2",
+            "range": "A1:D23",
+            "disposition": "render_content",
+            "expectedRowCount": 23,
+            "expectedColCount": 4
+          },
+          {
+            "sheet": "Operationell leasing del 1",
+            "range": "A1:X172",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 172,
+            "expectedColCount": 24,
+            "reason": "evidence_not_signed_reference_display_table"
+          }
         ]
       },
-      "title": "Leasingavtal"
+      "title": "Leasingavtal",
+      "authorityMode": "direct_workbook"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 5,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 5,
       "reconciliationRequirements": [
         {
@@ -120,23 +153,27 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "B",
-          "D"
-        ],
         "required": true,
-        "sheet": "Lön",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 6,
-            "range": "A1:F68",
-            "rowCount": 68
+            "sheet": "Lön",
+            "range": "A1:F68"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Lön",
+            "range": "A1:F68",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 68,
+            "expectedColCount": 6
+          }
+        ]
       },
-      "title": "Anställda och personalkostnader"
+      "title": "Anställda och personalkostnader",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -158,7 +195,8 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Övriga rörelsekostnader"
+      "title": "Övriga rörelsekostnader",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -180,7 +218,8 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Övriga ränteintäkter och liknande resultatposter"
+      "title": "Övriga ränteintäkter och liknande resultatposter",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -203,7 +242,8 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Räntekostnader och liknande resultatposter"
+      "title": "Räntekostnader och liknande resultatposter",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -225,13 +265,15 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Bokslutsdispositioner"
+      "title": "Bokslutsdispositioner",
+      "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 10,
       "diagnosticCodes": [
-        "EXTERNAL_LINK_CACHED_VALUE_USED"
+        "EXTERNAL_LINK_CACHED_VALUE_USED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
       ],
       "noteNumber": 10,
       "reconciliationRequirements": [
@@ -243,28 +285,34 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "D",
-          "L"
-        ],
         "required": true,
-        "sheet": "Skatt",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 16,
-            "range": "A1:P65",
-            "rowCount": 65
+            "sheet": "Skatt",
+            "range": "A1:P65"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Skatt",
+            "range": "A1:P65",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 65,
+            "expectedColCount": 16
+          }
+        ]
       },
-      "title": "Aktuell och uppskjuten skatt"
+      "title": "Aktuell och uppskjuten skatt",
+      "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 11,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 11,
       "reconciliationRequirements": [
         {
@@ -275,28 +323,34 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "B",
-          "E"
-        ],
         "required": true,
-        "sheet": "Imm. anläggningstillgångar",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 5,
-            "range": "A8:E24",
-            "rowCount": 17
+            "sheet": "Imm. anläggningstillgångar",
+            "range": "A8:E24"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Imm. anläggningstillgångar",
+            "range": "A8:E24",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 17,
+            "expectedColCount": 5
+          }
+        ]
       },
-      "title": "Goodwill"
+      "title": "Goodwill",
+      "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 12,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 12,
       "reconciliationRequirements": [
         {
@@ -307,23 +361,27 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "C",
-          "E"
-        ],
         "required": true,
-        "sheet": "Materiella anläggningstillgånga",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 5,
-            "range": "A8:E24",
-            "rowCount": 17
+            "sheet": "Materiella anläggningstillgånga",
+            "range": "A8:E24"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Materiella anläggningstillgånga",
+            "range": "A8:E24",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 17,
+            "expectedColCount": 5
+          }
+        ]
       },
-      "title": "Inventarier, verktyg och installationer"
+      "title": "Inventarier, verktyg och installationer",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
@@ -339,23 +397,27 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "D",
-          "F"
-        ],
         "required": true,
-        "sheet": "Andelar i koncernbolag",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 6,
-            "range": "A3:F12",
-            "rowCount": 10
+            "sheet": "Andelar i koncernbolag",
+            "range": "A3:F12"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Andelar i koncernbolag",
+            "range": "A3:F12",
+            "disposition": "render_content",
+            "expectedRowCount": 10,
+            "expectedColCount": 6
+          }
+        ]
       },
-      "title": "Andelar i koncernföretag"
+      "title": "Andelar i koncernföretag",
+      "authorityMode": "direct_workbook"
     },
     {
       "authorityStatus": "workbook_direct",
@@ -365,23 +427,33 @@
       "reconciliationRequirements": [],
       "source": {
         "required": true,
-        "sheet": "Andelar i koncernbolag",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 4,
-            "range": "J3:M9",
-            "rowCount": 7
+            "sheet": "Andelar i koncernbolag",
+            "range": "J3:M9"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Andelar i koncernbolag",
+            "range": "J3:M9",
+            "disposition": "render_content",
+            "expectedRowCount": 7,
+            "expectedColCount": 4
+          }
+        ]
       },
-      "title": "Specifikation andelar i koncernföretag"
+      "title": "Specifikation andelar i koncernföretag",
+      "authorityMode": "direct_workbook"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "review_required",
       "canonicalOrder": 15,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
       "noteNumber": 15,
       "reconciliationRequirements": [
         {
@@ -392,23 +464,27 @@
         }
       ],
       "source": {
-        "periodColumns": [
-          "C",
-          "C"
-        ],
         "required": true,
-        "sheet": "Långfristiga värdepappersinneha",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 5,
-            "range": "A1:E50",
-            "rowCount": 50
+            "sheet": "Långfristiga värdepappersinneha",
+            "range": "A1:E50"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Långfristiga värdepappersinneha",
+            "range": "A1:E50",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 50,
+            "expectedColCount": 5
+          }
+        ]
       },
-      "title": "Andra långfristiga värdepappersinnehav"
+      "title": "Andra långfristiga värdepappersinnehav",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -437,14 +513,28 @@
             "rowCount": 12
           }
         ],
-        "units": "SEK"
+        "units": "SEK",
+        "rangeDispositions": [
+          {
+            "sheet": "Långfristiga fordringar",
+            "range": "A1:P12",
+            "disposition": "reconciliation_evidence",
+            "expectedRowCount": 12,
+            "expectedColCount": 16,
+            "reason": "used_for_reconciliation_validation_not_direct_display"
+          }
+        ]
       },
-      "title": "Andra långfristiga fordringar"
+      "title": "Andra långfristiga fordringar",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 17,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+        "ROW_ROLE_AUTHORITY_REQUIRED"
+      ],
       "noteNumber": 17,
       "reconciliationRequirements": [
         {
@@ -456,23 +546,34 @@
       ],
       "source": {
         "required": true,
-        "sheet": "Övriga kf fordringar",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 13,
-            "range": "A1:M44",
-            "rowCount": 44
+            "sheet": "Övriga kf fordringar",
+            "range": "A1:M44"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Övriga kf fordringar",
+            "range": "A1:M44",
+            "disposition": "render_content",
+            "expectedRowCount": 44,
+            "expectedColCount": 13
+          }
+        ]
       },
-      "title": "Övriga fordringar"
+      "title": "Övriga fordringar",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 18,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "LABEL_MAPPING_REQUIRED",
+        "ROW_ROLE_AUTHORITY_REQUIRED"
+      ],
       "noteNumber": 18,
       "reconciliationRequirements": [
         {
@@ -484,23 +585,36 @@
       ],
       "source": {
         "required": true,
-        "sheet": "Upparbetat men ej fakturerat",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 7,
-            "range": "A1:G17",
-            "rowCount": 17
+            "sheet": "Upparbetat men ej fakturerat",
+            "range": "A1:G17"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Upparbetat men ej fakturerat",
+            "range": "A1:G17",
+            "disposition": "render_content",
+            "expectedRowCount": 17,
+            "expectedColCount": 7
+          }
+        ]
       },
-      "title": "Upparbetad men ej fakturerad intäkt"
+      "title": "Upparbetad men ej fakturerad intäkt",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 19,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+        "LABEL_MAPPING_REQUIRED",
+        "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+        "ROW_ROLE_AUTHORITY_REQUIRED"
+      ],
       "noteNumber": 19,
       "reconciliationRequirements": [
         {
@@ -512,18 +626,26 @@
       ],
       "source": {
         "required": true,
-        "sheet": "FKUI",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 19,
-            "range": "A1:S50",
-            "rowCount": 50
+            "sheet": "FKUI",
+            "range": "A1:S50"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "FKUI",
+            "range": "A1:S50",
+            "disposition": "render_content",
+            "expectedRowCount": 50,
+            "expectedColCount": 19
+          }
+        ]
       },
-      "title": "Förutbetalda kostnader och upplupna intäkter"
+      "title": "Förutbetalda kostnader och upplupna intäkter",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -541,9 +663,20 @@
             "range": "B44:E44",
             "sheet": "Start"
           }
+        ],
+        "rangeDispositions": [
+          {
+            "sheet": "Start",
+            "range": "B44:E44",
+            "disposition": "supporting_evidence",
+            "expectedRowCount": 1,
+            "expectedColCount": 4,
+            "reason": "evidence_not_signed_reference_display_table"
+          }
         ]
       },
-      "title": "Antal aktier och kvotvärde"
+      "title": "Antal aktier och kvotvärde",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -569,14 +702,29 @@
             "range": "B45:E45",
             "sheet": "Start"
           }
+        ],
+        "rangeDispositions": [
+          {
+            "sheet": "Start",
+            "range": "B45:E45",
+            "disposition": "reconciliation_evidence",
+            "expectedRowCount": 1,
+            "expectedColCount": 4,
+            "reason": "used_for_reconciliation_validation_not_direct_display"
+          }
         ]
       },
-      "title": "Disposition av vinst eller förlust"
+      "title": "Disposition av vinst eller förlust",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 22,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+        "LABEL_MAPPING_REQUIRED",
+        "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+      ],
       "noteNumber": 22,
       "reconciliationRequirements": [
         {
@@ -594,23 +742,34 @@
       ],
       "source": {
         "required": true,
-        "sheet": "Likvida medel",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 5,
-            "range": "A1:E24",
-            "rowCount": 24
+            "sheet": "Likvida medel",
+            "range": "A1:E24"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Likvida medel",
+            "range": "A1:E24",
+            "disposition": "render_content",
+            "expectedRowCount": 24,
+            "expectedColCount": 5
+          }
+        ]
       },
-      "title": "Likvida medel"
+      "title": "Likvida medel",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 23,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "LABEL_MAPPING_REQUIRED",
+        "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+      ],
       "noteNumber": 23,
       "reconciliationRequirements": [
         {
@@ -622,18 +781,26 @@
       ],
       "source": {
         "required": true,
-        "sheet": "UKFI",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 9,
-            "range": "A1:I46",
-            "rowCount": 46
+            "sheet": "UKFI",
+            "range": "A1:I46"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "UKFI",
+            "range": "A1:I46",
+            "disposition": "render_content",
+            "expectedRowCount": 46,
+            "expectedColCount": 9
+          }
+        ]
       },
-      "title": "Upplupna kostnader och förutbetalda intäkter"
+      "title": "Upplupna kostnader och förutbetalda intäkter",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -655,7 +822,8 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Räntor och utdelningar"
+      "title": "Räntor och utdelningar",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -677,12 +845,18 @@
         "required": false,
         "sourceType": "statement_reconciliation_only"
       },
-      "title": "Justering för poster som inte ingår i kassaflödet"
+      "title": "Justering för poster som inte ingår i kassaflödet",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "workbook_direct",
       "canonicalOrder": 26,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "LABEL_MAPPING_REQUIRED",
+        "ROW_ROLE_AUTHORITY_REQUIRED",
+        "SECTION_PERIOD_COLUMN_SELECTION_REQUIRED",
+        "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+      ],
       "noteNumber": 26,
       "reconciliationRequirements": [
         {
@@ -694,18 +868,26 @@
       ],
       "source": {
         "required": true,
-        "sheet": "Ställda säkerheter och eventual",
-        "sourceType": "workbook_range",
-        "tableShapes": [
+        "sourceType": "workbook_multi_range",
+        "worksheetRanges": [
           {
-            "colCount": 10,
-            "range": "A1:J26",
-            "rowCount": 26
+            "sheet": "Ställda säkerheter och eventual",
+            "range": "A1:J26"
           }
         ],
-        "units": "SEK"
+        "supportingRanges": [],
+        "rangeDispositions": [
+          {
+            "sheet": "Ställda säkerheter och eventual",
+            "range": "A1:J26",
+            "disposition": "render_content",
+            "expectedRowCount": 26,
+            "expectedColCount": 10
+          }
+        ]
       },
-      "title": "Ställda säkerheter"
+      "title": "Ställda säkerheter",
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -721,7 +903,8 @@
         "required": false,
         "sourceType": "management_contract_excluded_content"
       },
-      "title": "Transaktioner med närstående"
+      "title": "Transaktioner med närstående",
+      "authorityMode": "full_note_preview_override"
     },
     {
       "authorityStatus": "review_required",
@@ -737,7 +920,8 @@
         "required": false,
         "sourceType": "management_contract_excluded_content"
       },
-      "title": "Väsentliga händelser efter räkenskapsårets slut"
+      "title": "Väsentliga händelser efter räkenskapsårets slut",
+      "authorityMode": "full_note_preview_override"
     }
   ],
   "notesSchemaVersion": "1.0",
@@ -793,5 +977,6 @@
       }
     ],
     "version": "1.0"
-  }
+  },
+  "sourceRangeDispositionVersion": "1.0"
 }

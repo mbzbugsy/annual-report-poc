@@ -328,6 +328,42 @@ def _extract_calculation_properties(workbook_root: ET.Element) -> Dict[str, str]
     return {key: value for key, value in sorted(calc_pr.attrib.items())}
 
 
+def _extract_workbook_date_system(workbook_root: ET.Element) -> Dict[str, str]:
+    workbook_pr = workbook_root.find(_ns("workbookPr"))
+    if workbook_pr is None:
+        return {
+            "mode": "excel_1900",
+            "source": "workbookPr default (date1904 absent)",
+        }
+
+    raw_flag = workbook_pr.attrib.get("date1904")
+    if raw_flag is None:
+        return {
+            "mode": "excel_1900",
+            "source": "workbookPr default (date1904 absent)",
+        }
+
+    normalized = raw_flag.strip().lower()
+    if normalized in {"1", "true"}:
+        return {
+            "mode": "excel_1904",
+            "source": "workbookPr.date1904",
+            "raw": raw_flag,
+        }
+    if normalized in {"0", "false"}:
+        return {
+            "mode": "excel_1900",
+            "source": "workbookPr.date1904",
+            "raw": raw_flag,
+        }
+
+    return {
+        "mode": "unknown",
+        "source": "workbookPr.date1904",
+        "raw": raw_flag,
+    }
+
+
 def _extract_external_links(zf: zipfile.ZipFile) -> Dict[str, Any]:
     parts = sorted(path for path in zf.namelist() if path.startswith("xl/externalLinks/") and path.endswith(".xml"))
     relationships: List[Dict[str, str]] = []
@@ -707,6 +743,7 @@ def extract_notes_workbook_raw(
         workbook_root = ET.fromstring(zf.read("xl/workbook.xml"))
         defined_names = _extract_defined_names(workbook_root, sheet_entries)
         calc_props = _extract_calculation_properties(workbook_root)
+        date_system = _extract_workbook_date_system(workbook_root)
         external_links = _extract_external_links(zf)
         shared_strings = _parse_shared_strings(zf)
         styles = _load_styles(zf)
@@ -924,6 +961,7 @@ def extract_notes_workbook_raw(
             },
             "workbook": {
                 "calculationProperties": calc_props,
+                "dateSystem": date_system,
                 "definedNames": defined_names,
                 "externalLinks": external_links,
                 "sheetOrder": [sheet["name"] for sheet in sheet_entries],

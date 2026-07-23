@@ -1,0 +1,2157 @@
+{
+  "schemaVersion": "2.0",
+  "sourceType": "signed_reference_preview_override",
+  "approvalScope": "poc_preview_only",
+  "companyName": "Omegapoint Malmö AB",
+  "organizationNumber": "556613-1339",
+  "currentReportingPeriod": "2025-01-01\n-2025-12-31",
+  "signedReference": {
+    "sha256": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0"
+  },
+  "fullNoteOverrides": [
+    {
+      "noteNumber": 1,
+      "title": "Redovisnings- och värderingsprinciper",
+      "paragraphs": [],
+      "pageSegments": {
+        "9": {
+          "paragraphs": [
+            "Allmänna upplysningar",
+            "Årsredovisningen är upprättad i enlighet med årsredovisningslagen och BFNAR 2012:1 Årsredovisning och koncernredovisning (K3).",
+            "Företaget upprättar ingen koncernredovisning, med hänvisning till att företaget och samtliga dotterföretag omfattas av en koncernredovisning som upprättas av ett överordnat moderföretag.",
+            "Uppgifter om detta företag finns i not 27.",
+            "Redovisningsprinciperna är oförändrade jämfört med föregående år.",
+            "Intäktsredovisning",
+            "Intäkter har tagits upp till verkligt värde av vad som erhållits eller kommer att erhållas och redovisas i den omfattning det är sannolikt att de ekonomiska fördelarna kommer att tillgodogöras bolaget och intäkterna kan beräknas på ett tillförlitligt sätt.",
+            "Pågående tjänsteuppdrag",
+            "Inkomster från uppdrag på löpande räkning redovisas som intäkt i takt med att arbetet utförs och material levereras eller förbrukas innebärande att vinsten från uppdragen avräknas successivt.",
+            "Om det inte är sannolikt att betalning kommer att erhållas för belopp som redan har redovisats som intäkt redovisas det belopp som sannolikt inte kommer att erhållas som en kostnad.",
+            "I balansräkningen jämförs redovisade intäkter med de belopp som fakturerats beställaren under samma period. Om de fakturerade beloppen överstiger den redovisade intäkten utgör mellanskillnaden en skuld, vilken redovisas som fakturerad men ej upparbetad intäkt. Om intäkten överstiger de fakturerade beloppen utgör mellanskillnaden en fordran vilken redovisas som upparbetad men ej fakturerad intäkt.",
+            "Immateriella tillgångar",
+            "Företaget redovisar internt upparbetade immateriella anläggningstillgångar enligt kostnadsföringsmodellen. Det innebär att samtliga utgifter som avser framtagandet av en internt upparbetad immateriell anläggningstillgång kostnadsförs direkt när de uppkommer.",
+            "Anläggningstillgångar",
+            "Immateriella och materiella anläggningstillgångar redovisas till anskaffningsvärde minskat med ackumulerade avskrivningar enligt plan och eventuella nedskrivningar.",
+            "Avskrivning sker linjärt över den förväntade nyttjandeperioden med hänsyn till väsentligt restvärde. Avskrivningarna redovisas som kostnad i resultaträkningen. Skillnaden mellan ovan nämnda avskrivningar och skattemässigt gjorda avskrivningar redovisas som ackumulerade överavskrivningar, vilket ingår i obeskattade reserver.",
+            "Följande avskrivningsprocent tillämpas:"
+          ],
+          "tables": []
+        },
+        "10": {
+          "paragraphs": [
+            "Immateriella anläggningstillgångar",
+            "Goodwill 5 år",
+            "Materiella anläggningstillgångar",
+            "Inventarier, verktyg och installationer 3-5 år",
+            "Inkomstskatter",
+            "Total skatt utgörs av aktuell skatt och uppskjuten skatt. Skatter redovisas i resultaträkningen, utom då underliggande transaktion redovisas direkt mot eget kapital varvid tillhörande skatteeffekter redovisas i eget kapital.",
+            "Aktuell skatt",
+            "Aktuell skatt avser inkomstskatt för innevarande räkenskapsår samt den del av tidigare räkenskapsårs inkomstskatt som ännu inte redovisats. Aktuell skatt beräknas utifrån den skattesats som gäller per balansdagen.",
+            "Uppskjuten skatt",
+            "Uppskjuten skatt är inkomstskatt som avser framtida räkenskapsår till följd av tidigare händelser. Redovisning sker enligt balansräkningsmetoden. Enligt denna metod redovisas uppskjutna skatteskulder och uppskjutna skattefordringar på temporära skillnader som uppstår mellan bokförda respektive skattemässiga värden för tillgångar och skulder samt för övriga skattemässiga avdrag eller underskott.",
+            "Uppskjutna skattefordringar nettoredovisas mot uppskjutna skatteskulder endast om de kan betalas med ett nettobelopp. Uppskjuten skatt beräknas utifrån gällande skattesats på balansdagen. Effekter av förändringar i gällande skattesatser resultatförs i den period förändringen lagstadgats. Uppskjuten skattefordran redovisas som finansiell anläggningstillgång och uppskjuten skatteskuld som avsättning.",
+            "Uppskjuten skattefordran avseende underskottsavdrag eller andra framtida skattemässiga avdrag redovisas i den omfattning det är sannolikt att avdragen kan avräknas mot framtida skattemässiga överskott.",
+            "På grund av sambandet mellan redovisning och beskattning särredovisas inte den uppskjutna skatteskulden som är hänförlig till obeskattade reserver.",
+            "Koncernbidrag",
+            "Erhållna och lämnade koncernbidrag redovisas som bokslutsdispositioner."
+          ],
+          "tables": []
+        }
+      },
+      "tables": [],
+      "resolvedNoteReferences": [
+        {
+          "placeholder": "Not X",
+          "resolvedTo": "Not 27"
+        }
+      ],
+      "sourceJustification": "Signed reference preview pages 9-10 are authoritative for note 1 narrative and note-reference wording.",
+      "overriddenSemanticFieldPaths": [
+        "notes[1].paragraphs",
+        "notes[1].status",
+        "notes[1].renderability"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "9"
+        },
+        {
+          "kind": "signed_reference_page",
+          "value": "10"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[1].paragraphs",
+        "notes[1].status",
+        "notes[1].renderability"
+      ]
+    },
+    {
+      "noteNumber": 2,
+      "title": "Nettoomsättningens fördelning",
+      "paragraphs": [
+        "2024",
+        "2025",
+        "Nettoomsättningen per rörelsegren",
+        "Konsultjänster 121 088 307 126 504 482",
+        "Övrig nettoomsättning 2 448 673 2 879 459",
+        "123 536 980 129 383 941",
+        "Nettoomsättningen per geografisk marknad",
+        "Sverige 115 486 696 125 721 953",
+        "Norge 46 000 0",
+        "Danmark 1 310 632 542 375",
+        "Finland 2 515 773 1 144 615",
+        "Tyskland 0 125 297",
+        "Kanada 0 300 000",
+        "USA 296 589 404 894",
+        "Nederländerna 1 584 800 651 529",
+        "Österrike 71 391 144 051",
+        "Frankrike 0 170 031",
+        "Belgien 51 633 179 196",
+        "Storbritannien 2 173 466 0",
+        "123 536 980 129 383 941"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 2 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[2].paragraphs",
+        "notes[2].tables",
+        "notes[2].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "11"
+        }
+      ]
+    },
+    {
+      "noteNumber": 3,
+      "title": "Arvode till revisorer",
+      "paragraphs": [
+        "Med revisionsuppdrag avses granskning av årsredovisningen och bokföringen samt styrelsens och",
+        "verkställande direktörens förvaltning, övriga arbetsuppgifter som det ankommer på bolagets revisor att",
+        "utföra samt rådgivning eller annat biträde som föranleds av iakttagelser vid sådan granskning eller",
+        "genomförandet av sådana övriga arbetsuppgifter.",
+        "2025 2024",
+        "Öhrlings PricewaterhouseCoopers AB",
+        "Revisionsuppdrag 0 90 000",
+        "0 90 000",
+        "Cedra Sverige AB",
+        "Revisionsuppdrag 90 000 0",
+        "90 000 0"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 3 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[3].paragraphs",
+        "notes[3].tables",
+        "notes[3].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "noteNumber": 5,
+      "title": "Anställda och personalkostnader",
+      "paragraphs": [
+        "2025 2024",
+        "Medelantalet anställda",
+        "Kvinnor 24 23",
+        "Män 61 62",
+        "85 85",
+        "Löner och andra ersättningar",
+        "Styrelse och verkställande direktör 1 485 486 1 487 108",
+        "Övriga anställda 54 365 262 55 364 340",
+        "55 850 748 56 851 448",
+        "Sociala kostnader",
+        "Sociala kostnader (inkl pension) 24 515 079 24 441 572",
+        "Pensionskostnader 1) 6 812 847 6 249 782",
+        "31 327 926 30 691 354",
+        "Totala löner, ersättningar, sociala kostnader och",
+        "pensionskostnader 87 178 674 87 542 802",
+        "1) Av bolagets pensionskostnader avser 690 638 kr (fg år 649 577 kr) företagets styrelse och VD.",
+        "Bolagets utestående pensionsförpliktelser till dessa uppgår till 0 (0) kr.",
+        "Av de löner och ersättningar som lämnats till övriga anställda avser 4 656 458 kr (4 594 619 kr) andra",
+        "ledande befattningshavare än styrelse och VD.",
+        "Könsfördelning bland ledande befattningshavare",
+        "Andel kvinnor i styrelsen 33 % 33 %",
+        "Andel män i styrelsen 67 % 67 %",
+        "Andel kvinnor bland övriga ledande befattningshavare 17 % 17 %",
+        "Andel män bland övriga ledande befattningshavare 83 % 83 %"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 5 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[5].paragraphs",
+        "notes[5].tables",
+        "notes[5].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "13"
+        }
+      ]
+    },
+    {
+      "noteNumber": 6,
+      "title": "Övriga rörelsekostnader",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025 2024",
+          "rows": [
+            {
+              "cells": [
+                "Kursförluster på fordringar/skulder av rörelsekaraktär",
+                "137 655",
+                "331 896"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "137 655",
+                "331 896"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 13 provides approved display values and labels for note 6.",
+      "overriddenSemanticFieldPaths": [
+        "notes[6].tables",
+        "notes[6].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "13"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[6].tables",
+        "notes[6].status"
+      ]
+    },
+    {
+      "noteNumber": 7,
+      "title": "Övriga ränteintäkter och liknande resultatposter",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025 2024",
+          "rows": [
+            {
+              "cells": [
+                "Övriga ränteintäkter",
+                "26 548",
+                "177 388"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "26 548",
+                "177 388"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 13 provides approved display values and labels for note 7.",
+      "overriddenSemanticFieldPaths": [
+        "notes[7].tables",
+        "notes[7].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "13"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[7].tables",
+        "notes[7].status"
+      ]
+    },
+    {
+      "noteNumber": 8,
+      "title": "Räntekostnader och liknande resultatposter",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025 2024",
+          "rows": [
+            {
+              "cells": [
+                "Övriga räntekostnader",
+                "91 280",
+                "159 237"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "91 280",
+                "159 237"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 14 provides approved display values and sign presentation for note 8.",
+      "overriddenSemanticFieldPaths": [
+        "notes[8].tables",
+        "notes[8].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "INTEREST_SIGN_ROUNDING_POLICY_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "14"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "INTEREST_SIGN_ROUNDING_POLICY_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[8].tables",
+        "notes[8].status"
+      ]
+    },
+    {
+      "noteNumber": 9,
+      "title": "Bokslutsdispositioner",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025 2024",
+          "rows": [
+            {
+              "cells": [
+                "Lämnade koncernbidrag",
+                "0",
+                "2 300 000"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "0",
+                "2 300 000"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 14 provides approved display values and labels for note 9.",
+      "overriddenSemanticFieldPaths": [
+        "notes[9].tables",
+        "notes[9].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "14"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[9].tables",
+        "notes[9].status"
+      ]
+    },
+    {
+      "noteNumber": 10,
+      "title": "Aktuell och uppskjuten skatt",
+      "paragraphs": [
+        "2025 2024",
+        "Skatt på årets resultat",
+        "Aktuell skatt 2 164 031 2 227 158",
+        "Totalt redovisad skatt 2 164 031 2 227 158",
+        "Avstämning av effektiv skatt",
+        "2025 2024",
+        "Procent Belopp Procent Belopp",
+        "Redovisat resultat före skatt 2 197 354 2 479 891",
+        "Skatt enligt gällande skattesats 20,60 -452 655 20,60 -510 858",
+        "Ej avdragsgilla kostnader 6,68 -146 847 5,69 -141 178",
+        "Ej skattepliktiga intäkter -0,65 14 365 -0,14 3 427",
+        "Avskrivning av koncernmässig goodwill 71,85 -1 578 894 63,65 -1 578 550",
+        "Övrigt 0,00 0 0,00 1",
+        "Redovisad effektiv skatt 98,48 -2 164 031 89,81 -2 227 158"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 10 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[10].paragraphs",
+        "notes[10].tables",
+        "notes[10].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "EXTERNAL_LINK_CACHED_VALUE_USED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "14"
+        }
+      ]
+    },
+    {
+      "noteNumber": 11,
+      "title": "Goodwill",
+      "paragraphs": [
+        "2025-12-31 2024-12-31",
+        "Ingående anskaffningsvärden 37 751 278 36 037 122",
+        "Inköp 0 1 714 156",
+        "Utgående ackumulerade anskaffningsvärden 37 751 278 37 751 278",
+        "Ingående avskrivningar -14 499 893 -6 606 806",
+        "Rörelseförvärv 0 -230 222",
+        "Årets avskrivningar -7 664 533 -7 662 865",
+        "Utgående ackumulerade avskrivningar -22 164 426 -14 499 893",
+        "Utgående redovisat värde",
+        "15 586 852 23 251 385"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 11 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[11].paragraphs",
+        "notes[11].tables",
+        "notes[11].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "15"
+        }
+      ]
+    },
+    {
+      "noteNumber": 12,
+      "title": "Inventarier, verktyg och installationer",
+      "paragraphs": [
+        "2025-12-31 2024-12-31",
+        "Ingående anskaffningsvärden 1 770 397 2 351 560",
+        "Inköp 174 420 0",
+        "Avyttringar 0 -581 163",
+        "Utgående ackumulerade anskaffningsvärden 1 944 817 1 770 397",
+        "Ingående avskrivningar -616 837 -773 597",
+        "Avyttring 0 581 163",
+        "Årets avskrivningar -391 910 -424 403",
+        "Utgående ackumulerade avskrivningar -1 008 747 -616 837",
+        "Utgående redovisat värde",
+        "936 070 1 153 560"
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 12 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[12].paragraphs",
+        "notes[12].tables",
+        "notes[12].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "15"
+        }
+      ]
+    },
+    {
+      "noteNumber": 15,
+      "title": "Andra långfristiga värdepappersinnehav",
+      "paragraphs": [
+        "2025-12-31 2024-12-31",
+        "Ingående anskaffningsvärden 1 798 0",
+        "Inköp 0 1 798",
+        "Utgående ackumulerade anskaffningsvärden 1 798 1 798",
+        "Utgående redovisat värde 1 798 1 798",
+        "B3 IT Org nr: 559313-8166, Antal andelar 62."
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference preview is authoritative for complete visible note 15 presentation.",
+      "overriddenSemanticPaths": [
+        "notes[15].paragraphs",
+        "notes[15].tables",
+        "notes[15].renderTables"
+      ],
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "16"
+        }
+      ]
+    },
+    {
+      "noteNumber": 16,
+      "title": "Andra långfristiga fordringar",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025-12-31 2024-12-31",
+          "rows": [
+            {
+              "cells": [
+                "Ingående anskaffningsvärden",
+                "500 000",
+                "500 000"
+              ]
+            },
+            {
+              "cells": [
+                "Utgående ackumulerade anskaffningsvärden",
+                "500 000",
+                "500 000"
+              ]
+            },
+            {
+              "cells": [
+                "Utgående redovisat värde",
+                "500 000",
+                "500 000"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 16 is approved preview authority for note 16 values under mismatch diagnostics.",
+      "overriddenSemanticFieldPaths": [
+        "notes[16].tables",
+        "notes[16].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_16_WORKBOOK_BALANCE_MISMATCH",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "16"
+        },
+        {
+          "kind": "workbook_range",
+          "value": "Långfristiga fordringar:A1:P12"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_16_WORKBOOK_BALANCE_MISMATCH",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[16].tables",
+        "notes[16].status"
+      ]
+    },
+    {
+      "noteNumber": 20,
+      "title": "Antal aktier och kvotvärde",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "Namn Antal aktier Kvotvärde",
+          "rows": [
+            {
+              "cells": [
+                "Antal A-Aktier",
+                "1 200",
+                "100"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "1 200",
+                ""
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 17 provides approved table shape and values for note 20.",
+      "overriddenSemanticFieldPaths": [
+        "notes[20].tables",
+        "notes[20].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "17"
+        },
+        {
+          "kind": "workbook_range",
+          "value": "Start:B44:E44"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[20].tables",
+        "notes[20].status"
+      ]
+    },
+    {
+      "noteNumber": 21,
+      "title": "Disposition av vinst eller förlust",
+      "paragraphs": [
+        "Förslag till vinstdisposition",
+        "Styrelsen föreslår att till förfogande stående vinstmedel:"
+      ],
+      "tables": [
+        {
+          "rows": [
+            {
+              "cells": [
+                "balanserad vinst",
+                "37 980 965"
+              ]
+            },
+            {
+              "cells": [
+                "årets vinst",
+                "33 325"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "38 014 290"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "disponeras så att",
+          "rows": [
+            {
+              "cells": [
+                "i ny räkning överföres",
+                "38 014 290"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "38 014 290"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 17 provides approved wording and table values for note 21.",
+      "overriddenSemanticFieldPaths": [
+        "notes[21].paragraphs",
+        "notes[21].tables",
+        "notes[21].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "STATEMENT_RECONCILIATION_REQUIRED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "17"
+        },
+        {
+          "kind": "workbook_range",
+          "value": "Start:B45:E45"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "STATEMENT_RECONCILIATION_REQUIRED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[21].paragraphs",
+        "notes[21].tables",
+        "notes[21].status"
+      ]
+    },
+    {
+      "noteNumber": 24,
+      "title": "Räntor och utdelningar",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025-12-31 2024-12-31",
+          "rows": [
+            {
+              "cells": [
+                "Erhållen ränta",
+                "26 548",
+                "177 388"
+              ]
+            },
+            {
+              "cells": [
+                "Erlagd ränta",
+                "-91 280",
+                "-159 327"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "-64 732",
+                "18 061"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 18 provides approved note 24 values and sign handling.",
+      "overriddenSemanticFieldPaths": [
+        "notes[24].tables",
+        "notes[24].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "18"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[24].tables",
+        "notes[24].status"
+      ]
+    },
+    {
+      "noteNumber": 25,
+      "title": "Justering för poster som inte ingår i kassaflödet",
+      "paragraphs": [],
+      "tables": [
+        {
+          "heading": "2025-12-31 2024-12-31",
+          "rows": [
+            {
+              "cells": [
+                "Avskrivningar",
+                "8 056 443",
+                "8 087 268"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "8 056 443",
+                "8 087 268"
+              ]
+            }
+          ]
+        }
+      ],
+      "resolvedNoteReferences": [],
+      "sourceJustification": "Signed reference page 18 provides approved note 25 values and table shape.",
+      "overriddenSemanticFieldPaths": [
+        "notes[25].tables",
+        "notes[25].status"
+      ],
+      "coveredDiagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "18"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[25].tables",
+        "notes[25].status"
+      ]
+    },
+    {
+      "noteNumber": 27,
+      "title": "Transaktioner med närstående",
+      "paragraphs": [
+        "Moderföretag i den största koncern där Omegapoint Malmö AB, 556613-1339 är dotterföretag och koncernredovisning upprättas är AB Omegapoint HoldCo, 559312-6112 med säte i Stockholm.",
+        "Moderföretag i den minsta koncern är AB Omegapoint, 559312-6120 med säte i Stockholm.",
+        "Koncernredovisning finns att tillhandahålla hos det ultimata koncernmoderbolaget.",
+        "Inköp och försäljning inom koncernen",
+        "Av företagets totala inköp och försäljning mätt i kronor avser 51,3 % (47,4 %) av inköpen och 2,3 % (2,7%) av försäljningen andra företag inom hela den företagsgrupp som företaget tillhör."
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [
+        {
+          "placeholder": "Not X",
+          "resolvedTo": "Not 27"
+        }
+      ],
+      "sourceJustification": "Signed reference page 19 replaces placeholder note text with approved final accounting wording for note 27.",
+      "overriddenSemanticFieldPaths": [
+        "notes[27].paragraphs",
+        "notes[27].status",
+        "notes[27].renderability"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "19"
+        },
+        {
+          "kind": "management_source_block",
+          "value": "block-note-27"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[27].paragraphs",
+        "notes[27].status",
+        "notes[27].renderability"
+      ]
+    },
+    {
+      "noteNumber": 28,
+      "title": "Väsentliga händelser efter räkenskapsårets slut",
+      "paragraphs": [
+        "Inga väsentliga händelser har inträffat efter räkenskapsårets slut som har haft en betydande påverkan på bolaget."
+      ],
+      "tables": [],
+      "resolvedNoteReferences": [
+        {
+          "placeholder": "Not X",
+          "resolvedTo": "Not 28"
+        }
+      ],
+      "sourceJustification": "Signed reference page 19 replaces placeholder note text with approved final accounting wording for note 28.",
+      "overriddenSemanticFieldPaths": [
+        "notes[28].paragraphs",
+        "notes[28].status",
+        "notes[28].renderability"
+      ],
+      "coveredDiagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "19"
+        },
+        {
+          "kind": "management_source_block",
+          "value": "block-note-28"
+        }
+      ],
+      "signedReferenceHash": "e4396bbe09d63a6b4a3828fc6f63c9cd5b18a4b9500fe58acfe303428b0768f0",
+      "coveredDiagnostics": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "overriddenSemanticPaths": [
+        "notes[28].paragraphs",
+        "notes[28].status",
+        "notes[28].renderability"
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "id": "n17-r1-previous",
+      "noteNumber": 17,
+      "semanticPath": "notes[17].rows[1].previous",
+      "signedDisplayValue": "0",
+      "workbookSource": {
+        "worksheet": "Övriga kf fordringar",
+        "cell": "F11",
+        "rawValue": "",
+        "cachedValue": null,
+        "renderedValue": ""
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+      "overrideKind": "blank-to-zero presentation"
+    },
+    {
+      "id": "n19-r5-current",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[5].current",
+      "signedDisplayValue": "0",
+      "workbookSource": {
+        "worksheet": "FKUI",
+        "cell": "C15",
+        "rawValue": null,
+        "cachedValue": null,
+        "renderedValue": ""
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+      "overrideKind": "blank-to-zero presentation"
+    },
+    {
+      "id": "n19-r6-previous",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[6].previous",
+      "signedDisplayValue": "0",
+      "workbookSource": {
+        "worksheet": "FKUI",
+        "cell": "F16",
+        "rawValue": null,
+        "cachedValue": null,
+        "renderedValue": ""
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+      "overrideKind": "blank-to-zero presentation"
+    },
+    {
+      "id": "n19-r7-previous",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[7].previous",
+      "signedDisplayValue": "96 196",
+      "workbookSource": {
+        "worksheet": "FKUI",
+        "cell": "F18",
+        "rawValue": "96195.42",
+        "cachedValue": null,
+        "renderedValue": "96 195"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n22-r1-current",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[1].current",
+      "signedDisplayValue": "0",
+      "workbookSource": {
+        "worksheet": "Likvida medel",
+        "cell": "C9",
+        "rawValue": "",
+        "cachedValue": null,
+        "renderedValue": ""
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+      "overrideKind": "blank-to-zero presentation"
+    },
+    {
+      "id": "n22-r3-previous",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[3].previous",
+      "signedDisplayValue": "-2 777 602",
+      "workbookSource": {
+        "worksheet": "Likvida medel",
+        "cell": "E12",
+        "rawValue": "-2777601.09",
+        "cachedValue": "-2777601.09",
+        "renderedValue": "-2 777 601"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n23-r1-current",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[1].current",
+      "signedDisplayValue": "7 635 155",
+      "workbookSource": {
+        "worksheet": "UKFI",
+        "cell": "C10",
+        "rawValue": "7635154.4699999997",
+        "cachedValue": null,
+        "renderedValue": "7 635 154"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n23-r2-current",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[2].current",
+      "signedDisplayValue": "2 374 432",
+      "workbookSource": {
+        "worksheet": "UKFI",
+        "cell": "C11",
+        "rawValue": "2374431.4",
+        "cachedValue": null,
+        "renderedValue": "2 374 431"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n23-r6-previous",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[6].previous",
+      "signedDisplayValue": "126 937",
+      "workbookSource": {
+        "worksheet": "UKFI",
+        "cell": "F16",
+        "rawValue": "126938.77",
+        "cachedValue": null,
+        "renderedValue": "126 939"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n23-r7-previous",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[7].previous",
+      "signedDisplayValue": "10 552 161",
+      "workbookSource": {
+        "worksheet": "UKFI",
+        "cell": "F17",
+        "rawValue": "10552162.420000002",
+        "cachedValue": "10552162.420000002",
+        "renderedValue": "10 552 162"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n26-r2-current",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[2].current",
+      "signedDisplayValue": "2 612 322",
+      "workbookSource": {
+        "worksheet": "Ställda säkerheter och eventual",
+        "cell": "H11",
+        "rawValue": "",
+        "cachedValue": null,
+        "renderedValue": ""
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    },
+    {
+      "id": "n26-r3-current",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[3].current",
+      "signedDisplayValue": "4 112 322",
+      "workbookSource": {
+        "worksheet": "Ställda säkerheter och eventual",
+        "cell": "H14",
+        "rawValue": "1500000",
+        "cachedValue": "1500000",
+        "renderedValue": "1 500 000"
+      },
+      "reason": "Final authority audit approved field-level presentation override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    }
+  ],
+  "rowOverrides": [
+    {
+      "id": "n17-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 17,
+      "semanticPath": "notes[17].rows[1]",
+      "order": 1,
+      "worksheet": "Övriga kf fordringar",
+      "labelCell": "A11",
+      "currentCell": "C11",
+      "previousCell": "F11",
+      "signedDisplay": {
+        "label": "Moms- och skattekonto",
+        "current": "311",
+        "previous": "0"
+      },
+      "sourceRawCached": {
+        "currentRaw": "311",
+        "currentCached": null,
+        "previousRaw": "",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n17-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 17,
+      "semanticPath": "notes[17].rows[2]",
+      "order": 2,
+      "worksheet": "Övriga kf fordringar",
+      "labelCell": "A12",
+      "currentCell": "C12",
+      "previousCell": "F12",
+      "signedDisplay": {
+        "label": "Fordran anställda",
+        "current": "2 336",
+        "previous": "72 251"
+      },
+      "sourceRawCached": {
+        "currentRaw": "2336",
+        "currentCached": null,
+        "previousRaw": "72251",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n17-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 17,
+      "semanticPath": "notes[17].rows[3]",
+      "order": 3,
+      "worksheet": "Övriga kf fordringar",
+      "labelCell": "A13",
+      "currentCell": "B13",
+      "previousCell": "F13",
+      "signedDisplay": {
+        "label": "Övriga poster",
+        "current": "0",
+        "previous": "445 723"
+      },
+      "sourceRawCached": {
+        "currentRaw": "0",
+        "currentCached": "0",
+        "previousRaw": "445723",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n17-r4",
+      "type": "workbook_row_authority",
+      "noteNumber": 17,
+      "semanticPath": "notes[17].rows[4]",
+      "order": 4,
+      "worksheet": "Övriga kf fordringar",
+      "labelCell": "A14",
+      "currentCell": "C14",
+      "previousCell": "F14",
+      "signedDisplay": {
+        "label": "",
+        "current": "2 647",
+        "previous": "517 974"
+      },
+      "sourceRawCached": {
+        "currentRaw": "2647",
+        "currentCached": "2647",
+        "previousRaw": "517974",
+        "previousCached": "517974"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "row-role authority"
+    },
+    {
+      "id": "n18-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 18,
+      "semanticPath": "notes[18].rows[1]",
+      "order": 1,
+      "worksheet": "Upparbetat men ej fakturerat",
+      "labelCell": "A10",
+      "currentCell": "C10",
+      "previousCell": "F10",
+      "signedDisplay": {
+        "label": "Upparbetad men ej fakturerad intäkt",
+        "current": "19 024 345",
+        "previous": "15 059 732"
+      },
+      "sourceRawCached": {
+        "currentRaw": "19024344.670000002",
+        "currentCached": null,
+        "previousRaw": "15059732",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n18-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 18,
+      "semanticPath": "notes[18].rows[2]",
+      "order": 2,
+      "worksheet": "Upparbetat men ej fakturerat",
+      "labelCell": "A13",
+      "currentCell": "C13",
+      "previousCell": "F13",
+      "signedDisplay": {
+        "label": "",
+        "current": "19 024 345",
+        "previous": "15 059 732"
+      },
+      "sourceRawCached": {
+        "currentRaw": "19024344.670000002",
+        "currentCached": "19024344.670000002",
+        "previousRaw": "15059732",
+        "previousCached": "15059732"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "row-role authority"
+    },
+    {
+      "id": "n19-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[1]",
+      "order": 1,
+      "worksheet": "FKUI",
+      "labelCell": "A10",
+      "currentCell": "C10",
+      "previousCell": "F10",
+      "signedDisplay": {
+        "label": "Förutbetalda hyreskostnader",
+        "current": "1 317 409",
+        "previous": "1 522 561"
+      },
+      "sourceRawCached": {
+        "currentRaw": "1317409.32",
+        "currentCached": null,
+        "previousRaw": "1522561.2",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[2]",
+      "order": 2,
+      "worksheet": "FKUI",
+      "labelCell": "A11",
+      "currentCell": "C11",
+      "previousCell": "F11",
+      "signedDisplay": {
+        "label": "Förutbetalda försäkringspremier",
+        "current": "69 592",
+        "previous": "64 197"
+      },
+      "sourceRawCached": {
+        "currentRaw": "69592.19",
+        "currentCached": null,
+        "previousRaw": "64196.959999999999",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[3]",
+      "order": 3,
+      "worksheet": "FKUI",
+      "labelCell": "A12",
+      "currentCell": "C12",
+      "previousCell": "F12",
+      "signedDisplay": {
+        "label": "Pensionskostnader",
+        "current": "568 832",
+        "previous": "549 772"
+      },
+      "sourceRawCached": {
+        "currentRaw": "568831.69999999995",
+        "currentCached": null,
+        "previousRaw": "549772.27",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r4",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[4]",
+      "order": 4,
+      "worksheet": "FKUI",
+      "labelCell": "A13",
+      "currentCell": "C13",
+      "previousCell": "F13",
+      "signedDisplay": {
+        "label": "Leasingavgifter",
+        "current": "12 756",
+        "previous": "32 839"
+      },
+      "sourceRawCached": {
+        "currentRaw": "12756.03",
+        "currentCached": null,
+        "previousRaw": "32839.1",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r5",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[5]",
+      "order": 5,
+      "worksheet": "FKUI",
+      "labelCell": "A15",
+      "currentCell": "C15",
+      "previousCell": "F15",
+      "signedDisplay": {
+        "label": "Programvaror, systemkostnader och licenser",
+        "current": "0",
+        "previous": "639 179"
+      },
+      "sourceRawCached": {
+        "currentRaw": null,
+        "currentCached": null,
+        "previousRaw": "639178.80000000005",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r6",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[6]",
+      "order": 6,
+      "worksheet": "FKUI",
+      "labelCell": "A16",
+      "currentCell": "C16",
+      "previousCell": "F16",
+      "signedDisplay": {
+        "label": "Utbildning och resekostnader",
+        "current": "456 118",
+        "previous": "0"
+      },
+      "sourceRawCached": {
+        "currentRaw": "456117.56",
+        "currentCached": null,
+        "previousRaw": null,
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r7",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[7]",
+      "order": 7,
+      "worksheet": "FKUI",
+      "labelCell": "A18",
+      "currentCell": "C18",
+      "previousCell": "F18",
+      "signedDisplay": {
+        "label": "Övriga poster",
+        "current": "122 511",
+        "previous": "96 196"
+      },
+      "sourceRawCached": {
+        "currentRaw": "122511.23",
+        "currentCached": null,
+        "previousRaw": "96195.42",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n19-r8",
+      "type": "workbook_row_authority",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[8]",
+      "order": 8,
+      "worksheet": "FKUI",
+      "labelCell": "A19",
+      "currentCell": "C19",
+      "previousCell": "F19",
+      "signedDisplay": {
+        "label": "",
+        "current": "2 547 218",
+        "previous": "2 904 744"
+      },
+      "sourceRawCached": {
+        "currentRaw": "2547218.0299999998",
+        "currentCached": "2547218.0299999998",
+        "previousRaw": "2904743.75",
+        "previousCached": "2904743.75"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "row-role authority"
+    },
+    {
+      "id": "n22-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[1]",
+      "order": 1,
+      "worksheet": "Likvida medel",
+      "labelCell": "A9",
+      "currentCell": "C9",
+      "previousCell": "E9",
+      "signedDisplay": {
+        "label": "Banktillgodohavanden",
+        "current": "0",
+        "previous": "1 050"
+      },
+      "sourceRawCached": {
+        "currentRaw": "",
+        "currentCached": null,
+        "previousRaw": "1050.44",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n22-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[2]",
+      "order": 2,
+      "worksheet": "Likvida medel",
+      "labelCell": "A10",
+      "currentCell": "C10",
+      "previousCell": "E10",
+      "signedDisplay": {
+        "label": "Tillgodohavanden på koncernkonto",
+        "current": "704 583",
+        "previous": "-2 778 652"
+      },
+      "sourceRawCached": {
+        "currentRaw": "704582.81",
+        "currentCached": null,
+        "previousRaw": "-2778651.53",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n22-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[3]",
+      "order": 3,
+      "worksheet": "Likvida medel",
+      "labelCell": "A12",
+      "currentCell": "C12",
+      "previousCell": "E12",
+      "signedDisplay": {
+        "label": "",
+        "current": "704 583",
+        "previous": "-2 777 602"
+      },
+      "sourceRawCached": {
+        "currentRaw": "704582.81",
+        "currentCached": "704582.81",
+        "previousRaw": "-2777601.09",
+        "previousCached": "-2777601.09"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[1]",
+      "order": 1,
+      "worksheet": "UKFI",
+      "labelCell": "A10",
+      "currentCell": "C10",
+      "previousCell": "F10",
+      "signedDisplay": {
+        "label": "Upplupen lön, semester- och övertidsersättning",
+        "current": "7 635 155",
+        "previous": "7 547 695"
+      },
+      "sourceRawCached": {
+        "currentRaw": "7635154.4699999997",
+        "currentCached": null,
+        "previousRaw": "7547694.6100000003",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[2]",
+      "order": 2,
+      "worksheet": "UKFI",
+      "labelCell": "A11",
+      "currentCell": "C11",
+      "previousCell": "F11",
+      "signedDisplay": {
+        "label": "Upplupna sociala avgifter",
+        "current": "2 374 432",
+        "previous": "2 371 485"
+      },
+      "sourceRawCached": {
+        "currentRaw": "2374431.4",
+        "currentCached": null,
+        "previousRaw": "2371484.9900000002",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[3]",
+      "order": 3,
+      "worksheet": "UKFI",
+      "labelCell": "A13",
+      "currentCell": "C13",
+      "previousCell": "F13",
+      "signedDisplay": {
+        "label": "Förutbetalda intäkter",
+        "current": "510 197",
+        "previous": "388 277"
+      },
+      "sourceRawCached": {
+        "currentRaw": "510197.41",
+        "currentCached": null,
+        "previousRaw": "388276.65",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r4",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[4]",
+      "order": 4,
+      "worksheet": "UKFI",
+      "labelCell": "A14",
+      "currentCell": "C14",
+      "previousCell": "F14",
+      "signedDisplay": {
+        "label": "Upplupna underkonsulter",
+        "current": "32 006",
+        "previous": "22 767"
+      },
+      "sourceRawCached": {
+        "currentRaw": "32006.44",
+        "currentCached": null,
+        "previousRaw": "22767.4",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r5",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[5]",
+      "order": 5,
+      "worksheet": "UKFI",
+      "labelCell": "A15",
+      "currentCell": "C15",
+      "previousCell": "F15",
+      "signedDisplay": {
+        "label": "Upplupna revision- och rådgivningskostnader",
+        "current": "70 000",
+        "previous": "95 000"
+      },
+      "sourceRawCached": {
+        "currentRaw": "70000",
+        "currentCached": null,
+        "previousRaw": "95000",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r6",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[6]",
+      "order": 6,
+      "worksheet": "UKFI",
+      "labelCell": "A16",
+      "currentCell": "C16",
+      "previousCell": "F16",
+      "signedDisplay": {
+        "label": "Övriga poster",
+        "current": "121 766",
+        "previous": "126 937"
+      },
+      "sourceRawCached": {
+        "currentRaw": "121766.04",
+        "currentCached": null,
+        "previousRaw": "126938.77",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n23-r7",
+      "type": "workbook_row_authority",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[7]",
+      "order": 7,
+      "worksheet": "UKFI",
+      "labelCell": "A17",
+      "currentCell": "C17",
+      "previousCell": "F17",
+      "signedDisplay": {
+        "label": "",
+        "current": "10 743 556",
+        "previous": "10 552 161"
+      },
+      "sourceRawCached": {
+        "currentRaw": "10743555.759999998",
+        "currentCached": "10743555.759999998",
+        "previousRaw": "10552162.420000002",
+        "previousCached": "10552162.420000002"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n26-r1",
+      "type": "workbook_row_authority",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[1]",
+      "order": 1,
+      "worksheet": "Ställda säkerheter och eventual",
+      "labelCell": "A9",
+      "currentCell": "H9",
+      "previousCell": "J9",
+      "signedDisplay": {
+        "label": "Företagsinteckningar",
+        "current": "1 500 000",
+        "previous": "1 500 000"
+      },
+      "sourceRawCached": {
+        "currentRaw": "1500000",
+        "currentCached": null,
+        "previousRaw": "1500000",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "row-role authority"
+    },
+    {
+      "id": "n26-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[2]",
+      "order": 2,
+      "worksheet": "Ställda säkerheter och eventual",
+      "labelCell": "A11",
+      "currentCell": "H11",
+      "previousCell": "J11",
+      "signedDisplay": {
+        "label": "Aktier i bolaget",
+        "current": "2 612 322",
+        "previous": "2 612 322"
+      },
+      "sourceRawCached": {
+        "currentRaw": "",
+        "currentCached": null,
+        "previousRaw": "2612322",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n26-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[3]",
+      "order": 3,
+      "worksheet": "Ställda säkerheter och eventual",
+      "labelCell": "A14",
+      "currentCell": "H14",
+      "previousCell": "J14",
+      "signedDisplay": {
+        "label": "",
+        "current": "4 112 322",
+        "previous": "4 112 322"
+      },
+      "sourceRawCached": {
+        "currentRaw": "1500000",
+        "currentCached": "1500000",
+        "previousRaw": "4112322",
+        "previousCached": "4112322"
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n26-r4",
+      "type": "workbook_row_authority",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[4]",
+      "order": 4,
+      "worksheet": "Ställda säkerheter och eventual",
+      "labelCell": "A20",
+      "currentCell": "H20",
+      "previousCell": "J20",
+      "signedDisplay": {
+        "label": "Borgen, banklån",
+        "current": "715 000 000",
+        "previous": "743 880 000"
+      },
+      "sourceRawCached": {
+        "currentRaw": "715000000",
+        "currentCached": null,
+        "previousRaw": "743880000",
+        "previousCached": null
+      },
+      "reason": "Explicit workbook-backed row group approved by final authority audit.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n26-r5",
+      "type": "signed_preview_row_override",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[5]",
+      "order": 5,
+      "signedDisplay": {
+        "label": "",
+        "current": "715 000 000",
+        "previous": "743 880 000"
+      },
+      "reason": "Signed-reference repeated presentation row approved as explicit row override.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override"
+    }
+  ],
+  "labelMappings": [
+    {
+      "id": "n18-r1-label",
+      "noteNumber": 18,
+      "semanticPath": "notes[18].rows[1].label",
+      "signedLabel": "Upparbetad men ej fakturerad intäkt",
+      "workbookLabel": "Upparbetad, ej fakturerad intäkt",
+      "workbookSourceCell": "A10",
+      "sourceRawValue": "Upparbetad, ej fakturerad intäkt ",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n19-r1-label",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[1].label",
+      "signedLabel": "Förutbetalda hyreskostnader",
+      "workbookLabel": "Lokalhyra",
+      "workbookSourceCell": "A10",
+      "sourceRawValue": "Lokalhyra",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n19-r2-label",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[2].label",
+      "signedLabel": "Förutbetalda försäkringspremier",
+      "workbookLabel": "Försäkringar",
+      "workbookSourceCell": "A11",
+      "sourceRawValue": "Försäkringar ",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n19-r6-label",
+      "noteNumber": 19,
+      "semanticPath": "notes[19].rows[6].label",
+      "signedLabel": "Utbildning och resekostnader",
+      "workbookLabel": "Utbildning- och resekostnader",
+      "workbookSourceCell": "A16",
+      "sourceRawValue": "Utbildning- och resekostnader",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n22-r1-label",
+      "noteNumber": 22,
+      "semanticPath": "notes[22].rows[1].label",
+      "signedLabel": "Banktillgodohavanden",
+      "workbookLabel": "Banktillgodohavande",
+      "workbookSourceCell": "A9",
+      "sourceRawValue": "Banktillgodohavande",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n23-r4-label",
+      "noteNumber": 23,
+      "semanticPath": "notes[23].rows[4].label",
+      "signedLabel": "Upplupna underkonsulter",
+      "workbookLabel": "Upplupna underskonsulter",
+      "workbookSourceCell": "A14",
+      "sourceRawValue": "Upplupna underskonsulter",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    },
+    {
+      "id": "n26-r2-label",
+      "noteNumber": 26,
+      "semanticPath": "notes[26].rows[2].label",
+      "signedLabel": "Aktier i bolaget",
+      "workbookLabel": "Aktier i bolag",
+      "workbookSourceCell": "A11",
+      "sourceRawValue": "Aktier i bolag",
+      "reason": "Signed-reference label normalization approved in final authority audit.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping"
+    }
+  ],
+  "acknowledgedPolicyDiagnostics": [
+    {
+      "noteNumber": 17,
+      "code": "BLANK_TO_ZERO_PRESENTATION_REQUIRED"
+    },
+    {
+      "noteNumber": 17,
+      "code": "ROW_ROLE_AUTHORITY_REQUIRED"
+    },
+    {
+      "noteNumber": 18,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 18,
+      "code": "ROW_ROLE_AUTHORITY_REQUIRED"
+    },
+    {
+      "noteNumber": 19,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 19,
+      "code": "BLANK_TO_ZERO_PRESENTATION_REQUIRED"
+    },
+    {
+      "noteNumber": 19,
+      "code": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+    },
+    {
+      "noteNumber": 19,
+      "code": "ROW_ROLE_AUTHORITY_REQUIRED"
+    },
+    {
+      "noteNumber": 22,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 22,
+      "code": "BLANK_TO_ZERO_PRESENTATION_REQUIRED"
+    },
+    {
+      "noteNumber": 22,
+      "code": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+    },
+    {
+      "noteNumber": 23,
+      "code": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+    },
+    {
+      "noteNumber": 23,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 26,
+      "code": "ROW_ROLE_AUTHORITY_REQUIRED"
+    },
+    {
+      "noteNumber": 26,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 26,
+      "code": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+    },
+    {
+      "noteNumber": 26,
+      "code": "SECTION_PERIOD_COLUMN_SELECTION_REQUIRED"
+    },
+    {
+      "code": "WORKBOOK_REPORTING_ENTITY_ORG_NUMBER_NOT_PRESENT",
+      "noteNumber": null
+    },
+    {
+      "code": "KNOWN_INTERNAL_WORKBOOK_COMMENT_EXCLUDED",
+      "noteNumber": null
+    },
+    {
+      "code": "UNSUPPORTED_WORKBOOK_COMMENT_OUTSIDE_MAPPED_RANGE",
+      "noteNumber": null
+    },
+    {
+      "code": "NOTE_TEXT_SOURCE_REQUIRED",
+      "noteNumber": 1
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 1
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 6
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 6
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 7
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 7
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 8
+    },
+    {
+      "code": "INTEREST_SIGN_ROUNDING_POLICY_REQUIRED",
+      "noteNumber": 8
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 8
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 9
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 9
+    },
+    {
+      "code": "EXTERNAL_LINK_CACHED_VALUE_USED",
+      "noteNumber": 10
+    },
+    {
+      "code": "NOTE_16_WORKBOOK_BALANCE_MISMATCH",
+      "noteNumber": 16
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 16
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 20
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 21
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 21
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 24
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 24
+    },
+    {
+      "code": "STATEMENT_RECONCILIATION_REQUIRED",
+      "noteNumber": 25
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 25
+    },
+    {
+      "code": "NOTE_TEXT_SOURCE_REQUIRED",
+      "noteNumber": 27
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 27
+    },
+    {
+      "code": "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED",
+      "noteNumber": 27
+    },
+    {
+      "code": "NOTE_TEXT_SOURCE_REQUIRED",
+      "noteNumber": 28
+    },
+    {
+      "code": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+      "noteNumber": 28
+    },
+    {
+      "code": "NOTE_NUMBER_PLACEHOLDER_UNRESOLVED",
+      "noteNumber": 28
+    }
+  ]
+}
