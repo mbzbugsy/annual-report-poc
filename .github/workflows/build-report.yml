@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MANAGEMENT_REPORT_MODE: synthetic
 
     steps:
       - name: Check out repository
@@ -22,6 +24,24 @@ jobs:
 
       - name: Create generated and build directories
         run: mkdir -p generated build
+
+      - name: Extract management report contracts from synthetic DOCX fixture
+        run: |
+          python3 tools/extract_management_report.py \
+            --input data/mock/management_report_fixture.docx \
+            --metadata data/report_metadata.json \
+            --raw-output generated/management-report-raw.json \
+            --semantic-output generated/management-report.json
+
+      - name: Render management report pages 2-4 partial
+        run: |
+          python3 tools/render_management_report_tex.py \
+            --semantic-input generated/management-report.json \
+            --raw-input generated/management-report-raw.json \
+            --metadata data/report_metadata.json \
+            --override data/mock/management_report_page4_preview_override.json \
+            --output generated/management-report.tex \
+            --provenance-output generated/management-report.provenance.json
 
       - name: Render report metadata partial
         run: |
@@ -52,6 +72,10 @@ jobs:
 
       - name: Verify generated partials exist
         run: |
+          test -f generated/management-report-raw.json
+          test -f generated/management-report.json
+          test -f generated/management-report.tex
+          test -f generated/management-report.provenance.json
           test -f generated/report-metadata.tex
           test -f generated/income-statement.tex
           test -f generated/balance-sheet.tex
