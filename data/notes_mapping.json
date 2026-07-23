@@ -1,0 +1,797 @@
+{
+  "canonicalNotes": [
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 1,
+      "diagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "docxUpdateTarget": "note_1_accounting_principles_addition",
+      "noteNumber": 1,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": false,
+        "sourceType": "management_contract_excluded_content"
+      },
+      "title": "Redovisnings- och värderingsprinciper"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 2,
+      "diagnosticCodes": [],
+      "noteNumber": 2,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.revenue",
+          "reconciliationKey": "revenue",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "C",
+          "E"
+        ],
+        "required": true,
+        "sheet": "Nettoomsättning per rörelsegren",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 5,
+            "range": "A1:E39",
+            "rowCount": 39
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Nettoomsättningens fördelning"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 3,
+      "diagnosticCodes": [],
+      "noteNumber": 3,
+      "reconciliationRequirements": [],
+      "source": {
+        "periodColumns": [
+          "B",
+          "D"
+        ],
+        "required": true,
+        "sheet": "Revisionsarvode",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 52,
+            "range": "A1:AZ36",
+            "rowCount": 36
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Arvode till revisorer"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 4,
+      "diagnosticCodes": [],
+      "noteNumber": 4,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": true,
+        "sourceType": "workbook_multi_range",
+        "supportingRanges": [
+          {
+            "range": "A1:X172",
+            "role": "supporting_evidence",
+            "sheet": "Operationell leasing del 1"
+          }
+        ],
+        "tableShapes": [
+          {
+            "colCount": 4,
+            "range": "A1:D23",
+            "rowCount": 23
+          }
+        ],
+        "units": "SEK",
+        "worksheetRanges": [
+          {
+            "range": "A1:D23",
+            "sheet": "Operationell leasing del 2"
+          }
+        ]
+      },
+      "title": "Leasingavtal"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 5,
+      "diagnosticCodes": [],
+      "noteNumber": 5,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.personnelCosts",
+          "reconciliationKey": "employee_costs",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "B",
+          "D"
+        ],
+        "required": true,
+        "sheet": "Lön",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 6,
+            "range": "A1:F68",
+            "rowCount": 68
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Anställda och personalkostnader"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 6,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 6,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.otherOperatingCosts",
+          "reconciliationKey": "other_operating_costs",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Övriga rörelsekostnader"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 7,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 7,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.interestIncome",
+          "reconciliationKey": "interest_income",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Övriga ränteintäkter och liknande resultatposter"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 8,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "INTEREST_SIGN_ROUNDING_POLICY_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 8,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.interestCosts",
+          "reconciliationKey": "interest_costs",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Räntekostnader och liknande resultatposter"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 9,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 9,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.appropriations",
+          "reconciliationKey": "appropriations",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Bokslutsdispositioner"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 10,
+      "diagnosticCodes": [
+        "EXTERNAL_LINK_CACHED_VALUE_USED"
+      ],
+      "noteNumber": 10,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "income_statement.taxForYear",
+          "reconciliationKey": "tax",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "D",
+          "L"
+        ],
+        "required": true,
+        "sheet": "Skatt",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 16,
+            "range": "A1:P65",
+            "rowCount": 65
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Aktuell och uppskjuten skatt"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 11,
+      "diagnosticCodes": [],
+      "noteNumber": 11,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.goodwill",
+          "reconciliationKey": "goodwill",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "B",
+          "E"
+        ],
+        "required": true,
+        "sheet": "Imm. anläggningstillgångar",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 5,
+            "range": "A8:E24",
+            "rowCount": 17
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Goodwill"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 12,
+      "diagnosticCodes": [],
+      "noteNumber": 12,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.equipmentToolsInstallations",
+          "reconciliationKey": "inventories_tools_installations",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "C",
+          "E"
+        ],
+        "required": true,
+        "sheet": "Materiella anläggningstillgånga",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 5,
+            "range": "A8:E24",
+            "rowCount": 17
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Inventarier, verktyg och installationer"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 13,
+      "diagnosticCodes": [],
+      "noteNumber": 13,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.sharesInGroupCompanies",
+          "reconciliationKey": "group_company_shares",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "D",
+          "F"
+        ],
+        "required": true,
+        "sheet": "Andelar i koncernbolag",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 6,
+            "range": "A3:F12",
+            "rowCount": 10
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Andelar i koncernföretag"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 14,
+      "diagnosticCodes": [],
+      "noteNumber": 14,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": true,
+        "sheet": "Andelar i koncernbolag",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 4,
+            "range": "J3:M9",
+            "rowCount": 7
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Specifikation andelar i koncernföretag"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 15,
+      "diagnosticCodes": [],
+      "noteNumber": 15,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.otherLongTermSecurities",
+          "reconciliationKey": "long_term_securities",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "periodColumns": [
+          "C",
+          "C"
+        ],
+        "required": true,
+        "sheet": "Långfristiga värdepappersinneha",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 5,
+            "range": "A1:E50",
+            "rowCount": 50
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Andra långfristiga värdepappersinnehav"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 16,
+      "diagnosticCodes": [
+        "NOTE_16_WORKBOOK_BALANCE_MISMATCH",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 16,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.otherLongTermReceivables",
+          "reconciliationKey": "long_term_receivables",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "Långfristiga fordringar",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 16,
+            "range": "A1:P12",
+            "rowCount": 12
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Andra långfristiga fordringar"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 17,
+      "diagnosticCodes": [],
+      "noteNumber": 17,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.otherReceivables",
+          "reconciliationKey": "other_receivables",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "Övriga kf fordringar",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 13,
+            "range": "A1:M44",
+            "rowCount": 44
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Övriga fordringar"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 18,
+      "diagnosticCodes": [],
+      "noteNumber": 18,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.accruedUnbilledRevenue",
+          "reconciliationKey": "accrued_unbilled_revenue",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "Upparbetat men ej fakturerat",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 7,
+            "range": "A1:G17",
+            "rowCount": 17
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Upparbetad men ej fakturerad intäkt"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 19,
+      "diagnosticCodes": [],
+      "noteNumber": 19,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.prepaidExpensesAccruedIncome",
+          "reconciliationKey": "prepaid_expenses_accrued_income",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "FKUI",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 19,
+            "range": "A1:S50",
+            "rowCount": 50
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Förutbetalda kostnader och upplupna intäkter"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 20,
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 20,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": false,
+        "sourceType": "start_sheet_reference",
+        "worksheetRanges": [
+          {
+            "range": "B44:E44",
+            "sheet": "Start"
+          }
+        ]
+      },
+      "title": "Antal aktier och kvotvärde"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 21,
+      "diagnosticCodes": [
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "STATEMENT_RECONCILIATION_REQUIRED"
+      ],
+      "noteNumber": 21,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.profitForYear",
+          "reconciliationKey": "equity_disposition",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "start_sheet_reference",
+        "worksheetRanges": [
+          {
+            "range": "B45:E45",
+            "sheet": "Start"
+          }
+        ]
+      },
+      "title": "Disposition av vinst eller förlust"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 22,
+      "diagnosticCodes": [],
+      "noteNumber": 22,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.cashAndBank",
+          "reconciliationKey": "cash_balance_sheet",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        },
+        {
+          "expectedStatementSource": "cash_flow.cashAtEnd",
+          "reconciliationKey": "cash_flow_cash_at_end",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "Likvida medel",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 5,
+            "range": "A1:E24",
+            "rowCount": 24
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Likvida medel"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 23,
+      "diagnosticCodes": [],
+      "noteNumber": 23,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.accruedExpensesDeferredIncome",
+          "reconciliationKey": "accrued_expenses_deferred_income",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "UKFI",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 9,
+            "range": "A1:I46",
+            "rowCount": 46
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Upplupna kostnader och förutbetalda intäkter"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 24,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 24,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "cash_flow.resultAfterFinancialItems",
+          "reconciliationKey": "interest_dividends",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Räntor och utdelningar"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 25,
+      "diagnosticCodes": [
+        "STATEMENT_RECONCILIATION_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "noteNumber": 25,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "cash_flow.nonCashAdjustments",
+          "reconciliationKey": "non_cash_adjustments",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": false,
+        "sourceType": "statement_reconciliation_only"
+      },
+      "title": "Justering för poster som inte ingår i kassaflödet"
+    },
+    {
+      "authorityStatus": "workbook_direct",
+      "canonicalOrder": 26,
+      "diagnosticCodes": [],
+      "noteNumber": 26,
+      "reconciliationRequirements": [
+        {
+          "expectedStatementSource": "balance_sheet.liabilities_security",
+          "reconciliationKey": "pledged_assets_and_contingent_liabilities",
+          "roundingPolicy": "whole_currency",
+          "unit": "SEK"
+        }
+      ],
+      "source": {
+        "required": true,
+        "sheet": "Ställda säkerheter och eventual",
+        "sourceType": "workbook_range",
+        "tableShapes": [
+          {
+            "colCount": 10,
+            "range": "A1:J26",
+            "rowCount": 26
+          }
+        ],
+        "units": "SEK"
+      },
+      "title": "Ställda säkerheter"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 27,
+      "diagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "docxUpdateTarget": "note_27_related_party_and_parent_company",
+      "noteNumber": 27,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": false,
+        "sourceType": "management_contract_excluded_content"
+      },
+      "title": "Transaktioner med närstående"
+    },
+    {
+      "authorityStatus": "review_required",
+      "canonicalOrder": 28,
+      "diagnosticCodes": [
+        "NOTE_TEXT_SOURCE_REQUIRED",
+        "NOTE_SOURCE_AUTHORITY_UNRESOLVED"
+      ],
+      "docxUpdateTarget": "note_28_events_after_reporting_period",
+      "noteNumber": 28,
+      "reconciliationRequirements": [],
+      "source": {
+        "required": false,
+        "sourceType": "management_contract_excluded_content"
+      },
+      "title": "Väsentliga händelser efter räkenskapsårets slut"
+    }
+  ],
+  "notesSchemaVersion": "1.0",
+  "policyVersion": "1.0",
+  "reportingEntityIdentity": {
+    "companyName": {
+      "authority": "metadata",
+      "workbookEvidenceMode": "metadata_only"
+    },
+    "organizationNumber": {
+      "authority": "metadata",
+      "diagnosticCode": "WORKBOOK_REPORTING_ENTITY_ORG_NUMBER_NOT_PRESENT",
+      "workbookEvidenceMode": "metadata_only"
+    }
+  },
+  "unsupportedContentPolicy": {
+    "allowlist": [
+      {
+        "classification": "internal_instruction",
+        "constructType": "comment",
+        "coordinate": "V12",
+        "diagnosticCode": "KNOWN_INTERNAL_WORKBOOK_COMMENT_EXCLUDED",
+        "exclusionReason": "Excel compatibility threaded-comment wrapper with internal calculation-note instruction.",
+        "expectedSha256": "054886475771162004e7731cff7f9d263f281bdc60687a549698ed06592088b1",
+        "id": "allowlist_comment_operationell_leasing_del1_v12",
+        "requiresPresence": true,
+        "scope": "mapped_range_only",
+        "worksheet": "Operationell leasing del 1"
+      },
+      {
+        "classification": "template_help_text",
+        "constructType": "comment",
+        "coordinate": "E20",
+        "diagnosticCode": "KNOWN_INTERNAL_WORKBOOK_COMMENT_EXCLUDED",
+        "exclusionReason": "Header clarification text for source-system interpretation; not report narrative.",
+        "expectedSha256": "5ab15a6c3c388709d3e2bcf0cad962943d94da5c11ab1a77176cdcbb8185cf5a",
+        "id": "allowlist_comment_langfristiga_vardepappersinneha_e20",
+        "requiresPresence": true,
+        "scope": "mapped_range_only",
+        "worksheet": "Långfristiga värdepappersinneha"
+      },
+      {
+        "classification": "template_help_text",
+        "constructType": "comment",
+        "coordinate": "E44",
+        "diagnosticCode": "KNOWN_INTERNAL_WORKBOOK_COMMENT_EXCLUDED",
+        "exclusionReason": "Header clarification text for source-system interpretation; not report narrative.",
+        "expectedSha256": "5ab15a6c3c388709d3e2bcf0cad962943d94da5c11ab1a77176cdcbb8185cf5a",
+        "id": "allowlist_comment_langfristiga_vardepappersinneha_e44",
+        "requiresPresence": true,
+        "scope": "mapped_range_only",
+        "worksheet": "Långfristiga värdepappersinneha"
+      }
+    ],
+    "version": "1.0"
+  }
+}
