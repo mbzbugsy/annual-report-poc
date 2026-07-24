@@ -45,7 +45,11 @@ ALLOWED_OVERRIDE_KINDS = {
     "label mapping",
     "row-role authority",
     "signed-preview value override",
+    "signed-reference inter-note insertion",
+    "signed-reference note appendix",
 }
+
+ALLOWED_INSERTION_PAGES = set(range(9, 20))
 
 
 def _escape_latex(text: str) -> str:
@@ -182,6 +186,43 @@ def _render_table_rows(rows: List[List[str]], *, small: bool = True) -> List[str
     lines.append("\\bottomrule")
     lines.append("\\end{tabular}")
     lines.append("}")
+    return lines
+
+
+def _render_signed_reference_text_block(block: Dict[str, Any], *, field_prefix: str) -> List[str]:
+    lines: List[str] = []
+
+    paragraphs = block.get("paragraphs", [])
+    if not isinstance(paragraphs, list):
+        raise NotesRenderError(f"{field_prefix}.paragraphs must be list")
+    for paragraph in paragraphs:
+        text = _require_string(paragraph, f"{field_prefix}.paragraph")
+        if "Not X" in text:
+            raise NotesRenderError(f"Unresolved Not X placeholder in {field_prefix}")
+    lines.extend(_render_paragraphs(paragraphs))
+
+    tables = block.get("tables", [])
+    if not isinstance(tables, list):
+        raise NotesRenderError(f"{field_prefix}.tables must be list")
+    for table in tables:
+        t = _require_dict(table, f"{field_prefix}.table")
+        heading = t.get("heading")
+        if isinstance(heading, str) and heading.strip():
+            lines.append(_escape_latex(heading))
+            lines.append("")
+        rows_payload = t.get("rows")
+        if not isinstance(rows_payload, list):
+            raise NotesRenderError(f"{field_prefix}.table.rows must be list")
+        rows: List[List[str]] = []
+        for row in rows_payload:
+            row_obj = _require_dict(row, f"{field_prefix}.table.row")
+            cells = row_obj.get("cells")
+            if not isinstance(cells, list) or not cells:
+                raise NotesRenderError(f"{field_prefix}.table.row.cells must be non-empty list")
+            rows.append([_require_string(cell, f"{field_prefix}.table.row.cell") for cell in cells])
+        lines.extend(_render_table_rows(rows))
+        lines.append("")
+
     return lines
 
 
@@ -537,6 +578,8 @@ def _validate_override_manifest(
         "currentReportingPeriod",
         "signedReference",
         "fullNoteOverrides",
+        "interNoteInsertions",
+        "hybridNoteAppendixParagraphs",
         "fieldOverrides",
         "rowOverrides",
         "labelMappings",
@@ -621,6 +664,108 @@ def _validate_override_manifest(
 
     if set(full_map.keys()) != FULL_NOTE_OVERRIDE_NOTES:
         raise NotesRenderError("fullNoteOverrides must cover exactly approved full-note authority set")
+
+    inter_insertions = override.get("interNoteInsertions")
+    if not isinstance(inter_insertions, list):
+        raise NotesRenderError("interNoteInsertions must be list")
+    inter_map: Dict[Tuple[int, int], List[Dict[str, Any]]] = {}
+    for idx, item in enumerate(inter_insertions, start=1):
+        obj = _require_dict(item, "interNoteInsertions[]")
+        insertion_id = _require_non_empty_string(obj.get("id"), f"interNoteInsertions[{idx}].id")
+        page_number = obj.get("pageNumber")
+        if not isinstance(page_number, int) or page_number not in ALLOWED_INSERTION_PAGES:
+            raise NotesRenderError(f"interNoteInsertions[{insertion_id}].pageNumber must be integer in 9..19")
+        insert_before = obj.get("insertBeforeNoteNumber")
+        if not isinstance(insert_before, int) or insert_before < 1 or insert_before > 28:
+            raise NotesRenderError(f"interNoteInsertions[{insertion_id}].insertBeforeNoteNumber must be 1..28")
+        if insert_before not in PAGE_NOTE_MAP.get(page_number, []):
+            raise NotesRenderError(
+                f"interNoteInsertions[{insertion_id}] targets note {insert_before} which is not rendered on page {page_number}"
+            )
+        _require_non_empty_string(obj.get("sourceJustification"), f"interNoteInsertions[{insertion_id}].sourceJustification")
+        require_allowed_override_kind(obj.get("overrideKind"), f"interNoteInsertions[{insertion_id}].overrideKind")
+        diagnostic_covered = _require_non_empty_string(
+            obj.get("diagnosticCovered"), f"interNoteInsertions[{insertion_id}].diagnosticCovered"
+        )
+        require_note_diagnostic_covered(insert_before, diagnostic_covered, f"interNoteInsertions[{insertion_id}].diagnosticCovered")
+        refs = obj.get("coveredSourceRefs")
+        if not isinstance(refs, list) or not refs:
+            raise NotesRenderError(f"interNoteInsertions[{insertion_id}].coveredSourceRefs must be non-empty list")
+        has_signed_page_ref = False
+        for ref_idx, ref in enumerate(refs, start=1):
+            ref_obj = _require_dict(ref, f"interNoteInsertions[{insertion_id}].coveredSourceRefs[{ref_idx}]")
+            kind = _require_non_empty_string(
+                ref_obj.get("kind"), f"interNoteInsertions[{insertion_id}].coveredSourceRefs[{ref_idx}].kind"
+            )
+            value = _require_non_empty_string(
+                ref_obj.get("value"), f"interNoteInsertions[{insertion_id}].coveredSourceRefs[{ref_idx}].value"
+            )
+            if kind == "signed_reference_page":
+                has_signed_page_ref = True
+                if not re.fullmatch(r"\d+", value):
+                    raise NotesRenderError(
+                        f"interNoteInsertions[{insertion_id}] signed_reference_page value must be numeric page reference, got {value!r}"
+                    )
+                page = int(value)
+                if page < 9 or page > 19:
+                    raise NotesRenderError(
+                        f"interNoteInsertions[{insertion_id}] signed_reference_page value out of approved range 9-19: {page}"
+                    )
+        if not has_signed_page_ref:
+            raise NotesRenderError(f"interNoteInsertions[{insertion_id}] must include signed_reference_page reference")
+
+        _render_signed_reference_text_block(obj, field_prefix=f"interNoteInsertions[{insertion_id}]")
+        key = (page_number, insert_before)
+        inter_map.setdefault(key, []).append(obj)
+
+    appendix_raw = override.get("hybridNoteAppendixParagraphs")
+    if not isinstance(appendix_raw, list):
+        raise NotesRenderError("hybridNoteAppendixParagraphs must be list")
+    appendix_map: Dict[int, List[Dict[str, Any]]] = {n: [] for n in HYBRID_WORKBOOK_NOTES}
+    for idx, item in enumerate(appendix_raw, start=1):
+        obj = _require_dict(item, "hybridNoteAppendixParagraphs[]")
+        appendix_id = _require_non_empty_string(obj.get("id"), f"hybridNoteAppendixParagraphs[{idx}].id")
+        note_number = obj.get("noteNumber")
+        if not isinstance(note_number, int) or note_number not in HYBRID_WORKBOOK_NOTES:
+            raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}].noteNumber must target hybrid note")
+        position = _require_non_empty_string(obj.get("position"), f"hybridNoteAppendixParagraphs[{appendix_id}].position")
+        if position != "after_table":
+            raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}] unsupported position: {position}")
+        _require_non_empty_string(obj.get("sourceJustification"), f"hybridNoteAppendixParagraphs[{appendix_id}].sourceJustification")
+        require_allowed_override_kind(obj.get("overrideKind"), f"hybridNoteAppendixParagraphs[{appendix_id}].overrideKind")
+        diagnostic_covered = _require_non_empty_string(
+            obj.get("diagnosticCovered"), f"hybridNoteAppendixParagraphs[{appendix_id}].diagnosticCovered"
+        )
+        require_note_diagnostic_covered(note_number, diagnostic_covered, f"hybridNoteAppendixParagraphs[{appendix_id}].diagnosticCovered")
+
+        refs = obj.get("coveredSourceRefs")
+        if not isinstance(refs, list) or not refs:
+            raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs must be non-empty list")
+        has_signed_page_ref = False
+        for ref_idx, ref in enumerate(refs, start=1):
+            ref_obj = _require_dict(ref, f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[{ref_idx}]")
+            kind = _require_non_empty_string(
+                ref_obj.get("kind"), f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[{ref_idx}].kind"
+            )
+            value = _require_non_empty_string(
+                ref_obj.get("value"), f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[{ref_idx}].value"
+            )
+            if kind == "signed_reference_page":
+                has_signed_page_ref = True
+                if not re.fullmatch(r"\d+", value):
+                    raise NotesRenderError(
+                        f"hybridNoteAppendixParagraphs[{appendix_id}] signed_reference_page value must be numeric page reference, got {value!r}"
+                    )
+                page = int(value)
+                if page < 9 or page > 19:
+                    raise NotesRenderError(
+                        f"hybridNoteAppendixParagraphs[{appendix_id}] signed_reference_page value out of approved range 9-19: {page}"
+                    )
+        if not has_signed_page_ref:
+            raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}] must include signed_reference_page reference")
+
+        _render_signed_reference_text_block(obj, field_prefix=f"hybridNoteAppendixParagraphs[{appendix_id}]")
+        appendix_map[note_number].append(obj)
 
     row_overrides = override.get("rowOverrides")
     if not isinstance(row_overrides, list):
@@ -722,6 +867,8 @@ def _validate_override_manifest(
 
     return {
         "fullNoteOverrides": full_map,
+        "interNoteInsertions": inter_map,
+        "hybridNoteAppendixParagraphs": appendix_map,
         "rowOverrides": row_map,
         "fieldOverrides": field_map,
         "labelMappings": label_map,
@@ -831,36 +978,7 @@ def _render_full_override_note(note_number: int, page_number: int, note_title: s
     if isinstance(page_segments, dict) and str(page_number) in page_segments:
         payload = _require_dict(page_segments[str(page_number)], f"override note {note_number} pageSegments[{page_number}]")
 
-    paragraphs = payload.get("paragraphs", [])
-    if not isinstance(paragraphs, list):
-        raise NotesRenderError(f"fullNoteOverrides[{note_number}] paragraphs must be list")
-    for paragraph in paragraphs:
-        text = _require_string(paragraph, f"full override note {note_number} paragraph")
-        if "Not X" in text:
-            raise NotesRenderError(f"Unresolved Not X placeholder in full-note override {note_number}")
-    lines.extend(_render_paragraphs(paragraphs))
-
-    tables = payload.get("tables", [])
-    if not isinstance(tables, list):
-        raise NotesRenderError(f"fullNoteOverrides[{note_number}] tables must be list")
-    for table in tables:
-        t = _require_dict(table, f"full override note {note_number} table")
-        heading = t.get("heading")
-        if isinstance(heading, str) and heading.strip():
-            lines.append(_escape_latex(heading))
-            lines.append("")
-        rows_payload = t.get("rows")
-        if not isinstance(rows_payload, list):
-            raise NotesRenderError(f"full override note {note_number} table rows must be list")
-        rows: List[List[str]] = []
-        for row in rows_payload:
-            r = _require_dict(row, f"full override note {note_number} row")
-            cells = r.get("cells")
-            if not isinstance(cells, list) or not cells:
-                raise NotesRenderError(f"full override note {note_number} row cells must be non-empty list")
-            rows.append([_require_string(cell, f"full override note {note_number} table cell") for cell in cells])
-        lines.extend(_render_table_rows(rows))
-        lines.append("")
+    lines.extend(_render_signed_reference_text_block(payload, field_prefix=f"fullNoteOverrides[{note_number}]"))
 
     return lines, {
         "fullNoteOverrideUsed": True,
@@ -947,6 +1065,7 @@ def _render_hybrid_note(
     row_overrides: List[Dict[str, Any]],
     field_overrides: List[Dict[str, Any]],
     label_mappings: List[Dict[str, Any]],
+    appendix_blocks: List[Dict[str, Any]],
     continued: bool,
     *,
     workbook_date_system: str | None,
@@ -1045,8 +1164,31 @@ def _render_hybrid_note(
     lines.extend(_render_table_rows(table_rows))
     lines.append("")
 
+    used_appendix_ids: List[str] = []
+    appendix_source_refs: List[Dict[str, str]] = []
+    for appendix in appendix_blocks:
+        appendix_id = _require_non_empty_string(appendix.get("id"), "hybrid appendix id")
+        used_appendix_ids.append(appendix_id)
+        refs = appendix.get("coveredSourceRefs", [])
+        if isinstance(refs, list):
+            for ref in refs:
+                ref_obj = _require_dict(ref, f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[]")
+                appendix_source_refs.append(
+                    {
+                        "kind": _require_non_empty_string(
+                            ref_obj.get("kind"),
+                            f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[].kind",
+                        ),
+                        "value": _require_non_empty_string(
+                            ref_obj.get("value"),
+                            f"hybridNoteAppendixParagraphs[{appendix_id}].coveredSourceRefs[].value",
+                        ),
+                    }
+                )
+        lines.extend(_render_signed_reference_text_block(appendix, field_prefix=f"hybridNoteAppendixParagraphs[{appendix_id}]"))
+
     covered_codes: List[str] = []
-    for entry in row_overrides + field_overrides + label_mappings:
+    for entry in row_overrides + field_overrides + label_mappings + appendix_blocks:
         code = entry.get("diagnosticCovered")
         if isinstance(code, str) and code not in covered_codes:
             covered_codes.append(code)
@@ -1056,6 +1198,8 @@ def _render_hybrid_note(
         "fieldOverridesUsed": used_field_ids,
         "rowOverridesUsed": used_row_ids,
         "labelMappingsUsed": used_label_ids,
+        "appendixOverridesUsed": used_appendix_ids,
+        "appendixCoveredSourceRefs": appendix_source_refs,
         "workbookRenderedSourceCells": used_cells,
         "coveredDiagnostics": covered_codes,
     }
@@ -1129,6 +1273,11 @@ def render_notes(
         tex_lines.append("")
 
         for note_number in PAGE_NOTE_MAP[page]:
+            inter_blocks = override_scope["interNoteInsertions"].get((page, note_number), [])
+            for block in inter_blocks:
+                block_id = _require_non_empty_string(block.get("id"), "inter-note insertion id")
+                tex_lines.extend(_render_signed_reference_text_block(block, field_prefix=f"interNoteInsertions[{block_id}]"))
+
             note_pages[note_number].append(page)
             semantic_note = notes_by_number[note_number]
             title = _require_non_empty_string(semantic_note.get("title"), f"note {note_number} title")
@@ -1151,6 +1300,7 @@ def render_notes(
                     override_scope["rowOverrides"].get(note_number, []),
                     override_scope["fieldOverrides"].get(note_number, []),
                     override_scope["labelMappings"].get(note_number, []),
+                    override_scope["hybridNoteAppendixParagraphs"].get(note_number, []),
                     continued,
                     workbook_date_system=workbook_date_system,
                 )
@@ -1180,6 +1330,8 @@ def render_notes(
                 "fieldOverridesUsed": mode_info["fieldOverridesUsed"],
                 "rowOverridesUsed": mode_info["rowOverridesUsed"],
                 "labelMappingsUsed": mode_info["labelMappingsUsed"],
+                "appendixOverridesUsed": mode_info.get("appendixOverridesUsed", []),
+                "appendixCoveredSourceRefs": mode_info.get("appendixCoveredSourceRefs", []),
                 "coveredDiagnostics": mode_info["coveredDiagnostics"],
                 "nonRenderedEvidenceReasons": accounting["nonRenderedEvidenceReasons"],
                 "physicalPage": note_pages[note_number],

@@ -27,7 +27,10 @@ SECTION_HEADING_ALIASES: Dict[str, List[str]] = {
     "multiYearOverview": ["Utveckling av företagets verksamhet, resultat och ställning"],
     "significantEvents": ["Väsentliga händelser under räkenskapsåret"],
     "researchAndDevelopment": ["Forskning och utveckling"],
-    "sustainabilityDisclosures": ["Hållbarhetsupplysningar - ESG (Environmental, Social and Governance)"],
+    "sustainabilityDisclosures": [
+        "Hållbarhetsupplysningar",
+        "Hållbarhetsupplysningar - ESG (Environmental, Social and Governance)",
+    ],
     "futureDevelopmentAndRisks": ["Förväntad framtida utveckling samt väsentliga risker och osäkerhetsfaktorer"],
     "equityAndProfitDisposition": ["Eget kapital"],
 }
@@ -43,6 +46,33 @@ SECTION_ORDER = [
     "futureDevelopmentAndRisks",
     "equityAndProfitDisposition",
 ]
+
+SIGNED_REFERENCE_AUTHORITY_TYPE = "signed_reference_pdf"
+SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE = {
+    "scopeId": "management_alignment_entity_period_section_v1",
+    "companyName": "Omegapoint Malmö AB",
+    "organizationNumber": "556613-1339",
+    "currentReportingPeriod": "2025-01-01\n-2025-12-31",
+}
+
+OFFICE_ALIGNMENT_CORRECTION_ID = "management.office_location_without_oslo.v1"
+OFFICE_ALIGNMENT_DIAGNOSTIC = "SIGNED_REFERENCE_OFFICE_LOCATION_ALIGNMENT_REQUIRED"
+OFFICE_ALIGNMENT_SIGNED_PAGE = "2"
+OFFICE_ALIGNMENT_OLD_VALUE = "Uppsala, Oslo, Köpenhamn och Montréal."
+OFFICE_ALIGNMENT_NEW_VALUE = "Uppsala, Köpenhamn och Montréal."
+
+SUSTAINABILITY_HEADING_CORRECTION_ID = "management.sustainability_heading_normalization.v1"
+SUSTAINABILITY_HEADING_DIAGNOSTIC = "SIGNED_REFERENCE_SUSTAINABILITY_HEADING_ALIGNMENT_REQUIRED"
+SUSTAINABILITY_HEADING_SIGNED_PAGE = "3"
+SUSTAINABILITY_HEADING_OLD_VALUE = "Hållbarhetsupplysningar - ESG (Environmental, Social and Governance)"
+SUSTAINABILITY_HEADING_NEW_VALUE = "Hållbarhetsupplysningar"
+
+CLOSING_SUPPRESSION_CORRECTION_ID = "management.closing_sentence_suppression.v1"
+CLOSING_SUPPRESSION_DIAGNOSTIC = "SIGNED_REFERENCE_CLOSING_SENTENCE_SUPPRESSION_REQUIRED"
+CLOSING_SUPPRESSION_SIGNED_PAGE = "4"
+CLOSING_SUPPRESSION_OLD_VALUE_1 = "Vad beträffar resultat och ställning i övrigt hänvisas till efterföljande resultat- och balansräkning med"
+CLOSING_SUPPRESSION_OLD_VALUE_2 = "tillhörande noter."
+CLOSING_SUPPRESSION_DISPOSITION = "excluded_from_closing_transition"
 
 
 def _block_id_set(blocks: List[Dict[str, object]]) -> Set[str]:
@@ -229,6 +259,8 @@ def _build_section_payload(
     key: str,
     heading_block: Optional[Dict[str, object]],
     paragraph_blocks: List[Dict[str, object]],
+    *,
+    forced_heading_text: Optional[str] = None,
 ) -> Dict[str, object]:
     heading_text = ""
     heading_block_id = ""
@@ -237,6 +269,8 @@ def _build_section_payload(
         bid = heading_block.get("blockId")
         if isinstance(bid, str):
             heading_block_id = bid
+    if forced_heading_text is not None:
+        heading_text = forced_heading_text
 
     return {
         "sectionKey": key,
@@ -438,6 +472,7 @@ def _validate_source_block_accounting(
     sections: List[Dict[str, object]],
     tables: List[Dict[str, object]],
     excluded_content: List[Dict[str, object]],
+    signed_reference_corrections: Optional[List[Dict[str, object]]] = None,
     *,
     enforce_completeness: bool = True,
 ) -> Set[str]:
@@ -467,6 +502,14 @@ def _validate_source_block_accounting(
                 if isinstance(bid, str):
                     used_ids.append(bid)
 
+    if signed_reference_corrections is not None:
+        for correction in signed_reference_corrections:
+            excluded_ids = correction.get("excludedSourceBlockIds")
+            if isinstance(excluded_ids, list):
+                for bid in excluded_ids:
+                    if isinstance(bid, str):
+                        used_ids.append(bid)
+
     used_set = set(used_ids)
     if len(used_set) != len(used_ids):
         raise ContractError("Semantic source block referenced more than once unexpectedly")
@@ -487,6 +530,141 @@ def _validate_source_block_accounting(
             raise ContractError(f"Source block silently lost from semantic contract: {missing_ids}")
 
     return used_set
+
+
+def _scope_matches_signed_reference_alignment(metadata: object) -> bool:
+    return (
+        getattr(metadata, "company_name", None) == SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["companyName"]
+        and getattr(metadata, "organization_number", None) == SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["organizationNumber"]
+        and getattr(metadata, "current_reporting_period", None)
+        == SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["currentReportingPeriod"]
+    )
+
+
+def _correction_approval_scope(section_key: str) -> Dict[str, str]:
+    return {
+        "scopeId": SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["scopeId"],
+        "companyName": SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["companyName"],
+        "organizationNumber": SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["organizationNumber"],
+        "currentReportingPeriod": SIGNED_REFERENCE_ALIGNMENT_APPROVAL_SCOPE["currentReportingPeriod"],
+        "sectionKey": section_key,
+    }
+
+
+def _validate_signed_reference_corrections(
+    corrections: List[Dict[str, object]],
+    diagnostics: List[Dict[str, object]],
+    sections: List[Dict[str, object]],
+) -> None:
+    by_code: Dict[str, Dict[str, object]] = {}
+    for d in diagnostics:
+        code = d.get("code")
+        if isinstance(code, str):
+            by_code[code] = d
+
+    section_payload: Dict[str, Dict[str, object]] = {}
+    for s in sections:
+        key = s.get("sectionKey")
+        if isinstance(key, str):
+            section_payload[key] = s
+
+    expected = {
+        OFFICE_ALIGNMENT_CORRECTION_ID: {
+            "diagnosticCode": OFFICE_ALIGNMENT_DIAGNOSTIC,
+            "signedReferencePage": OFFICE_ALIGNMENT_SIGNED_PAGE,
+            "sectionKey": "businessInformation",
+        },
+        SUSTAINABILITY_HEADING_CORRECTION_ID: {
+            "diagnosticCode": SUSTAINABILITY_HEADING_DIAGNOSTIC,
+            "signedReferencePage": SUSTAINABILITY_HEADING_SIGNED_PAGE,
+            "sectionKey": "sustainabilityDisclosures",
+        },
+        CLOSING_SUPPRESSION_CORRECTION_ID: {
+            "diagnosticCode": CLOSING_SUPPRESSION_DIAGNOSTIC,
+            "signedReferencePage": CLOSING_SUPPRESSION_SIGNED_PAGE,
+            "sectionKey": "closingTransition",
+        },
+    }
+
+    seen_ids: set[str] = set()
+    for correction in corrections:
+        cid = correction.get("correctionId")
+        if not isinstance(cid, str) or not cid:
+            raise ContractError("signedReferenceCorrections[].correctionId must be non-empty string")
+        if cid in seen_ids:
+            raise ContractError(f"Duplicate signed-reference correctionId: {cid}")
+        seen_ids.add(cid)
+        if cid not in expected:
+            raise ContractError(f"Unknown signed-reference correctionId: {cid}")
+
+        exp = expected[cid]
+        if correction.get("diagnosticCode") != exp["diagnosticCode"]:
+            raise ContractError(f"signedReferenceCorrections[{cid}] diagnosticCode mismatch")
+        if correction.get("signedReferencePage") != exp["signedReferencePage"]:
+            raise ContractError(f"signedReferenceCorrections[{cid}] signedReferencePage mismatch")
+        if correction.get("sectionKey") != exp["sectionKey"]:
+            raise ContractError(f"signedReferenceCorrections[{cid}] sectionKey mismatch")
+        if correction.get("authorityType") != SIGNED_REFERENCE_AUTHORITY_TYPE:
+            raise ContractError(f"signedReferenceCorrections[{cid}] authorityType mismatch")
+
+        approval_scope = correction.get("approvalScope")
+        if not isinstance(approval_scope, dict):
+            raise ContractError(f"signedReferenceCorrections[{cid}] approvalScope must be object")
+        for field, expected_value in _correction_approval_scope(exp["sectionKey"]).items():
+            if approval_scope.get(field) != expected_value:
+                raise ContractError(f"signedReferenceCorrections[{cid}] approvalScope.{field} mismatch")
+
+        source_block_id = correction.get("sourceBlockId")
+        if not isinstance(source_block_id, str) or not source_block_id:
+            raise ContractError(f"signedReferenceCorrections[{cid}] sourceBlockId must be non-empty string")
+
+        section_obj = section_payload.get(exp["sectionKey"])
+        if not isinstance(section_obj, dict):
+            raise ContractError(f"signedReferenceCorrections[{cid}] section payload missing")
+        section_ids: set[str] = set()
+        heading = section_obj.get("heading")
+        if isinstance(heading, dict):
+            hb = heading.get("sourceBlockId")
+            if isinstance(hb, str) and hb:
+                section_ids.add(hb)
+        paragraphs = section_obj.get("paragraphs")
+        if isinstance(paragraphs, list):
+            for p in paragraphs:
+                if isinstance(p, dict):
+                    pid = p.get("sourceBlockId")
+                    if isinstance(pid, str) and pid:
+                        section_ids.add(pid)
+        if source_block_id not in section_ids and cid != CLOSING_SUPPRESSION_CORRECTION_ID:
+            raise ContractError(f"signedReferenceCorrections[{cid}] sourceBlockId not present in section")
+
+        original_value = correction.get("originalValue")
+        aligned_value = correction.get("alignedValue")
+        disposition = correction.get("disposition")
+        if not isinstance(original_value, str) or not original_value:
+            raise ContractError(f"signedReferenceCorrections[{cid}] originalValue must be non-empty string")
+        if not isinstance(aligned_value, str) or not aligned_value:
+            raise ContractError(f"signedReferenceCorrections[{cid}] alignedValue must be non-empty string")
+        if not isinstance(disposition, str) or not disposition:
+            raise ContractError(f"signedReferenceCorrections[{cid}] disposition must be non-empty string")
+
+        if cid == CLOSING_SUPPRESSION_CORRECTION_ID:
+            excluded_ids = correction.get("excludedSourceBlockIds")
+            if not isinstance(excluded_ids, list) or len(excluded_ids) != 2:
+                raise ContractError("closing-suppression correction must include exactly two excludedSourceBlockIds")
+            if any(not isinstance(v, str) or not v for v in excluded_ids):
+                raise ContractError("closing-suppression excludedSourceBlockIds must be non-empty strings")
+            if disposition != CLOSING_SUPPRESSION_DISPOSITION:
+                raise ContractError("closing-suppression disposition mismatch")
+
+        diag = by_code.get(exp["diagnosticCode"])
+        if not isinstance(diag, dict):
+            raise ContractError(f"signedReferenceCorrections[{cid}] missing diagnostic record")
+        if diag.get("severity") != "info":
+            raise ContractError(f"signedReferenceCorrections[{cid}] diagnostic must be severity=info")
+        if diag.get("sectionKey") != exp["sectionKey"]:
+            raise ContractError(f"signedReferenceCorrections[{cid}] diagnostic sectionKey mismatch")
+        if diag.get("sourceBlockId") != source_block_id:
+            raise ContractError(f"signedReferenceCorrections[{cid}] diagnostic sourceBlockId mismatch")
 
 
 def build_semantic_management_report_contract(
@@ -564,11 +742,84 @@ def build_semantic_management_report_contract(
     if period_start != metadata_start or period_end != metadata_end:
         raise ContractError("Contradictory reporting period between DOCX and report metadata")
 
+    in_alignment_scope = _scope_matches_signed_reference_alignment(metadata)
+
     business_paragraphs = [b for b in _slice_by_index(managed_blocks, business_heading_idx, multi_year_heading_idx) if b.get("blockType") == "paragraph"]
     significant_paragraphs = [b for b in _slice_by_index(managed_blocks, significant_heading_idx, research_heading_idx) if b.get("blockType") == "paragraph"]
     research_paragraphs = [b for b in _slice_by_index(managed_blocks, research_heading_idx, sustainability_heading_idx) if b.get("blockType") == "paragraph"]
     sustainability_paragraphs = [b for b in _slice_by_index(managed_blocks, sustainability_heading_idx, future_heading_idx) if b.get("blockType") == "paragraph"]
     future_paragraphs = [b for b in _slice_by_index(managed_blocks, future_heading_idx, equity_heading_idx) if b.get("blockType") == "paragraph"]
+
+    normalized_business_paragraphs: List[Dict[str, object]] = []
+    signed_reference_corrections: List[Dict[str, object]] = []
+
+    office_candidates: List[Dict[str, object]] = []
+    office_phrase_seen_outside_business = False
+    for block in managed_blocks:
+        if block.get("blockType") != "paragraph":
+            continue
+        text = _paragraph_text(block)
+        if OFFICE_ALIGNMENT_OLD_VALUE in text:
+            if business_heading_idx < _block_index(block) < multi_year_heading_idx:
+                office_candidates.append(block)
+            else:
+                office_phrase_seen_outside_business = True
+
+    if office_phrase_seen_outside_business:
+        raise ContractError("Signed-reference office-location phrase found outside approved businessInformation section")
+
+    if office_candidates:
+        if not in_alignment_scope:
+            raise ContractError("Signed-reference office-location correction out of approved entity/period scope")
+        if len(office_candidates) > 1:
+            raise ContractError("Multiple office-location candidates found for signed-reference alignment")
+
+    office_candidate_id: Optional[str] = None
+    if len(office_candidates) == 1:
+        oc = office_candidates[0].get("blockId")
+        if isinstance(oc, str):
+            office_candidate_id = oc
+
+    for block in business_paragraphs:
+        paragraph = block.get("paragraph")
+        if not isinstance(paragraph, dict):
+            normalized_business_paragraphs.append(block)
+            continue
+        text = paragraph.get("text")
+        if not isinstance(text, str):
+            normalized_business_paragraphs.append(block)
+            continue
+        if "Oslo" in text and OFFICE_ALIGNMENT_OLD_VALUE not in text:
+            raise ContractError("Office-location source wording differs from approved signed-reference match text")
+
+        block_id = block.get("blockId")
+        is_target = isinstance(block_id, str) and block_id == office_candidate_id
+        if is_target:
+            replaced = text.replace(OFFICE_ALIGNMENT_OLD_VALUE, OFFICE_ALIGNMENT_NEW_VALUE, 1)
+            if replaced == text:
+                raise ContractError("Office-location alignment target block did not contain approved source phrase")
+            block_copy = dict(block)
+            paragraph_copy = dict(paragraph)
+            paragraph_copy["text"] = replaced
+            block_copy["paragraph"] = paragraph_copy
+            normalized_business_paragraphs.append(block_copy)
+            signed_reference_corrections.append(
+                {
+                    "correctionId": OFFICE_ALIGNMENT_CORRECTION_ID,
+                    "diagnosticCode": OFFICE_ALIGNMENT_DIAGNOSTIC,
+                    "signedReferencePage": OFFICE_ALIGNMENT_SIGNED_PAGE,
+                    "approvalScope": _correction_approval_scope("businessInformation"),
+                    "authorityType": SIGNED_REFERENCE_AUTHORITY_TYPE,
+                    "sectionKey": "businessInformation",
+                    "sourceBlockId": block_id,
+                    "originalValue": OFFICE_ALIGNMENT_OLD_VALUE,
+                    "alignedValue": OFFICE_ALIGNMENT_NEW_VALUE,
+                    "disposition": "text_replaced",
+                    "matchedSourceText": text,
+                }
+            )
+            continue
+        normalized_business_paragraphs.append(block)
 
     multi_year_range = _slice_by_index(managed_blocks, multi_year_heading_idx, significant_heading_idx)
     multi_year_table = _require_single_table_in_range(multi_year_range, expected_rows=8, expected_cols=6, label="multiYearOverview")
@@ -583,18 +834,98 @@ def build_semantic_management_report_contract(
         for b in managed_blocks
         if b.get("blockType") == "paragraph" and _block_index(b) > equity_table_idx
     ]
-    if not any(_non_empty(_paragraph_text(b)) for b in closing_paragraphs):
-        raise ContractError("Missing required closing transition section")
+    closing_start_matches = [
+        b for b in closing_paragraphs if _paragraph_text(b).strip() == CLOSING_SUPPRESSION_OLD_VALUE_1
+    ]
+    closing_tail_matches = [
+        b for b in closing_paragraphs if _paragraph_text(b).strip() == CLOSING_SUPPRESSION_OLD_VALUE_2
+    ]
+
+    if closing_start_matches or closing_tail_matches:
+        if not in_alignment_scope:
+            raise ContractError("Signed-reference closing-suppression correction out of approved entity/period scope")
+        if len(closing_start_matches) != 1 or len(closing_tail_matches) != 1:
+            raise ContractError("Closing-suppression correction requires exactly one matching source block per sentence")
+
+        removed_ids = {
+            closing_start_matches[0].get("blockId"),
+            closing_tail_matches[0].get("blockId"),
+        }
+        closing_paragraphs = [
+            b for b in closing_paragraphs if b.get("blockId") not in removed_ids
+        ]
+
+        start_id = closing_start_matches[0].get("blockId")
+        tail_id = closing_tail_matches[0].get("blockId")
+        if not isinstance(start_id, str) or not isinstance(tail_id, str):
+            raise ContractError("Closing-suppression correction requires stable source block ids")
+
+        signed_reference_corrections.append(
+            {
+                "correctionId": CLOSING_SUPPRESSION_CORRECTION_ID,
+                "diagnosticCode": CLOSING_SUPPRESSION_DIAGNOSTIC,
+                "signedReferencePage": CLOSING_SUPPRESSION_SIGNED_PAGE,
+                "approvalScope": _correction_approval_scope("closingTransition"),
+                "authorityType": SIGNED_REFERENCE_AUTHORITY_TYPE,
+                "sectionKey": "closingTransition",
+                "sourceBlockId": start_id,
+                "originalValue": CLOSING_SUPPRESSION_OLD_VALUE_1,
+                "alignedValue": CLOSING_SUPPRESSION_DISPOSITION,
+                "disposition": CLOSING_SUPPRESSION_DISPOSITION,
+                "excludedSourceBlockIds": [start_id, tail_id],
+                "matchedValues": [CLOSING_SUPPRESSION_OLD_VALUE_1, CLOSING_SUPPRESSION_OLD_VALUE_2],
+            }
+        )
+
+    if not closing_paragraphs:
+        raise ContractError("Closing transition became structurally empty after signed-reference suppression")
+
+    closing_has_non_empty = any(_non_empty(_paragraph_text(b)) for b in closing_paragraphs)
+    if not closing_has_non_empty:
+        structural_ids = [b.get("blockId") for b in closing_paragraphs if isinstance(b.get("blockId"), str)]
+        if not structural_ids:
+            raise ContractError("Closing transition is structurally invalid after signed-reference suppression")
+
+    sustainability_heading_text = _paragraph_text(heading_blocks["sustainabilityDisclosures"])
+    forced_sustainability_heading: Optional[str] = None
+    if sustainability_heading_text == SUSTAINABILITY_HEADING_OLD_VALUE:
+        if not in_alignment_scope:
+            raise ContractError("Signed-reference sustainability-heading correction out of approved entity/period scope")
+        forced_sustainability_heading = SUSTAINABILITY_HEADING_NEW_VALUE
+        sustainability_block_id = heading_blocks["sustainabilityDisclosures"].get("blockId")
+        if not isinstance(sustainability_block_id, str) or not sustainability_block_id:
+            raise ContractError("Sustainability heading correction requires stable source block id")
+        signed_reference_corrections.append(
+            {
+                "correctionId": SUSTAINABILITY_HEADING_CORRECTION_ID,
+                "diagnosticCode": SUSTAINABILITY_HEADING_DIAGNOSTIC,
+                "signedReferencePage": SUSTAINABILITY_HEADING_SIGNED_PAGE,
+                "approvalScope": _correction_approval_scope("sustainabilityDisclosures"),
+                "authorityType": SIGNED_REFERENCE_AUTHORITY_TYPE,
+                "sectionKey": "sustainabilityDisclosures",
+                "sourceBlockId": sustainability_block_id,
+                "originalValue": SUSTAINABILITY_HEADING_OLD_VALUE,
+                "alignedValue": SUSTAINABILITY_HEADING_NEW_VALUE,
+                "disposition": "heading_normalized",
+            }
+        )
+    elif sustainability_heading_text == SUSTAINABILITY_HEADING_NEW_VALUE:
+        forced_sustainability_heading = None
 
     sections = [
         _build_section_payload("managementReportHeading", heading_blocks["managementReportHeading"], []),
         _build_section_payload("introductoryStatement", None, introductory_paragraphs),
         _build_section_payload("currencyStatement", None, currency_paragraphs),
-        _build_section_payload("businessInformation", heading_blocks["businessInformation"], business_paragraphs),
+        _build_section_payload("businessInformation", heading_blocks["businessInformation"], normalized_business_paragraphs),
         _build_section_payload("significantEvents", heading_blocks["significantEvents"], significant_paragraphs),
         _build_section_payload("futureDevelopmentAndRisks", heading_blocks["futureDevelopmentAndRisks"], future_paragraphs),
         _build_section_payload("researchAndDevelopment", heading_blocks["researchAndDevelopment"], research_paragraphs),
-        _build_section_payload("sustainabilityDisclosures", heading_blocks["sustainabilityDisclosures"], sustainability_paragraphs),
+        _build_section_payload(
+            "sustainabilityDisclosures",
+            heading_blocks["sustainabilityDisclosures"],
+            sustainability_paragraphs,
+            forced_heading_text=forced_sustainability_heading,
+        ),
         _build_section_payload("multiYearOverview", heading_blocks["multiYearOverview"], []),
         _build_section_payload("equityAndProfitDisposition", heading_blocks["equityAndProfitDisposition"], []),
         _build_section_payload("closingTransition", None, closing_paragraphs),
@@ -661,13 +992,28 @@ def build_semantic_management_report_contract(
             "sourceBlockId": equity_table.get("blockId"),
         },
     ]
+
+    for correction in signed_reference_corrections:
+        diagnostics.append(
+            {
+                "code": correction["diagnosticCode"],
+                "severity": "info",
+                "message": "Signed-reference correction applied.",
+                "sectionKey": correction["sectionKey"],
+                "sourceBlockId": correction["sourceBlockId"],
+                "correctionId": correction["correctionId"],
+            }
+        )
     diagnostics.extend(unsupported_semantic_diagnostics)
+
+    _validate_signed_reference_corrections(signed_reference_corrections, diagnostics, sections)
 
     used_set = _validate_source_block_accounting(
         blocks,
         sections,
         tables,
         excluded_content,
+        signed_reference_corrections,
         enforce_completeness=False,
     )
 
@@ -704,7 +1050,13 @@ def build_semantic_management_report_contract(
             if isinstance(b.get("blockId"), str)
         )
 
-    _validate_source_block_accounting(blocks, sections, tables, excluded_content)
+    _validate_source_block_accounting(
+        blocks,
+        sections,
+        tables,
+        excluded_content,
+        signed_reference_corrections,
+    )
 
     raw_hash = _sha256_bytes(_canonical_json_bytes(raw_contract))
 
@@ -726,6 +1078,7 @@ def build_semantic_management_report_contract(
         "sections": sections,
         "tables": tables,
         "excludedContent": excluded_content,
+        "signedReferenceCorrections": signed_reference_corrections,
         "unresolvedAmbiguities": [],
         "diagnostics": diagnostics,
         "rawContractSha256": raw_hash,

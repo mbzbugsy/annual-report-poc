@@ -162,6 +162,10 @@ class ManagementReportRendererTests(unittest.TestCase):
         self.assertIn("Förvaltningsberättelse", tex)
         self.assertIn("Flerårsöversikt (Tkr)", tex)
         self.assertIn("Förslag till vinstdisposition", tex)
+        self.assertIn("Hållbarhetsupplysningar", tex)
+        self.assertNotIn("Hållbarhetsupplysningar - ESG (Environmental, Social and Governance)", tex)
+        self.assertNotIn("Uppsala, Oslo", tex)
+        self.assertNotIn("Vad beträffar resultat och ställning i övrigt", tex)
 
         provenance = result.provenance_payload
         assert provenance is not None
@@ -182,11 +186,14 @@ class ManagementReportRendererTests(unittest.TestCase):
             "coveredDiagnosticCodes",
             "coveredSourceBlockIds",
             "overriddenFields",
+            "signedReferenceCorrections",
             "sourceBlockIdsUsed",
             "outputTexPath",
             "outputTexSha256",
         }
         self.assertTrue(required.issubset(set(provenance.keys())))
+        correction_ids = [entry["correctionId"] for entry in provenance["signedReferenceCorrections"]]
+        self.assertEqual(len(correction_ids), len(set(correction_ids)))
 
     def test_tex_and_provenance_are_deterministic(self) -> None:
         tex_pair, prov_pair = self._run_render_twice_hashes()
@@ -311,6 +318,13 @@ class ManagementReportRendererTests(unittest.TestCase):
         result = self._run_render(override=override)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Invalid overriddenFields manifest", result.stderr)
+
+    def test_unapproved_closing_statement_override_is_rejected(self) -> None:
+        override = deepcopy(self.base_override)
+        override["profitDisposition"]["closingStatement"] = "Modified closing text"
+        result = self._run_render(override=override)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("approved signed-reference final paragraph", result.stderr)
 
     def test_unrelated_review_required_diagnostic_rejected(self) -> None:
         semantic = deepcopy(self.base_semantic)

@@ -202,10 +202,16 @@ def _write_docx(
             zf.writestr("word/comments.xml", _comments_xml(comments_text))
 
 
-def _write_metadata(path: Path, *, current_period: str = "2025-01-01\n-2025-12-31") -> None:
+def _write_metadata(
+    path: Path,
+    *,
+    current_period: str = "2025-01-01\n-2025-12-31",
+    company_name: str = "Omegapoint Malmö AB",
+    organization_number: str = "556613-1339",
+) -> None:
     payload = {
-        "companyName": "Omegapoint Malmö AB",
-        "organizationNumber": "556613-1339",
+        "companyName": company_name,
+        "organizationNumber": organization_number,
         "reportTitle": "Årsredovisning 2025",
         "reportSubtitle": "PoC",
         "currentReportingPeriod": current_period,
@@ -223,6 +229,8 @@ class ManagementReportContractTests(unittest.TestCase):
         *,
         doc_xml: Optional[str] = None,
         metadata_current_period: str = "2025-01-01\n-2025-12-31",
+        metadata_company_name: str = "Omegapoint Malmö AB",
+        metadata_organization_number: str = "556613-1339",
         track_revisions: bool = False,
         comments_text: Optional[str] = None,
     ) -> Tuple[Dict[str, object], Dict[str, object]]:
@@ -236,14 +244,43 @@ class ManagementReportContractTests(unittest.TestCase):
                 track_revisions=track_revisions,
                 comments_text=comments_text,
             )
-            _write_metadata(metadata, current_period=metadata_current_period)
+            _write_metadata(
+                metadata,
+                current_period=metadata_current_period,
+                company_name=metadata_company_name,
+                organization_number=metadata_organization_number,
+            )
             raw = extract_management_report_raw(docx)
             semantic = build_semantic_management_report_contract(raw, metadata)
             return raw, semantic
 
-    def _build_contract(self, *, doc_xml: Optional[str] = None, metadata_current_period: str = "2025-01-01\n-2025-12-31") -> Dict[str, object]:
-        _, semantic = self._build_raw_and_semantic(doc_xml=doc_xml, metadata_current_period=metadata_current_period)
+    def _build_contract(
+        self,
+        *,
+        doc_xml: Optional[str] = None,
+        metadata_current_period: str = "2025-01-01\n-2025-12-31",
+        metadata_company_name: str = "Omegapoint Malmö AB",
+        metadata_organization_number: str = "556613-1339",
+    ) -> Dict[str, object]:
+        _, semantic = self._build_raw_and_semantic(
+            doc_xml=doc_xml,
+            metadata_current_period=metadata_current_period,
+            metadata_company_name=metadata_company_name,
+            metadata_organization_number=metadata_organization_number,
+        )
         return semantic
+
+    def _doc_with_all_three_alignment_candidates(self) -> str:
+        with_office = _base_document_xml().replace(
+            "<w:p><w:r><w:t>Business paragraph.</w:t></w:r></w:p>",
+            "<w:p><w:r><w:t>Uppsala, Oslo, Köpenhamn och Montréal. Omegapoint är en arbetsplats.</w:t></w:r></w:p>",
+            1,
+        )
+        return with_office.replace(
+            "<w:p><w:r><w:t></w:t></w:r></w:p>",
+            "<w:p><w:r><w:t>Företagets resultat och ställning i övrigt framgår av efterföljande resultat- och balansräkning samt kassaflödesanalys med noter.</w:t></w:r></w:p>",
+            1,
+        )
 
     def test_required_headings_map_to_stable_semantic_keys(self) -> None:
         semantic = self._build_contract()
@@ -275,6 +312,115 @@ class ManagementReportContractTests(unittest.TestCase):
         semantic = self._build_contract()
         by_key = {s["sectionKey"]: s for s in semantic["sections"]}
         self.assertEqual(by_key["businessInformation"]["heading"]["text"], "Allmänt om verksamheten")
+
+    def test_sustainability_heading_is_normalized_to_signed_reference_form(self) -> None:
+        semantic = self._build_contract()
+        by_key = {s["sectionKey"]: s for s in semantic["sections"]}
+        self.assertEqual(by_key["sustainabilityDisclosures"]["heading"]["text"], "Hållbarhetsupplysningar")
+
+    def test_business_office_sentence_removes_oslo_when_present_in_source(self) -> None:
+        doc = self._doc_with_all_three_alignment_candidates()
+        semantic = self._build_contract(doc_xml=doc)
+        by_key = {s["sectionKey"]: s for s in semantic["sections"]}
+        business_texts = [p["text"] for p in by_key["businessInformation"]["paragraphs"]]
+        self.assertTrue(any("Uppsala, Köpenhamn och Montréal." in t for t in business_texts))
+        self.assertFalse(any("Uppsala, Oslo, Köpenhamn och Montréal." in t for t in business_texts))
+
+    def test_duplicate_closing_sentence_is_removed_when_present(self) -> None:
+        semantic = self._build_contract(doc_xml=self._doc_with_all_three_alignment_candidates())
+        by_key = {s["sectionKey"]: s for s in semantic["sections"]}
+        closing_texts = [p["text"] for p in by_key["closingTransition"]["paragraphs"]]
+        self.assertFalse(any(t.startswith("Vad beträffar resultat och ställning i övrigt") for t in closing_texts))
+        self.assertFalse(any(t == "tillhörande noter." for t in closing_texts))
+
+        corrections = {c["correctionId"]: c for c in semantic["signedReferenceCorrections"]}
+        self.assertIn("management.closing_sentence_suppression.v1", corrections)
+        self.assertEqual(corrections["management.closing_sentence_suppression.v1"]["signedReferencePage"], "4")
+
+    def test_all_three_signed_reference_corrections_persist_pages_scope_and_diagnostics(self) -> None:
+        semantic = self._build_contract(doc_xml=self._doc_with_all_three_alignment_candidates())
+
+        corrections = semantic["signedReferenceCorrections"]
+        self.assertEqual(len(corrections), 3)
+        by_id = {c["correctionId"]: c for c in corrections}
+
+        self.assertEqual(by_id["management.office_location_without_oslo.v1"]["signedReferencePage"], "2")
+        self.assertEqual(by_id["management.sustainability_heading_normalization.v1"]["signedReferencePage"], "3")
+        self.assertEqual(by_id["management.closing_sentence_suppression.v1"]["signedReferencePage"], "4")
+
+        for record in corrections:
+            scope = record["approvalScope"]
+            self.assertEqual(scope["scopeId"], "management_alignment_entity_period_section_v1")
+            self.assertEqual(scope["companyName"], "Omegapoint Malmö AB")
+            self.assertEqual(scope["organizationNumber"], "556613-1339")
+            self.assertEqual(scope["currentReportingPeriod"], "2025-01-01\n-2025-12-31")
+            self.assertEqual(record["authorityType"], "signed_reference_pdf")
+
+        diagnostics = {d["code"]: d for d in semantic["diagnostics"]}
+        self.assertIn("SIGNED_REFERENCE_OFFICE_LOCATION_ALIGNMENT_REQUIRED", diagnostics)
+        self.assertIn("SIGNED_REFERENCE_SUSTAINABILITY_HEADING_ALIGNMENT_REQUIRED", diagnostics)
+        self.assertIn("SIGNED_REFERENCE_CLOSING_SENTENCE_SUPPRESSION_REQUIRED", diagnostics)
+
+    def test_wrong_entity_fails_closed_for_signed_reference_alignment(self) -> None:
+        with self.assertRaises(ContractError):
+            self._build_contract(
+                doc_xml=self._doc_with_all_three_alignment_candidates(),
+                metadata_company_name="Wrong AB",
+            )
+
+    def test_wrong_reporting_period_fails_closed_for_signed_reference_alignment(self) -> None:
+        with self.assertRaises(ContractError):
+            self._build_contract(
+                doc_xml=self._doc_with_all_three_alignment_candidates(),
+                metadata_current_period="2024-01-01\n-2024-12-31",
+            )
+
+    def test_wrong_section_for_office_phrase_fails_closed(self) -> None:
+        doc = _base_document_xml().replace(
+            "<w:p><w:r><w:t>Events paragraph.</w:t></w:r></w:p>",
+            "<w:p><w:r><w:t>Uppsala, Oslo, Köpenhamn och Montréal. Omegapoint är en arbetsplats.</w:t></w:r></w:p>",
+            1,
+        )
+        with self.assertRaises(ContractError):
+            self._build_contract(doc_xml=doc)
+
+    def test_changed_office_source_wording_fails_closed(self) -> None:
+        doc = _base_document_xml().replace(
+            "<w:p><w:r><w:t>Business paragraph.</w:t></w:r></w:p>",
+            "<w:p><w:r><w:t>Uppsala, Oslo, Köpenhamn och Montreal. Omegapoint är en arbetsplats.</w:t></w:r></w:p>",
+            1,
+        )
+        with self.assertRaises(ContractError):
+            self._build_contract(doc_xml=doc)
+
+    def test_multiple_office_phrase_matches_fail_closed(self) -> None:
+        doc = _base_document_xml().replace(
+            "<w:p><w:r><w:t>Business paragraph.</w:t></w:r></w:p>",
+            "".join(
+                [
+                    "<w:p><w:r><w:t>Uppsala, Oslo, Köpenhamn och Montréal. Omegapoint är en arbetsplats.</w:t></w:r></w:p>",
+                    "<w:p><w:r><w:t>Uppsala, Oslo, Köpenhamn och Montréal. Omegapoint är en arbetsplats igen.</w:t></w:r></w:p>",
+                ]
+            ),
+            1,
+        )
+        with self.assertRaises(ContractError):
+            self._build_contract(doc_xml=doc)
+
+    def test_closing_suppression_cannot_leave_section_empty(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            docx = tmp_path / "m.docx"
+            metadata = tmp_path / "meta.json"
+            _write_docx(docx, document_xml=self._doc_with_all_three_alignment_candidates())
+            _write_metadata(metadata)
+            raw = extract_management_report_raw(docx)
+            raw["blocks"] = [
+                block for block in raw["blocks"]
+                if not (block.get("blockType") == "paragraph" and block.get("blockId") == "b0023")
+            ]
+            with self.assertRaises(ContractError):
+                build_semantic_management_report_contract(raw, metadata)
 
     def test_internal_helper_text_is_explicitly_excluded_with_trace(self) -> None:
         semantic = self._build_contract()
@@ -379,6 +525,10 @@ class ManagementReportContractTests(unittest.TestCase):
         used_ids.update(t["sourceBlockId"] for t in semantic["tables"])
         for excl in semantic["excludedContent"]:
             used_ids.update(b["sourceBlockId"] for b in excl["blocks"])
+        for correction in semantic.get("signedReferenceCorrections", []):
+            excluded_ids = correction.get("excludedSourceBlockIds", [])
+            if isinstance(excluded_ids, list):
+                used_ids.update(v for v in excluded_ids if isinstance(v, str))
 
         self.assertEqual(raw_ids, used_ids)
 

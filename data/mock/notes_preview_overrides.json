@@ -101,28 +101,145 @@
       "noteNumber": 2,
       "title": "Nettoomsättningens fördelning",
       "paragraphs": [
-        "2024",
-        "2025",
-        "Nettoomsättningen per rörelsegren",
-        "Konsultjänster 121 088 307 126 504 482",
-        "Övrig nettoomsättning 2 448 673 2 879 459",
-        "123 536 980 129 383 941",
-        "Nettoomsättningen per geografisk marknad",
-        "Sverige 115 486 696 125 721 953",
-        "Norge 46 000 0",
-        "Danmark 1 310 632 542 375",
-        "Finland 2 515 773 1 144 615",
-        "Tyskland 0 125 297",
-        "Kanada 0 300 000",
-        "USA 296 589 404 894",
-        "Nederländerna 1 584 800 651 529",
-        "Österrike 71 391 144 051",
-        "Frankrike 0 170 031",
-        "Belgien 51 633 179 196",
-        "Storbritannien 2 173 466 0",
-        "123 536 980 129 383 941"
+        "Nettoomsättningen per rörelsegren"
       ],
-      "tables": [],
+      "tables": [
+        {
+          "rows": [
+            {
+              "cells": [
+                "",
+                "2025",
+                "2024"
+              ]
+            },
+            {
+              "cells": [
+                "Konsultjänster",
+                "121 088 307",
+                "126 504 482"
+              ]
+            },
+            {
+              "cells": [
+                "Övrig nettoomsättning",
+                "2 448 673",
+                "2 879 459"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "123 536 980",
+                "129 383 941"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Nettoomsättningen per geografisk marknad",
+          "rows": [
+            {
+              "cells": [
+                "",
+                "2025",
+                "2024"
+              ]
+            },
+            {
+              "cells": [
+                "Sverige",
+                "115 486 696",
+                "125 721 953"
+              ]
+            },
+            {
+              "cells": [
+                "Norge",
+                "46 000",
+                "0"
+              ]
+            },
+            {
+              "cells": [
+                "Danmark",
+                "1 310 632",
+                "542 375"
+              ]
+            },
+            {
+              "cells": [
+                "Finland",
+                "2 515 773",
+                "1 144 615"
+              ]
+            },
+            {
+              "cells": [
+                "Tyskland",
+                "0",
+                "125 297"
+              ]
+            },
+            {
+              "cells": [
+                "Kanada",
+                "0",
+                "300 000"
+              ]
+            },
+            {
+              "cells": [
+                "USA",
+                "296 589",
+                "404 894"
+              ]
+            },
+            {
+              "cells": [
+                "Nederländerna",
+                "1 584 800",
+                "651 529"
+              ]
+            },
+            {
+              "cells": [
+                "Österrike",
+                "71 391",
+                "144 051"
+              ]
+            },
+            {
+              "cells": [
+                "Frankrike",
+                "0",
+                "170 031"
+              ]
+            },
+            {
+              "cells": [
+                "Belgien",
+                "51 633",
+                "179 196"
+              ]
+            },
+            {
+              "cells": [
+                "Storbritannien",
+                "2 173 466",
+                "0"
+              ]
+            },
+            {
+              "cells": [
+                "",
+                "123 536 980",
+                "129 383 941"
+              ]
+            }
+          ]
+        }
+      ],
       "resolvedNoteReferences": [],
       "sourceJustification": "Signed reference preview is authoritative for complete visible note 2 presentation.",
       "overriddenSemanticPaths": [
@@ -967,6 +1084,57 @@
       ]
     }
   ],
+    "interNoteInsertions": [
+      {
+        "id": "p11-before-note2-key-ratio-definitions",
+        "pageNumber": 11,
+        "insertBeforeNoteNumber": 2,
+        "paragraphs": [
+          "Nyckeltalsdefinitioner",
+          "Nettoomsättning",
+          "Rörelsens huvudintäkter, fakturerade kostnader, sidointäkter samt intäktskorrigeringar.",
+          "Rörelseresultat",
+          "Resultat efter avskrivningar men före finansiella intäkter och kostnader.",
+          "Resultat efter skatt",
+          "Det slutliga resultatet efter att alla intäkter och kostnader, inklusive finansiella poster och skatt, har beaktas.",
+          "Rörelsemarginal (%)",
+          "Rörelseresultat i procent av totala intäkter.",
+          "Soliditet (%)",
+          "Justerat eget kapital (eget kapital och obeskattade reserver med avdrag för uppskjuten skatt) i procent av balansomslutning."
+        ],
+        "tables": [],
+        "sourceJustification": "Signed reference page 11 contains key-ratio definitions between note 1 and note 2 and is authoritative for wording and placement.",
+        "coveredSourceRefs": [
+          {
+            "kind": "signed_reference_page",
+            "value": "11"
+          }
+        ],
+        "diagnosticCovered": "NOTE_SOURCE_AUTHORITY_UNRESOLVED",
+        "overrideKind": "signed-reference inter-note insertion"
+      }
+    ],
+    "hybridNoteAppendixParagraphs": [
+      {
+        "id": "n26-signed-reference-appendix-paragraphs",
+        "noteNumber": 26,
+        "position": "after_table",
+        "paragraphs": [
+          "I enlighet med låneavtal mellan Swedbank och AB Omegapoint, 559312-6120, ansvarar varje borgensman solidariskt i enlighet med Aktiebolagslagen 2005:551 varandras åtaganden.",
+          "Moderföretagets aktier i dotterföretag är enligt låneavtalet pantsatta som säkerhet."
+        ],
+        "tables": [],
+        "sourceJustification": "Signed reference page 18 includes the two explanatory paragraphs directly after note 26 table and is authoritative for this appendix text.",
+        "coveredSourceRefs": [
+          {
+            "kind": "signed_reference_page",
+            "value": "18"
+          }
+        ],
+        "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+        "overrideKind": "signed-reference note appendix"
+      }
+    ],
   "fieldOverrides": [
     {
       "id": "n17-r1-previous",
@@ -984,6 +1152,22 @@
       "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
       "overrideKind": "blank-to-zero presentation"
     },
+      {
+        "id": "n17-r3-current",
+        "noteNumber": 17,
+        "semanticPath": "notes[17].rows[3].current",
+        "signedDisplayValue": "0",
+        "workbookSource": {
+          "worksheet": "Övriga kf fordringar",
+          "cell": "B13",
+          "rawValue": "0",
+          "cachedValue": "0",
+          "renderedValue": "0,0 %"
+        },
+        "reason": "Signed-reference note 17 row value is plain numeric zero, approved as field-level display override.",
+        "diagnosticCovered": "BLANK_TO_ZERO_PRESENTATION_REQUIRED",
+        "overrideKind": "blank-to-zero presentation"
+      },
     {
       "id": "n19-r5-current",
       "noteNumber": 19,
