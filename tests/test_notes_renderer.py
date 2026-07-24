@@ -413,6 +413,92 @@ class NotesRendererTests(unittest.TestCase):
         self.assertEqual(note2["coveredSourceRefs"], [{"kind": "signed_reference_page", "value": "11"}])
         self.assertEqual(note3["coveredSourceRefs"], [{"kind": "signed_reference_page", "value": "12"}])
 
+    def test_key_ratio_definitions_render_between_note1_and_note2_with_exact_wording(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        tex = result.output_text
+        idx_note1 = tex.find("Not 1 Redovisnings- och värderingsprinciper")
+        idx_defs = tex.find("Nyckeltalsdefinitioner")
+        idx_note2 = tex.find("Not 2 Nettoomsättningens fördelning")
+
+        self.assertGreaterEqual(idx_note1, 0)
+        self.assertGreaterEqual(idx_defs, 0)
+        self.assertGreaterEqual(idx_note2, 0)
+        self.assertLess(idx_note1, idx_defs)
+        self.assertLess(idx_defs, idx_note2)
+
+        self.assertIn("Nettoomsättning", tex)
+        self.assertIn("Rörelseresultat", tex)
+        self.assertIn("Resultat efter skatt", tex)
+        self.assertIn("Rörelsemarginal (\\%)", tex)
+        self.assertIn("Soliditet (\\%)", tex)
+        self.assertIn(
+            "Rörelsens huvudintäkter, fakturerade kostnader, sidointäkter samt intäktskorrigeringar.",
+            tex,
+        )
+        self.assertIn("Resultat efter avskrivningar men före finansiella intäkter och kostnader.", tex)
+        self.assertIn("Det slutliga resultatet efter att alla intäkter och kostnader, inklusive finansiella poster", tex)
+        self.assertIn("och skatt, har beaktas.", tex)
+        self.assertIn("Rörelseresultat i procent av totala intäkter.", tex)
+        self.assertIn(
+            "Justerat eget kapital (eget kapital och obeskattade reserver med avdrag för uppskjuten",
+            tex,
+        )
+        self.assertIn("skatt) i procent av balansomslutning.", tex)
+
+    def test_note2_has_2025_left_and_2024_right_with_horizontal_headings(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        tex = result.output_text
+
+        self.assertIn(" & 2025 & 2024 \\\\", tex)
+        self.assertIn("Konsultjänster & 121 088 307 & 126 504 482 \\\\", tex)
+        self.assertIn("Sverige & 115 486 696 & 125 721 953 \\\\", tex)
+
+    def test_note17_ovriga_poster_2025_is_plain_zero_without_percent(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        tex = result.output_text
+
+        self.assertIn("Övriga poster & 0 & 445 723 \\\\", tex)
+        self.assertNotIn("Övriga poster & 0,0 \\%", tex)
+
+        # Regression guard: keep unrelated percentage formatting behavior intact.
+        self.assertIn("33 \\%", tex)
+
+    def test_note26_explanatory_paragraphs_render_after_table_with_page18_provenance(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        tex = result.output_text
+
+        idx_table_row = tex.find("Borgen, banklån & 715 000 000 & 743 880 000")
+        p1 = (
+            "I enlighet med låneavtal mellan Swedbank och AB Omegapoint, 559312-6120, ansvarar varje borgensman "
+            "solidariskt i enlighet med Aktiebolagslagen 2005:551 varandras åtaganden."
+        )
+        p2 = "Moderföretagets aktier i dotterföretag är enligt låneavtalet pantsatta som säkerhet."
+        idx_p1 = tex.find("I enlighet med låneavtal mellan Swedbank och AB Omegapoint, 559312-6120")
+        idx_p2 = tex.find("Moderföretagets aktier i dotterföretag är enligt låneavtalet pantsatta som säkerhet.")
+
+        self.assertGreaterEqual(idx_table_row, 0)
+        self.assertGreaterEqual(idx_p1, 0)
+        self.assertGreaterEqual(idx_p2, 0)
+        self.assertLess(idx_table_row, idx_p1)
+        self.assertLess(idx_p1, idx_p2)
+        self.assertIn("I enlighet med låneavtal mellan Swedbank och AB Omegapoint, 559312-6120", tex)
+        self.assertIn("borgensman solidariskt i enlighet med Aktiebolagslagen 2005:551 varandras åtaganden.", tex)
+        self.assertIn(p2, tex)
+
+        prov = result.provenance_payload
+        assert prov is not None
+        self.assertIn("n26-signed-reference-appendix-paragraphs", prov["notes"]["26"]["appendixOverridesUsed"])
+
+        appendix = next(
+            item for item in self.base_override["hybridNoteAppendixParagraphs"] if item["id"] == "n26-signed-reference-appendix-paragraphs"
+        )
+        self.assertEqual(appendix["coveredSourceRefs"], [{"kind": "signed_reference_page", "value": "18"}])
+
     def test_missing_hybrid_source_cell_fails(self) -> None:
         override = deepcopy(self.base_override)
         target = next(item for item in override["rowOverrides"] if item["noteNumber"] == 17 and item["type"] == "workbook_row_authority")

@@ -100,6 +100,30 @@ IMPLICITLY_SCOPED_DECORATIVE_CODES = {
     "UNSUPPORTED_DECORATIVE_PICT_PRESENT",
 }
 
+SIGNED_REFERENCE_AUTHORITY_TYPE = "signed_reference_pdf"
+SIGNED_REFERENCE_ALIGNMENT_SCOPE_ID = "management_alignment_entity_period_section_v1"
+
+OFFICE_ALIGNMENT_CORRECTION_ID = "management.office_location_without_oslo.v1"
+OFFICE_ALIGNMENT_DIAGNOSTIC = "SIGNED_REFERENCE_OFFICE_LOCATION_ALIGNMENT_REQUIRED"
+OFFICE_ALIGNMENT_SIGNED_PAGE = "2"
+OFFICE_ALIGNMENT_OLD_VALUE = "Uppsala, Oslo, Köpenhamn och Montréal."
+OFFICE_ALIGNMENT_NEW_VALUE = "Uppsala, Köpenhamn och Montréal."
+
+SUSTAINABILITY_HEADING_CORRECTION_ID = "management.sustainability_heading_normalization.v1"
+SUSTAINABILITY_HEADING_DIAGNOSTIC = "SIGNED_REFERENCE_SUSTAINABILITY_HEADING_ALIGNMENT_REQUIRED"
+SUSTAINABILITY_HEADING_SIGNED_PAGE = "3"
+SUSTAINABILITY_HEADING_OLD_VALUE = "Hållbarhetsupplysningar - ESG (Environmental, Social and Governance)"
+SUSTAINABILITY_HEADING_NEW_VALUE = "Hållbarhetsupplysningar"
+
+CLOSING_SUPPRESSION_CORRECTION_ID = "management.closing_sentence_suppression.v1"
+CLOSING_SUPPRESSION_DIAGNOSTIC = "SIGNED_REFERENCE_CLOSING_SENTENCE_SUPPRESSION_REQUIRED"
+CLOSING_SUPPRESSION_SIGNED_PAGE = "4"
+CLOSING_SUPPRESSION_DISPOSITION = "excluded_from_closing_transition"
+
+EXPECTED_SIGNED_REFERENCE_FINAL_CLOSING_PARAGRAPH = (
+    "Företagets resultat och ställning i övrigt framgår av efterföljande resultat- och balansräkning samt kassaflödesanalys med noter."
+)
+
 
 def _escape_latex(text: str) -> str:
     replacements = {
@@ -527,7 +551,9 @@ def _validate_override_financial_shapes(preview_override: Dict[str, Any]) -> Non
     _require_non_empty_string(disposition.get("heading"), "profitDisposition.heading")
     _require_non_empty_string(disposition.get("intro"), "profitDisposition.intro")
     _require_non_empty_string(disposition.get("dispositionLead"), "profitDisposition.dispositionLead")
-    _require_non_empty_string(disposition.get("closingStatement"), "profitDisposition.closingStatement")
+    closing_statement = _require_non_empty_string(disposition.get("closingStatement"), "profitDisposition.closingStatement")
+    if closing_statement != EXPECTED_SIGNED_REFERENCE_FINAL_CLOSING_PARAGRAPH:
+        raise ManagementReportRenderError("profitDisposition.closingStatement must match approved signed-reference final paragraph")
 
     lines_payload = disposition.get("lines")
     if not isinstance(lines_payload, list) or len(lines_payload) != len(EXPECTED_PROFIT_LINES_LABELS):
@@ -554,6 +580,139 @@ def _validate_override_financial_shapes(preview_override: Dict[str, Any]) -> Non
                 f"Unexpected profitDisposition.disposalLines label at index {index}: expected '{EXPECTED_DISPOSAL_LINES_LABELS[index]}', got '{label}'"
             )
         _require_non_empty_string(row.get("amount"), "profitDisposition.disposalLines[].amount")
+
+
+def _validate_signed_reference_corrections(
+    semantic_contract: Dict[str, Any],
+    *,
+    metadata: ReportMetadata,
+    diagnostics_raw: List[Dict[str, Any]],
+    sections: Dict[str, Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    corrections_raw = semantic_contract.get("signedReferenceCorrections")
+    if not isinstance(corrections_raw, list):
+        raise ManagementReportRenderError("Semantic contract must include signedReferenceCorrections list")
+
+    diagnostics_by_code: Dict[str, Dict[str, Any]] = {}
+    for d in diagnostics_raw:
+        if isinstance(d, dict):
+            code = d.get("code")
+            if isinstance(code, str):
+                diagnostics_by_code[code] = d
+
+    expected = {
+        OFFICE_ALIGNMENT_CORRECTION_ID: {
+            "diagnosticCode": OFFICE_ALIGNMENT_DIAGNOSTIC,
+            "signedReferencePage": OFFICE_ALIGNMENT_SIGNED_PAGE,
+            "sectionKey": "businessInformation",
+            "originalValue": OFFICE_ALIGNMENT_OLD_VALUE,
+            "alignedValue": OFFICE_ALIGNMENT_NEW_VALUE,
+            "disposition": "text_replaced",
+        },
+        SUSTAINABILITY_HEADING_CORRECTION_ID: {
+            "diagnosticCode": SUSTAINABILITY_HEADING_DIAGNOSTIC,
+            "signedReferencePage": SUSTAINABILITY_HEADING_SIGNED_PAGE,
+            "sectionKey": "sustainabilityDisclosures",
+            "originalValue": SUSTAINABILITY_HEADING_OLD_VALUE,
+            "alignedValue": SUSTAINABILITY_HEADING_NEW_VALUE,
+            "disposition": "heading_normalized",
+        },
+        CLOSING_SUPPRESSION_CORRECTION_ID: {
+            "diagnosticCode": CLOSING_SUPPRESSION_DIAGNOSTIC,
+            "signedReferencePage": CLOSING_SUPPRESSION_SIGNED_PAGE,
+            "sectionKey": "closingTransition",
+            "disposition": CLOSING_SUPPRESSION_DISPOSITION,
+        },
+    }
+
+    seen_ids: set[str] = set()
+    validated: List[Dict[str, Any]] = []
+    for correction in corrections_raw:
+        c = _require_dict(correction, "signedReferenceCorrections[]")
+        cid = _require_non_empty_string(c.get("correctionId"), "signedReferenceCorrections[].correctionId")
+        if cid in seen_ids:
+            raise ManagementReportRenderError(f"Duplicate signedReferenceCorrections.correctionId: {cid}")
+        seen_ids.add(cid)
+        if cid not in expected:
+            raise ManagementReportRenderError(f"Unknown signedReferenceCorrections correctionId: {cid}")
+        exp = expected[cid]
+
+        diagnostic_code = _require_non_empty_string(c.get("diagnosticCode"), f"signedReferenceCorrections[{cid}].diagnosticCode")
+        if diagnostic_code != exp["diagnosticCode"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] diagnosticCode mismatch")
+
+        signed_page = _require_non_empty_string(c.get("signedReferencePage"), f"signedReferenceCorrections[{cid}].signedReferencePage")
+        if signed_page != exp["signedReferencePage"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] signedReferencePage mismatch")
+
+        section_key = _require_non_empty_string(c.get("sectionKey"), f"signedReferenceCorrections[{cid}].sectionKey")
+        if section_key != exp["sectionKey"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] sectionKey mismatch")
+        if section_key not in sections:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] references missing section")
+
+        authority_type = _require_non_empty_string(c.get("authorityType"), f"signedReferenceCorrections[{cid}].authorityType")
+        if authority_type != SIGNED_REFERENCE_AUTHORITY_TYPE:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] authorityType mismatch")
+
+        approval_scope = _require_dict(c.get("approvalScope"), f"signedReferenceCorrections[{cid}].approvalScope")
+        if _require_non_empty_string(approval_scope.get("scopeId"), f"signedReferenceCorrections[{cid}].approvalScope.scopeId") != SIGNED_REFERENCE_ALIGNMENT_SCOPE_ID:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] approvalScope.scopeId mismatch")
+        if _require_non_empty_string(approval_scope.get("companyName"), f"signedReferenceCorrections[{cid}].approvalScope.companyName") != metadata.company_name:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] approvalScope.companyName mismatch")
+        if _require_non_empty_string(approval_scope.get("organizationNumber"), f"signedReferenceCorrections[{cid}].approvalScope.organizationNumber") != metadata.organization_number:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] approvalScope.organizationNumber mismatch")
+        if _require_non_empty_string(approval_scope.get("currentReportingPeriod"), f"signedReferenceCorrections[{cid}].approvalScope.currentReportingPeriod") != metadata.current_reporting_period:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] approvalScope.currentReportingPeriod mismatch")
+        if _require_non_empty_string(approval_scope.get("sectionKey"), f"signedReferenceCorrections[{cid}].approvalScope.sectionKey") != section_key:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] approvalScope.sectionKey mismatch")
+
+        source_block_id = _require_non_empty_string(c.get("sourceBlockId"), f"signedReferenceCorrections[{cid}].sourceBlockId")
+        section_ids: set[str] = set()
+        heading = _require_dict(sections[section_key].get("heading"), f"{section_key}.heading")
+        heading_id = heading.get("sourceBlockId")
+        if isinstance(heading_id, str) and heading_id.strip():
+            section_ids.add(heading_id)
+        paragraphs = sections[section_key].get("paragraphs")
+        if isinstance(paragraphs, list):
+            for paragraph in paragraphs:
+                if isinstance(paragraph, dict):
+                    pid = paragraph.get("sourceBlockId")
+                    if isinstance(pid, str) and pid.strip():
+                        section_ids.add(pid)
+        if cid != CLOSING_SUPPRESSION_CORRECTION_ID and source_block_id not in section_ids:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] sourceBlockId not present in section")
+
+        original_value = _require_non_empty_string(c.get("originalValue"), f"signedReferenceCorrections[{cid}].originalValue")
+        aligned_value = _require_non_empty_string(c.get("alignedValue"), f"signedReferenceCorrections[{cid}].alignedValue")
+        disposition = _require_non_empty_string(c.get("disposition"), f"signedReferenceCorrections[{cid}].disposition")
+        if disposition != exp["disposition"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] disposition mismatch")
+        if "originalValue" in exp and original_value != exp["originalValue"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] originalValue mismatch")
+        if "alignedValue" in exp and aligned_value != exp["alignedValue"]:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] alignedValue mismatch")
+
+        if cid == CLOSING_SUPPRESSION_CORRECTION_ID:
+            excluded_ids = c.get("excludedSourceBlockIds")
+            if not isinstance(excluded_ids, list) or len(excluded_ids) != 2:
+                raise ManagementReportRenderError("Closing-suppression correction must include exactly two excludedSourceBlockIds")
+            for idx, excluded_id in enumerate(excluded_ids):
+                _require_non_empty_string(excluded_id, f"signedReferenceCorrections[{cid}].excludedSourceBlockIds[{idx}]")
+
+        diag = diagnostics_by_code.get(diagnostic_code)
+        if not isinstance(diag, dict):
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] missing diagnostic")
+        if _require_non_empty_string(diag.get("severity"), f"diagnostics[{diagnostic_code}].severity") != "info":
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] diagnostic severity must be info")
+        if _require_non_empty_string(diag.get("sectionKey"), f"diagnostics[{diagnostic_code}].sectionKey") != section_key:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] diagnostic sectionKey mismatch")
+        if _require_non_empty_string(diag.get("sourceBlockId"), f"diagnostics[{diagnostic_code}].sourceBlockId") != source_block_id:
+            raise ManagementReportRenderError(f"signedReferenceCorrections[{cid}] diagnostic sourceBlockId mismatch")
+
+        validated.append(c)
+
+    return validated
 
 
 def _render_paragraphs(texts: Sequence[str]) -> List[str]:
@@ -757,6 +916,12 @@ def render_management_report(
     resolved_sections = _resolve_sections(semantic_contract)
     sections = resolved_sections["sections"]
     source_usage = resolved_sections["source_usage"]
+    signed_reference_corrections = _validate_signed_reference_corrections(
+        semantic_contract,
+        metadata=metadata,
+        diagnostics_raw=diagnostics_raw,
+        sections=sections,
+    )
     multi_year_table = _resolve_multi_year_table(semantic_contract, source_usage)
 
     tables = semantic_contract.get("tables")
@@ -957,6 +1122,7 @@ def render_management_report(
         "overriddenFields": override_scope["overriddenFields"],
         "displayMappings": multi_year_table["displayMappings"],
         "reviewDiagnosticsPresent": review_codes,
+        "signedReferenceCorrections": signed_reference_corrections,
         "sourceBlockIdsUsed": source_block_ids_used,
         "outputTexPath": "",
         "outputTexSha256": "",
