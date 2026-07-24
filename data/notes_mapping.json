@@ -87,9 +87,13 @@
       "authorityMode": "full_note_preview_override"
     },
     {
-      "authorityStatus": "workbook_direct",
+      "authorityStatus": "hybrid_workbook_preview_override",
       "canonicalOrder": 4,
-      "diagnosticCodes": [],
+      "diagnosticCodes": [
+        "ROW_ROLE_AUTHORITY_REQUIRED",
+        "LABEL_MAPPING_REQUIRED",
+        "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+      ],
       "noteNumber": 4,
       "reconciliationRequirements": [],
       "source": {
@@ -135,7 +139,7 @@
         ]
       },
       "title": "Leasingavtal",
-      "authorityMode": "direct_workbook"
+      "authorityMode": "hybrid_workbook_preview_override"
     },
     {
       "authorityStatus": "review_required",

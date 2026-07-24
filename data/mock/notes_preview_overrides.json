@@ -1114,7 +1114,54 @@
         "overrideKind": "signed-reference inter-note insertion"
       }
     ],
+    "hybridNotePrefaceParagraphs": [
+      {
+        "id": "n4-signed-reference-intro",
+        "noteNumber": 4,
+        "position": "before_table",
+        "paragraphs": [
+          "Framtida leasingavgifter, för icke uppsägningsbara leasingavtal, förfaller till betalning enligt följande:"
+        ],
+        "tables": [],
+        "sourceJustification": "Signed reference page 12 is authoritative for Note 4 introductory wording.",
+        "coveredSourceRefs": [
+          {
+            "kind": "signed_reference_page",
+            "value": "12"
+          }
+        ],
+        "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+        "overrideKind": "signed-reference note appendix"
+      }
+    ],
     "hybridNoteAppendixParagraphs": [
+      {
+        "id": "n4-signed-reference-final-paragraph",
+        "noteNumber": 4,
+        "position": "after_table",
+        "paragraphs": [
+          "Årets leasingkostnader avseende leasingavtal, uppgår till {{NOTE4_CURRENT_LEASING_COST}} kronor (6 310 759)."
+        ],
+        "tables": [],
+        "workbookBindings": [
+          {
+            "placeholder": "{{NOTE4_CURRENT_LEASING_COST}}",
+            "worksheet": "Operationell leasing del 2",
+            "cell": "B21",
+            "expectedRenderedValue": "5 924 000",
+            "semanticRole": "notes[4].finalParagraph.current"
+          }
+        ],
+        "sourceJustification": "Signed reference page 12 is authoritative for Note 4 final sentence wording and prior-year comparison value; current-year value remains workbook-bound.",
+        "coveredSourceRefs": [
+          {
+            "kind": "signed_reference_page",
+            "value": "12"
+          }
+        ],
+        "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+        "overrideKind": "signed-reference note appendix"
+      },
       {
         "id": "n26-signed-reference-appendix-paragraphs",
         "noteNumber": 26,
@@ -1136,6 +1183,94 @@
       }
     ],
   "fieldOverrides": [
+    {
+      "id": "n4-r2-previous",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[2].previous",
+      "signedDisplayValue": "4 851 202",
+      "workbookSource": {
+        "worksheet": "Operationell leasing del 2",
+        "cell": "B12",
+        "rawValue": "5646453.0899999989",
+        "cachedValue": "5646453.0899999989",
+        "renderedValue": "5 646 453"
+      },
+      "reason": "Signed reference page 12 is authoritative for Note 4 previous-year comparison value.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "id": "n4-r3-previous",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[3].previous",
+      "signedDisplayValue": "17 973 133",
+      "workbookSource": {
+        "worksheet": "Operationell leasing del 2",
+        "cell": "B13",
+        "rawValue": "14285066.270000001",
+        "cachedValue": "14285066.270000001",
+        "renderedValue": "14 285 066"
+      },
+      "reason": "Signed reference page 12 is authoritative for Note 4 previous-year comparison value.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "id": "n4-r4-previous",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[4].previous",
+      "signedDisplayValue": "0",
+      "workbookSource": {
+        "worksheet": "Operationell leasing del 2",
+        "cell": "B14",
+        "rawValue": "0",
+        "cachedValue": "0",
+        "renderedValue": "0"
+      },
+      "reason": "Signed reference page 12 is authoritative for Note 4 previous-year comparison value.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "id": "n4-r5-previous",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[5].previous",
+      "signedDisplayValue": "22 824 335",
+      "workbookSource": {
+        "worksheet": "Operationell leasing del 2",
+        "cell": "B15",
+        "rawValue": "19931519.359999999",
+        "cachedValue": "19931519.359999999",
+        "renderedValue": "19 931 519"
+      },
+      "reason": "Signed reference page 12 is authoritative for Note 4 previous-year comparison total.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
     {
       "id": "n17-r1-previous",
       "noteNumber": 17,
@@ -1346,6 +1481,127 @@
     }
   ],
   "rowOverrides": [
+    {
+      "id": "n4-header-comparison-years",
+      "type": "signed_preview_row_override",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[1]",
+      "order": 1,
+      "signedDisplay": {
+        "label": "",
+        "current": "2025",
+        "previous": "2024"
+      },
+      "reason": "Signed reference page 12 is authoritative for Note 4 comparative year headings.",
+      "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+      "overrideKind": "signed-preview value override",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "id": "n4-r2",
+      "type": "workbook_row_authority",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[2]",
+      "order": 2,
+      "worksheet": "Operationell leasing del 2",
+      "labelCell": "A12",
+      "currentCell": "B12",
+      "previousCell": "",
+      "signedDisplay": {
+        "label": "Inom ett år",
+        "current": "5 646 453",
+        "previous": "4 851 202"
+      },
+      "sourceRawCached": {
+        "currentRaw": "5646453.0899999989",
+        "currentCached": "5646453.0899999989",
+        "previousRaw": "",
+        "previousCached": ""
+      },
+      "reason": "Workbook-derived Note 4 current-year row with signed comparison value authority.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n4-r3",
+      "type": "workbook_row_authority",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[3]",
+      "order": 3,
+      "worksheet": "Operationell leasing del 2",
+      "labelCell": "A13",
+      "currentCell": "B13",
+      "previousCell": "",
+      "signedDisplay": {
+        "label": "Senare än ett år men inom fem år",
+        "current": "14 285 066",
+        "previous": "17 973 133"
+      },
+      "sourceRawCached": {
+        "currentRaw": "14285066.270000001",
+        "currentCached": "14285066.270000001",
+        "previousRaw": "",
+        "previousCached": ""
+      },
+      "reason": "Workbook-derived Note 4 current-year row with signed label and comparison value authority.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n4-r4",
+      "type": "workbook_row_authority",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[4]",
+      "order": 4,
+      "worksheet": "Operationell leasing del 2",
+      "labelCell": "A14",
+      "currentCell": "B14",
+      "previousCell": "",
+      "signedDisplay": {
+        "label": "Senare än fem år",
+        "current": "0",
+        "previous": "0"
+      },
+      "sourceRawCached": {
+        "currentRaw": "0",
+        "currentCached": "0",
+        "previousRaw": "",
+        "previousCached": ""
+      },
+      "reason": "Workbook-derived Note 4 current-year row with signed comparison value authority.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "display formatting"
+    },
+    {
+      "id": "n4-r5",
+      "type": "workbook_row_authority",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[5]",
+      "order": 5,
+      "worksheet": "Operationell leasing del 2",
+      "labelCell": "A15",
+      "currentCell": "B15",
+      "previousCell": "",
+      "signedDisplay": {
+        "label": "",
+        "current": "19 931 519",
+        "previous": "22 824 335"
+      },
+      "sourceRawCached": {
+        "currentRaw": "19931519.359999999",
+        "currentCached": "19931519.359999999",
+        "previousRaw": "",
+        "previousCached": ""
+      },
+      "reason": "Workbook-derived Note 4 current-year total with signed comparison total authority.",
+      "diagnosticCovered": "ROW_ROLE_AUTHORITY_REQUIRED",
+      "overrideKind": "row-role authority"
+    },
     {
       "id": "n17-r1",
       "type": "workbook_row_authority",
@@ -2064,6 +2320,24 @@
   ],
   "labelMappings": [
     {
+      "id": "n4-r3-label",
+      "noteNumber": 4,
+      "semanticPath": "notes[4].rows[3].label",
+      "signedLabel": "Senare än ett år men inom fem år",
+      "workbookLabel": "Mellan ett och fem år",
+      "workbookSourceCell": "A13",
+      "sourceRawValue": "    Mellan ett och fem år",
+      "reason": "Signed reference page 12 is authoritative for Note 4 row label wording.",
+      "diagnosticCovered": "LABEL_MAPPING_REQUIRED",
+      "overrideKind": "label mapping",
+      "coveredSourceRefs": [
+        {
+          "kind": "signed_reference_page",
+          "value": "12"
+        }
+      ]
+    },
+    {
       "id": "n18-r1-label",
       "noteNumber": 18,
       "semanticPath": "notes[18].rows[1].label",
@@ -2149,6 +2423,18 @@
     }
   ],
   "acknowledgedPolicyDiagnostics": [
+    {
+      "noteNumber": 4,
+      "code": "ROW_ROLE_AUTHORITY_REQUIRED"
+    },
+    {
+      "noteNumber": 4,
+      "code": "LABEL_MAPPING_REQUIRED"
+    },
+    {
+      "noteNumber": 4,
+      "code": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED"
+    },
     {
       "noteNumber": 17,
       "code": "BLANK_TO_ZERO_PRESENTATION_REQUIRED"

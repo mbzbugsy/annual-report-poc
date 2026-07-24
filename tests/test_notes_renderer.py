@@ -189,14 +189,23 @@ class NotesRendererTests(unittest.TestCase):
             )
             return result
 
+    def _extract_note_section(self, tex: str, note_number: int) -> str:
+        marker = f"\\textbf{{Not {note_number} "
+        start = tex.find(marker)
+        self.assertNotEqual(start, -1, msg=f"missing note marker for note {note_number}")
+        end = tex.find("\\textbf{Not ", start + len(marker))
+        if end == -1:
+            end = len(tex)
+        return tex[start:end]
+
     def test_authority_modes_are_exact_approved_sets(self) -> None:
         notes = self.base_semantic["notes"]
         direct = {n["noteNumber"] for n in notes if n["renderAuthority"]["mode"] == "direct_workbook"}
         hybrid = {n["noteNumber"] for n in notes if n["renderAuthority"]["mode"] == "hybrid_workbook_preview_override"}
         full = {n["noteNumber"] for n in notes if n["renderAuthority"]["mode"] == "full_note_preview_override"}
 
-        self.assertEqual(direct, {4, 13, 14})
-        self.assertEqual(hybrid, {17, 18, 19, 22, 23, 26})
+        self.assertEqual(direct, {13, 14})
+        self.assertEqual(hybrid, {4, 17, 18, 19, 22, 23, 26})
         self.assertEqual(full, {1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 20, 21, 24, 25, 27, 28})
 
     def test_override_manifest_has_required_sections(self) -> None:
@@ -238,8 +247,8 @@ class NotesRendererTests(unittest.TestCase):
         hybrid = {int(k) for k, v in notes.items() if v["renderAuthority"] == "hybrid_workbook_preview_override"}
         full = {int(k) for k, v in notes.items() if v["renderAuthority"] == "full_note_preview_override"}
 
-        self.assertEqual(direct, {4, 13, 14})
-        self.assertEqual(hybrid, {17, 18, 19, 22, 23, 26})
+        self.assertEqual(direct, {13, 14})
+        self.assertEqual(hybrid, {4, 17, 18, 19, 22, 23, 26})
         self.assertEqual(full, {1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 20, 21, 24, 25, 27, 28})
 
     def test_note4_supporting_range_not_rendered(self) -> None:
@@ -257,9 +266,123 @@ class NotesRendererTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         prov = result.provenance_payload
         assert prov is not None
-        for note in [17, 18, 19, 22, 23, 26]:
+        for note in [4, 17, 18, 19, 22, 23, 26]:
             cells = prov["notes"][str(note)]["workbookRenderedSourceCells"]
             self.assertEqual(len(cells), len(set(cells)))
+
+    def test_note4_signed_alignment_exact_content_and_order(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        tex = result.output_text
+        note4_tex = self._extract_note_section(tex, 4)
+        normalized_note4 = " ".join(note4_tex.split())
+
+        self.assertIn("Not 4 Leasingavtal", note4_tex)
+        self.assertIn(
+            "Framtida leasingavgifter, för icke uppsägningsbara leasingavtal, förfaller till betalning enligt följande:",
+            normalized_note4,
+        )
+        self.assertIn(" & 2025 & 2024 " + "\\\\", note4_tex)
+        self.assertIn("Inom ett år & 5 646 453 & 4 851 202 " + "\\\\", note4_tex)
+        self.assertIn("Senare än ett år men inom fem år & 14 285 066 & 17 973 133 " + "\\\\", note4_tex)
+        self.assertIn("Senare än fem år & 0 & 0 " + "\\\\", note4_tex)
+        self.assertIn(" & 19 931 519 & 22 824 335 " + "\\\\", note4_tex)
+        self.assertIn("Årets leasingkostnader avseende leasingavtal, uppgår till 5 924 000 kronor (6 310 759).", note4_tex)
+
+        note4_idx = note4_tex.find("Not 4 Leasingavtal")
+        intro_idx = note4_tex.find("Framtida leasingavgifter")
+        header_idx = note4_tex.find(" & 2025 & 2024 " + "\\\\")
+        final_idx = note4_tex.find("Årets leasingkostnader avseende leasingavtal, uppgår till 5 924 000 kronor (6 310 759).")
+        self.assertLess(note4_idx, intro_idx)
+        self.assertLess(intro_idx, header_idx)
+        self.assertLess(header_idx, final_idx)
+
+    def test_note4_excludes_internal_workbook_content(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        note4_tex = self._extract_note_section(result.output_text, 4)
+
+        disallowed = [
+            "Not)  Operationell leasing",
+            "Omegapoint Malmö AB (Ink E.Syd)",
+            "Koncern",
+            "2025-01--2025-12",
+            "(Ange konton i RR)",
+            "5010",
+            "5012",
+            "5220",
+            "5614",
+            "5615",
+            "-Varav lokalhyra",
+            "Mellan ett och fem år",
+            "Denna fil beräknar automatiskt",
+        ]
+        for token in disallowed:
+            self.assertNotIn(token, note4_tex)
+
+    def test_note4_provenance_distinguishes_workbook_signed_and_supporting(self) -> None:
+        result = self._run_render()
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        prov = result.provenance_payload
+        assert prov is not None
+
+        note4 = prov["notes"]["4"]
+        self.assertEqual(note4["renderAuthority"], "hybrid_workbook_preview_override")
+        self.assertEqual(note4["physicalPage"], [12])
+        self.assertEqual(note4["workbookRenderedSourceRanges"], ["Operationell leasing del 2:A1:D23"])
+        self.assertEqual(note4["workbookSupportingEvidence"], ["Operationell leasing del 1:A1:X172"])
+        self.assertIn("n4-signed-reference-intro", note4["prefaceOverridesUsed"])
+        self.assertIn("n4-signed-reference-final-paragraph", note4["appendixOverridesUsed"])
+
+        field_auth = {item["semanticRole"]: item for item in note4["displayFieldAuthorities"]}
+        self.assertEqual(field_auth["notes[4].rows[2].current"]["authority"], "workbook")
+        self.assertEqual(field_auth["notes[4].rows[3].current"]["authority"], "workbook")
+        self.assertEqual(field_auth["notes[4].rows[4].current"]["authority"], "workbook")
+        self.assertEqual(field_auth["notes[4].rows[5].current"]["authority"], "workbook")
+        self.assertEqual(field_auth["notes[4].finalParagraph.current"]["authority"], "workbook")
+        self.assertEqual(field_auth["notes[4].rows[2].previous"]["authority"], "signed_reference")
+        self.assertEqual(field_auth["notes[4].rows[3].previous"]["authority"], "signed_reference")
+        self.assertEqual(field_auth["notes[4].rows[4].previous"]["authority"], "signed_reference")
+        self.assertEqual(field_auth["notes[4].rows[5].previous"]["authority"], "signed_reference")
+        self.assertEqual(field_auth["note4.intro_paragraph"]["signedReferencePage"], "12")
+        self.assertEqual(field_auth["note4.final_paragraph"]["signedReferencePage"], "12")
+
+    def test_note4_signed_page_must_be_12(self) -> None:
+        override = deepcopy(self.base_override)
+        note4_row_prev = next(item for item in override["fieldOverrides"] if item["id"] == "n4-r2-previous")
+        note4_row_prev["coveredSourceRefs"][0]["value"] = "11"
+        result = self._run_render(override_payload=override)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("note 4 requires signed_reference_page=12", result.stderr)
+
+    def test_note4_missing_required_workbook_cell_fails_closed(self) -> None:
+        semantic = deepcopy(self.base_semantic)
+        self._set_cell_fields(semantic, note_number=4, coordinate="B12", fields={"formula": "SUM(B1:B2)"})
+        result = self._run_render(semantic_payload=semantic)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Note 4 fail-closed: formula drift at B12", result.stderr)
+
+    def test_note4_signed_override_cannot_replace_workbook_current_value(self) -> None:
+        override = deepcopy(self.base_override)
+        override["fieldOverrides"].append(
+            {
+                "id": "n4-invalid-current-override",
+                "noteNumber": 4,
+                "semanticPath": "notes[4].rows[2].current",
+                "signedDisplayValue": "5 646 453",
+                "workbookSource": {
+                    "worksheet": "Operationell leasing del 2",
+                    "cell": "B12",
+                },
+                "reason": "invalid",
+                "diagnosticCovered": "SIGNED_PREVIEW_VALUE_OVERRIDE_REQUIRED",
+                "overrideKind": "signed-preview value override",
+                "coveredSourceRefs": [{"kind": "signed_reference_page", "value": "12"}],
+            }
+        )
+        result = self._run_render(override_payload=override)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("signed override cannot replace workbook-authoritative current-year value", result.stderr)
 
     def test_broad_blank_to_zero_policy_rejected(self) -> None:
         override = deepcopy(self.base_override)
@@ -519,8 +642,8 @@ class NotesRendererTests(unittest.TestCase):
 
     def test_unresolved_direct_note_fails(self) -> None:
         semantic = deepcopy(self.base_semantic)
-        note4 = next(n for n in semantic["notes"] if n["noteNumber"] == 4)
-        note4["diagnostics"] = [{"code": "UNRESOLVED_DIRECT", "severity": "review_required"}]
+        note13 = next(n for n in semantic["notes"] if n["noteNumber"] == 13)
+        note13["diagnostics"] = [{"code": "UNRESOLVED_DIRECT", "severity": "review_required"}]
         result = self._run_render(semantic_payload=semantic)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("direct mode", result.stderr)

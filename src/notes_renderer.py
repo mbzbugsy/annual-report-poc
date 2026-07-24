@@ -18,8 +18,8 @@ class NotesRenderError(ValueError):
 
 RENDERER_VERSION = "2.0"
 
-DIRECT_WORKBOOK_NOTES = {4, 13, 14}
-HYBRID_WORKBOOK_NOTES = {17, 18, 19, 22, 23, 26}
+DIRECT_WORKBOOK_NOTES = {13, 14}
+HYBRID_WORKBOOK_NOTES = {4, 17, 18, 19, 22, 23, 26}
 FULL_NOTE_OVERRIDE_NOTES = {1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 20, 21, 24, 25, 27, 28}
 
 PAGE_NOTE_MAP: Dict[int, List[int]] = {
@@ -273,6 +273,36 @@ def _semantic_cell_lookup(semantic_note: Dict[str, Any]) -> Dict[str, Dict[str, 
                 coord = cell.get("coordinate")
                 if isinstance(coord, str) and coord:
                     lookup[coord] = cell
+    return lookup
+
+
+def _semantic_cell_lookup_by_sheet(semantic_note: Dict[str, Any]) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    lookup: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    tables = semantic_note.get("tables")
+    if not isinstance(tables, list):
+        return lookup
+    for table in tables:
+        if not isinstance(table, dict):
+            continue
+        sheet = table.get("sheet")
+        if not isinstance(sheet, str) or not sheet.strip():
+            continue
+        rows = table.get("rows")
+        if not isinstance(rows, list):
+            continue
+        sheet_map = lookup.setdefault(sheet, {})
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            cells = row.get("cells")
+            if not isinstance(cells, list):
+                continue
+            for cell in cells:
+                if not isinstance(cell, dict):
+                    continue
+                coord = cell.get("coordinate")
+                if isinstance(coord, str) and coord:
+                    sheet_map[coord] = cell
     return lookup
 
 
@@ -579,6 +609,7 @@ def _validate_override_manifest(
         "signedReference",
         "fullNoteOverrides",
         "interNoteInsertions",
+        "hybridNotePrefaceParagraphs",
         "hybridNoteAppendixParagraphs",
         "fieldOverrides",
         "rowOverrides",
@@ -718,6 +749,57 @@ def _validate_override_manifest(
         key = (page_number, insert_before)
         inter_map.setdefault(key, []).append(obj)
 
+    preface_raw = override.get("hybridNotePrefaceParagraphs")
+    if not isinstance(preface_raw, list):
+        raise NotesRenderError("hybridNotePrefaceParagraphs must be list")
+    preface_map: Dict[int, List[Dict[str, Any]]] = {n: [] for n in HYBRID_WORKBOOK_NOTES}
+    for idx, item in enumerate(preface_raw, start=1):
+        obj = _require_dict(item, "hybridNotePrefaceParagraphs[]")
+        preface_id = _require_non_empty_string(obj.get("id"), f"hybridNotePrefaceParagraphs[{idx}].id")
+        note_number = obj.get("noteNumber")
+        if not isinstance(note_number, int) or note_number not in HYBRID_WORKBOOK_NOTES:
+            raise NotesRenderError(f"hybridNotePrefaceParagraphs[{preface_id}].noteNumber must target hybrid note")
+        position = _require_non_empty_string(obj.get("position"), f"hybridNotePrefaceParagraphs[{preface_id}].position")
+        if position != "before_table":
+            raise NotesRenderError(f"hybridNotePrefaceParagraphs[{preface_id}] unsupported position: {position}")
+        _require_non_empty_string(obj.get("sourceJustification"), f"hybridNotePrefaceParagraphs[{preface_id}].sourceJustification")
+        require_allowed_override_kind(obj.get("overrideKind"), f"hybridNotePrefaceParagraphs[{preface_id}].overrideKind")
+        diagnostic_covered = _require_non_empty_string(
+            obj.get("diagnosticCovered"), f"hybridNotePrefaceParagraphs[{preface_id}].diagnosticCovered"
+        )
+        require_note_diagnostic_covered(note_number, diagnostic_covered, f"hybridNotePrefaceParagraphs[{preface_id}].diagnosticCovered")
+
+        refs = obj.get("coveredSourceRefs")
+        if not isinstance(refs, list) or not refs:
+            raise NotesRenderError(f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs must be non-empty list")
+        has_signed_page_ref = False
+        for ref_idx, ref in enumerate(refs, start=1):
+            ref_obj = _require_dict(ref, f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[{ref_idx}]")
+            kind = _require_non_empty_string(
+                ref_obj.get("kind"), f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[{ref_idx}].kind"
+            )
+            value = _require_non_empty_string(
+                ref_obj.get("value"), f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[{ref_idx}].value"
+            )
+            if kind == "signed_reference_page":
+                has_signed_page_ref = True
+                if not re.fullmatch(r"\d+", value):
+                    raise NotesRenderError(
+                        f"hybridNotePrefaceParagraphs[{preface_id}] signed_reference_page value must be numeric page reference, got {value!r}"
+                    )
+                page = int(value)
+                if page < 9 or page > 19:
+                    raise NotesRenderError(
+                        f"hybridNotePrefaceParagraphs[{preface_id}] signed_reference_page value out of approved range 9-19: {page}"
+                    )
+        if not has_signed_page_ref:
+            raise NotesRenderError(f"hybridNotePrefaceParagraphs[{preface_id}] must include signed_reference_page reference")
+        if note_number == 4 and not any(isinstance(ref, dict) and ref.get("kind") == "signed_reference_page" and ref.get("value") == "12" for ref in refs):
+            raise NotesRenderError(f"hybridNotePrefaceParagraphs[{preface_id}] note 4 requires signed_reference_page=12")
+
+        _render_signed_reference_text_block(obj, field_prefix=f"hybridNotePrefaceParagraphs[{preface_id}]")
+        preface_map[note_number].append(obj)
+
     appendix_raw = override.get("hybridNoteAppendixParagraphs")
     if not isinstance(appendix_raw, list):
         raise NotesRenderError("hybridNoteAppendixParagraphs must be list")
@@ -763,6 +845,8 @@ def _validate_override_manifest(
                     )
         if not has_signed_page_ref:
             raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}] must include signed_reference_page reference")
+        if note_number == 4 and not any(isinstance(ref, dict) and ref.get("kind") == "signed_reference_page" and ref.get("value") == "12" for ref in refs):
+            raise NotesRenderError(f"hybridNoteAppendixParagraphs[{appendix_id}] note 4 requires signed_reference_page=12")
 
         _render_signed_reference_text_block(obj, field_prefix=f"hybridNoteAppendixParagraphs[{appendix_id}]")
         appendix_map[note_number].append(obj)
@@ -796,6 +880,12 @@ def _validate_override_manifest(
             prev = obj.get("previousCell")
             if prev is not None and not isinstance(prev, str):
                 raise NotesRenderError(f"rowOverrides[{row_id}].previousCell must be string")
+        if note_number == 4 and row_type == "signed_preview_row_override":
+            refs = obj.get("coveredSourceRefs")
+            if not isinstance(refs, list) or not refs:
+                raise NotesRenderError(f"rowOverrides[{row_id}] note 4 signed rows require coveredSourceRefs")
+            if not any(isinstance(ref, dict) and ref.get("kind") == "signed_reference_page" and ref.get("value") == "12" for ref in refs):
+                raise NotesRenderError(f"rowOverrides[{row_id}] note 4 signed rows require signed_reference_page=12")
         row_map[note_number].append(obj)
 
     for note_number in HYBRID_WORKBOOK_NOTES:
@@ -826,6 +916,12 @@ def _validate_override_manifest(
         require_allowed_override_kind(obj.get("overrideKind"), f"fieldOverrides[{field_id}].overrideKind")
         diagnostic_covered = _require_non_empty_string(obj.get("diagnosticCovered"), f"fieldOverrides[{field_id}].diagnosticCovered")
         require_note_diagnostic_covered(note_number, diagnostic_covered, f"fieldOverrides[{field_id}].diagnosticCovered")
+        if note_number == 4:
+            refs = obj.get("coveredSourceRefs")
+            if not isinstance(refs, list) or not refs:
+                raise NotesRenderError(f"fieldOverrides[{field_id}] note 4 requires coveredSourceRefs")
+            if not any(isinstance(ref, dict) and ref.get("kind") == "signed_reference_page" and ref.get("value") == "12" for ref in refs):
+                raise NotesRenderError(f"fieldOverrides[{field_id}] note 4 requires signed_reference_page=12")
         field_map[note_number].append(obj)
 
     label_mappings = override.get("labelMappings")
@@ -848,6 +944,12 @@ def _validate_override_manifest(
         require_allowed_override_kind(obj.get("overrideKind"), f"labelMappings[{mapping_id}].overrideKind")
         diagnostic_covered = _require_non_empty_string(obj.get("diagnosticCovered"), f"labelMappings[{mapping_id}].diagnosticCovered")
         require_note_diagnostic_covered(note_number, diagnostic_covered, f"labelMappings[{mapping_id}].diagnosticCovered")
+        if note_number == 4:
+            refs = obj.get("coveredSourceRefs")
+            if not isinstance(refs, list) or not refs:
+                raise NotesRenderError(f"labelMappings[{mapping_id}] note 4 requires coveredSourceRefs")
+            if not any(isinstance(ref, dict) and ref.get("kind") == "signed_reference_page" and ref.get("value") == "12" for ref in refs):
+                raise NotesRenderError(f"labelMappings[{mapping_id}] note 4 requires signed_reference_page=12")
         label_map[note_number].append(obj)
 
     ack = override.get("acknowledgedPolicyDiagnostics")
@@ -868,12 +970,190 @@ def _validate_override_manifest(
     return {
         "fullNoteOverrides": full_map,
         "interNoteInsertions": inter_map,
+        "hybridNotePrefaceParagraphs": preface_map,
         "hybridNoteAppendixParagraphs": appendix_map,
         "rowOverrides": row_map,
         "fieldOverrides": field_map,
         "labelMappings": label_map,
         "acknowledgedPolicyDiagnostics": ack,
     }
+
+
+def _resolve_signed_block_with_workbook_bindings(
+    *,
+    note_number: int,
+    block: Dict[str, Any],
+    cell_lookup: Dict[str, Dict[str, Any]],
+    cell_lookup_by_sheet: Dict[str, Dict[str, Dict[str, Any]]],
+    workbook_date_system: str | None,
+) -> Tuple[Dict[str, Any], List[Dict[str, str]]]:
+    bindings = block.get("workbookBindings")
+    if bindings is None:
+        return block, []
+    if not isinstance(bindings, list):
+        raise NotesRenderError(f"hybrid note {note_number} workbookBindings must be a list")
+
+    resolved = dict(block)
+    paragraphs = resolved.get("paragraphs", [])
+    if not isinstance(paragraphs, list):
+        raise NotesRenderError(f"hybrid note {note_number} paragraphs must be a list when workbookBindings are used")
+
+    refs: List[Dict[str, str]] = []
+    replacements: Dict[str, str] = {}
+    for idx, entry in enumerate(bindings, start=1):
+        obj = _require_dict(entry, f"workbookBindings[{idx}]")
+        placeholder = _require_non_empty_string(obj.get("placeholder"), f"workbookBindings[{idx}].placeholder")
+        worksheet = _require_non_empty_string(obj.get("worksheet"), f"workbookBindings[{idx}].worksheet")
+        cell = _require_non_empty_string(obj.get("cell"), f"workbookBindings[{idx}].cell")
+        role = _require_non_empty_string(obj.get("semanticRole"), f"workbookBindings[{idx}].semanticRole")
+
+        cell_obj = cell_lookup_by_sheet.get(worksheet, {}).get(cell)
+        if not isinstance(cell_obj, dict):
+            cell_obj = cell_lookup.get(cell)
+        if not isinstance(cell_obj, dict):
+            raise NotesRenderError(f"hybrid note {note_number} workbook binding cell missing: {worksheet}!{cell}")
+        source_trace = cell_obj.get("sourceTrace")
+        source_ws = ""
+        if isinstance(source_trace, dict):
+            ws_value = source_trace.get("worksheetName")
+            if isinstance(ws_value, str):
+                source_ws = ws_value
+        if source_ws and source_ws != worksheet:
+            raise NotesRenderError(
+                f"hybrid note {note_number} workbook binding worksheet mismatch for {cell}: expected {worksheet}, got {source_ws}"
+            )
+
+        rendered_value = _display_from_cell(cell_obj, workbook_date_system=workbook_date_system)
+        expected = obj.get("expectedRenderedValue")
+        if isinstance(expected, str) and rendered_value != expected:
+            raise NotesRenderError(
+                f"hybrid note {note_number} workbook binding value drift for {worksheet}!{cell}: "
+                f"expected {expected!r}, got {rendered_value!r}"
+            )
+        replacements[placeholder] = rendered_value
+        refs.append(
+            {
+                "authority": "workbook",
+                "semanticRole": role,
+                "worksheet": worksheet,
+                "cell": cell,
+                "formula": _require_string(cell_obj.get("formula"), "formula") if isinstance(cell_obj.get("formula"), str) else "",
+                "rawValue": _require_string(cell_obj.get("rawValue"), "rawValue") if isinstance(cell_obj.get("rawValue"), str) else "",
+                "cachedValue": _require_string(cell_obj.get("cachedValue"), "cachedValue") if isinstance(cell_obj.get("cachedValue"), str) else "",
+                "displayedValue": rendered_value,
+            }
+        )
+
+    resolved_paragraphs: List[str] = []
+    for idx, paragraph in enumerate(paragraphs, start=1):
+        text = _require_string(paragraph, f"paragraphs[{idx}]")
+        for placeholder, replacement in replacements.items():
+            text = text.replace(placeholder, replacement)
+        if "{{" in text or "}}" in text:
+            raise NotesRenderError(f"hybrid note {note_number} unresolved workbook binding placeholder in paragraph")
+        resolved_paragraphs.append(text)
+    resolved["paragraphs"] = resolved_paragraphs
+    return resolved, refs
+
+
+def _validate_note4_hybrid_model(
+    *,
+    semantic_note: Dict[str, Any],
+    row_overrides: List[Dict[str, Any]],
+    field_overrides: List[Dict[str, Any]],
+    label_mappings: List[Dict[str, Any]],
+    preface_blocks: List[Dict[str, Any]],
+    appendix_blocks: List[Dict[str, Any]],
+    workbook_date_system: str | None,
+) -> None:
+    dispositions = _extract_range_meta(semantic_note, 4)
+    expected_dispositions = {
+        "Operationell leasing del 2:A1:D23": "render_content",
+        "Operationell leasing del 1:A1:X172": "supporting_evidence",
+    }
+    if set(dispositions.keys()) != set(expected_dispositions.keys()):
+        raise NotesRenderError("Note 4 fail-closed: source ranges changed")
+    for key, expected in expected_dispositions.items():
+        if dispositions[key].get("disposition") != expected:
+            raise NotesRenderError(f"Note 4 fail-closed: disposition changed for {key}")
+
+    lookup = _semantic_cell_lookup(semantic_note)
+    lookup_by_sheet = _semantic_cell_lookup_by_sheet(semantic_note)
+    sheet_lookup = lookup_by_sheet.get("Operationell leasing del 2", {})
+    for coord in ("B12", "B13", "B14", "B15", "B21", "A13"):
+        if coord not in sheet_lookup:
+            raise NotesRenderError(f"Note 4 fail-closed: required source cell missing ({coord})")
+
+    if _display_from_cell(sheet_lookup["A13"], workbook_date_system=workbook_date_system).strip() != "Mellan ett och fem år":
+        raise NotesRenderError("Note 4 fail-closed: workbook row label drift at A13")
+
+    expected_formulas = {
+        "B12": "SUM('Operationell leasing del 1'!V20:V170)",
+        "B13": "SUM('Operationell leasing del 1'!W20:W170)",
+        "B14": "SUM('Operationell leasing del 1'!X20:X170)",
+        "B15": "SUM(B12:B14)",
+    }
+    for cell, formula in expected_formulas.items():
+        got = sheet_lookup[cell].get("formula")
+        if got != formula:
+            raise NotesRenderError(f"Note 4 fail-closed: formula drift at {cell}")
+
+    if sheet_lookup["B21"].get("formula") not in {None, ""}:
+        raise NotesRenderError("Note 4 fail-closed: B21 must remain workbook value cell without formula override")
+
+    expected_displays = {
+        "B12": "5 646 453",
+        "B13": "14 285 066",
+        "B14": "0",
+        "B15": "19 931 519",
+        "B21": "5 924 000",
+    }
+    for cell, expected in expected_displays.items():
+        got = _display_from_cell(sheet_lookup[cell], workbook_date_system=workbook_date_system)
+        if got != expected:
+            raise NotesRenderError(f"Note 4 fail-closed: workbook value drift at {cell}")
+
+    workbook_rows = [r for r in row_overrides if r.get("type") == "workbook_row_authority"]
+    signed_rows = [r for r in row_overrides if r.get("type") == "signed_preview_row_override"]
+    expected_workbook_row_coords = {
+        "notes[4].rows[2]": ("A12", "B12"),
+        "notes[4].rows[3]": ("A13", "B13"),
+        "notes[4].rows[4]": ("A14", "B14"),
+        "notes[4].rows[5]": ("A15", "B15"),
+    }
+    if len(workbook_rows) != len(expected_workbook_row_coords):
+        raise NotesRenderError("Note 4 fail-closed: workbook authority row count changed")
+    seen_paths: Set[str] = set()
+    for row in workbook_rows:
+        path = _require_non_empty_string(row.get("semanticPath"), "note4 workbook row semanticPath")
+        if path in seen_paths:
+            raise NotesRenderError("Note 4 fail-closed: duplicate workbook row authority semanticPath")
+        seen_paths.add(path)
+        expected = expected_workbook_row_coords.get(path)
+        if expected is None:
+            raise NotesRenderError("Note 4 fail-closed: unexpected workbook row authority semanticPath")
+        if row.get("labelCell") != expected[0] or row.get("currentCell") != expected[1]:
+            raise NotesRenderError("Note 4 fail-closed: workbook row authority source cell changed")
+
+    if len(signed_rows) != 1:
+        raise NotesRenderError("Note 4 fail-closed: signed comparison header row count changed")
+
+    current_paths = {
+        "notes[4].rows[2].current",
+        "notes[4].rows[3].current",
+        "notes[4].rows[4].current",
+        "notes[4].rows[5].current",
+        "notes[4].finalParagraph.current",
+    }
+    for entry in field_overrides:
+        path = _require_non_empty_string(entry.get("semanticPath"), "note4 field override semanticPath")
+        if path in current_paths:
+            raise NotesRenderError("Note 4 fail-closed: signed override cannot replace workbook-authoritative current-year value")
+
+    if len(preface_blocks) != 1:
+        raise NotesRenderError("Note 4 fail-closed: missing signed introductory paragraph block")
+    if len(appendix_blocks) != 1:
+        raise NotesRenderError("Note 4 fail-closed: missing signed final paragraph block")
 
 
 def _extract_range_meta(semantic_note: Dict[str, Any], note_number: int) -> Dict[str, Dict[str, Any]]:
@@ -985,6 +1265,8 @@ def _render_full_override_note(note_number: int, page_number: int, note_title: s
         "fieldOverridesUsed": [],
         "rowOverridesUsed": [],
         "labelMappingsUsed": [],
+        "prefaceOverridesUsed": [],
+        "prefaceCoveredSourceRefs": [],
         "workbookRenderedSourceCells": [],
         "coveredDiagnostics": list(override_note.get("coveredDiagnostics", override_note.get("coveredDiagnosticCodes", []))),
     }
@@ -1053,6 +1335,8 @@ def _render_direct_note(
         "fieldOverridesUsed": [],
         "rowOverridesUsed": [],
         "labelMappingsUsed": [],
+        "prefaceOverridesUsed": [],
+        "prefaceCoveredSourceRefs": [],
         "workbookRenderedSourceCells": rendered_cells,
         "coveredDiagnostics": [],
     }
@@ -1065,12 +1349,24 @@ def _render_hybrid_note(
     row_overrides: List[Dict[str, Any]],
     field_overrides: List[Dict[str, Any]],
     label_mappings: List[Dict[str, Any]],
+    preface_blocks: List[Dict[str, Any]],
     appendix_blocks: List[Dict[str, Any]],
     continued: bool,
     *,
     workbook_date_system: str | None,
 ) -> Tuple[List[str], Dict[str, Any]]:
     lines = _render_note_heading(note_number, note_title, continued=continued)
+
+    if note_number == 4:
+        _validate_note4_hybrid_model(
+            semantic_note=semantic_note,
+            row_overrides=row_overrides,
+            field_overrides=field_overrides,
+            label_mappings=label_mappings,
+            preface_blocks=preface_blocks,
+            appendix_blocks=appendix_blocks,
+            workbook_date_system=workbook_date_system,
+        )
 
     paragraphs_payload = semantic_note.get("renderParagraphs")
     if not isinstance(paragraphs_payload, list):
@@ -1087,12 +1383,13 @@ def _render_hybrid_note(
     lines.extend(_render_paragraphs(paragraphs))
 
     cell_lookup = _semantic_cell_lookup(semantic_note)
+    cell_lookup_by_sheet = _semantic_cell_lookup_by_sheet(semantic_note)
     workbook_rows = [r for r in row_overrides if r.get("type") == "workbook_row_authority"]
     signed_preview_rows = [r for r in row_overrides if r.get("type") == "signed_preview_row_override"]
     workbook_rows.sort(key=lambda item: int(item.get("order", 0)))
     signed_preview_rows.sort(key=lambda item: int(item.get("order", 0)))
 
-    table_rows: List[List[str]] = []
+    table_rows: List[Tuple[int, List[str]]] = []
     used_cells: List[str] = []
     used_row_ids: List[str] = []
 
@@ -1101,6 +1398,45 @@ def _render_hybrid_note(
 
     used_label_ids: List[str] = []
     used_field_ids: List[str] = []
+    display_field_authorities: List[Dict[str, str]] = []
+    authority_roles: Set[str] = set()
+
+    used_preface_ids: List[str] = []
+    preface_source_refs: List[Dict[str, str]] = []
+    for preface in preface_blocks:
+        preface_id = _require_non_empty_string(preface.get("id"), "hybrid preface id")
+        used_preface_ids.append(preface_id)
+        refs = preface.get("coveredSourceRefs", [])
+        if isinstance(refs, list):
+            for ref in refs:
+                ref_obj = _require_dict(ref, f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[]")
+                preface_source_refs.append(
+                    {
+                        "kind": _require_non_empty_string(
+                            ref_obj.get("kind"),
+                            f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[].kind",
+                        ),
+                        "value": _require_non_empty_string(
+                            ref_obj.get("value"),
+                            f"hybridNotePrefaceParagraphs[{preface_id}].coveredSourceRefs[].value",
+                        ),
+                    }
+                )
+        lines.extend(_render_signed_reference_text_block(preface, field_prefix=f"hybridNotePrefaceParagraphs[{preface_id}]"))
+        if note_number == 4:
+            role = "note4.intro_paragraph"
+            if role in authority_roles:
+                raise NotesRenderError("Note 4 fail-closed: intro paragraph authority duplicated")
+            authority_roles.add(role)
+            display_field_authorities.append(
+                {
+                    "semanticRole": role,
+                    "authority": "signed_reference",
+                    "signedReferencePage": "12",
+                    "diagnosticCovered": _require_non_empty_string(preface.get("diagnosticCovered"), "note4 intro diagnosticCovered"),
+                    "displayedValue": "Framtida leasingavgifter, för icke uppsägningsbara leasingavtal, förfaller till betalning enligt följande:",
+                }
+            )
 
     for row in workbook_rows:
         row_id = _require_non_empty_string(row.get("id"), "row override id")
@@ -1112,18 +1448,30 @@ def _render_hybrid_note(
 
         label_cell = _require_non_empty_string(row.get("labelCell"), f"row override {row_id} labelCell")
         current_cell = _require_non_empty_string(row.get("currentCell"), f"row override {row_id} currentCell")
+        worksheet = _require_non_empty_string(row.get("worksheet"), f"row override {row_id} worksheet")
         previous_cell = row.get("previousCell")
         if previous_cell is None:
             previous_cell = ""
         if not isinstance(previous_cell, str):
             raise NotesRenderError(f"row override {row_id} previousCell must be string")
 
-        if label_cell not in cell_lookup or current_cell not in cell_lookup or (previous_cell and previous_cell not in cell_lookup):
+        label_obj = cell_lookup_by_sheet.get(worksheet, {}).get(label_cell)
+        current_obj = cell_lookup_by_sheet.get(worksheet, {}).get(current_cell)
+        previous_obj = cell_lookup_by_sheet.get(worksheet, {}).get(previous_cell) if previous_cell else None
+
+        if not isinstance(label_obj, dict):
+            label_obj = cell_lookup.get(label_cell)
+        if not isinstance(current_obj, dict):
+            current_obj = cell_lookup.get(current_cell)
+        if previous_cell and not isinstance(previous_obj, dict):
+            previous_obj = cell_lookup.get(previous_cell)
+
+        if not isinstance(label_obj, dict) or not isinstance(current_obj, dict) or (previous_cell and not isinstance(previous_obj, dict)):
             raise NotesRenderError(f"missing hybrid source cell fails: note {note_number} row {row_id}")
 
-        base_label = _display_from_cell(cell_lookup.get(label_cell), workbook_date_system=workbook_date_system).strip()
-        base_current = _display_from_cell(cell_lookup.get(current_cell), workbook_date_system=workbook_date_system).strip()
-        base_previous = _display_from_cell(cell_lookup.get(previous_cell), workbook_date_system=workbook_date_system).strip() if previous_cell else ""
+        base_label = _display_from_cell(label_obj, workbook_date_system=workbook_date_system).strip()
+        base_current = _display_from_cell(current_obj, workbook_date_system=workbook_date_system).strip()
+        base_previous = _display_from_cell(previous_obj, workbook_date_system=workbook_date_system).strip() if previous_cell else ""
 
         used_cells.extend([label_cell, current_cell])
         if previous_cell:
@@ -1133,35 +1481,132 @@ def _render_hybrid_note(
             mapping = label_by_path[label_path]
             base_label = _require_string(mapping.get("signedLabel"), f"label mapping {mapping.get('id')} signedLabel")
             used_label_ids.append(_require_non_empty_string(mapping.get("id"), "label mapping id"))
+            if note_number == 4:
+                role = f"{semantic_path}.label"
+                if role in authority_roles:
+                    raise NotesRenderError("Note 4 fail-closed: duplicate authority for label")
+                authority_roles.add(role)
+                display_field_authorities.append(
+                    {
+                        "semanticRole": role,
+                        "authority": "signed_reference",
+                        "signedReferencePage": "12",
+                        "diagnosticCovered": _require_non_empty_string(mapping.get("diagnosticCovered"), "note4 label diagnosticCovered"),
+                        "displayedValue": base_label,
+                    }
+                )
+        elif note_number == 4:
+            role = f"{semantic_path}.label"
+            if role in authority_roles:
+                raise NotesRenderError("Note 4 fail-closed: duplicate authority for label")
+            authority_roles.add(role)
+            display_field_authorities.append(
+                {
+                    "semanticRole": role,
+                    "authority": "workbook",
+                    "worksheet": worksheet,
+                    "cell": label_cell,
+                    "formula": _require_string(label_obj.get("formula"), "label formula") if isinstance(label_obj.get("formula"), str) else "",
+                    "rawValue": _require_string(label_obj.get("rawValue"), "label rawValue") if isinstance(label_obj.get("rawValue"), str) else "",
+                    "cachedValue": _require_string(label_obj.get("cachedValue"), "label cachedValue") if isinstance(label_obj.get("cachedValue"), str) else "",
+                    "displayedValue": base_label,
+                }
+            )
 
         if current_path in field_by_path:
             ov = field_by_path[current_path]
             base_current = _require_string(ov.get("signedDisplayValue"), f"field override {ov.get('id')} signedDisplayValue")
             used_field_ids.append(_require_non_empty_string(ov.get("id"), "field override id"))
+            if note_number == 4:
+                raise NotesRenderError("Note 4 fail-closed: current-year value cannot be signed override")
+        elif note_number == 4:
+            role = f"{semantic_path}.current"
+            if role in authority_roles:
+                raise NotesRenderError("Note 4 fail-closed: duplicate authority for current value")
+            authority_roles.add(role)
+            display_field_authorities.append(
+                {
+                    "semanticRole": role,
+                    "authority": "workbook",
+                    "worksheet": worksheet,
+                    "cell": current_cell,
+                    "formula": _require_string(current_obj.get("formula"), "current formula") if isinstance(current_obj.get("formula"), str) else "",
+                    "rawValue": _require_string(current_obj.get("rawValue"), "current rawValue") if isinstance(current_obj.get("rawValue"), str) else "",
+                    "cachedValue": _require_string(current_obj.get("cachedValue"), "current cachedValue") if isinstance(current_obj.get("cachedValue"), str) else "",
+                    "displayedValue": base_current,
+                }
+            )
 
         if previous_path in field_by_path:
             ov = field_by_path[previous_path]
             base_previous = _require_string(ov.get("signedDisplayValue"), f"field override {ov.get('id')} signedDisplayValue")
             used_field_ids.append(_require_non_empty_string(ov.get("id"), "field override id"))
+            if note_number == 4:
+                role = f"{semantic_path}.previous"
+                if role in authority_roles:
+                    raise NotesRenderError("Note 4 fail-closed: duplicate authority for previous value")
+                authority_roles.add(role)
+                display_field_authorities.append(
+                    {
+                        "semanticRole": role,
+                        "authority": "signed_reference",
+                        "signedReferencePage": "12",
+                        "diagnosticCovered": _require_non_empty_string(ov.get("diagnosticCovered"), "note4 previous diagnosticCovered"),
+                        "displayedValue": base_previous,
+                    }
+                )
+        elif note_number == 4:
+            raise NotesRenderError("Note 4 fail-closed: missing signed previous-year override")
 
-        table_rows.append([base_label, base_current, base_previous])
+        row_order = int(row.get("order", 0))
+        table_rows.append((row_order, [base_label, base_current, base_previous]))
 
     for row in signed_preview_rows:
         row_id = _require_non_empty_string(row.get("id"), "signed preview row id")
         used_row_ids.append(row_id)
         signed_display = _require_dict(row.get("signedDisplay"), f"signed preview row {row_id} signedDisplay")
+        row_order = int(row.get("order", 0))
         table_rows.append(
-            [
-                _require_string(signed_display.get("label", ""), f"signed preview row {row_id} label"),
-                _require_string(signed_display.get("current", ""), f"signed preview row {row_id} current"),
-                _require_string(signed_display.get("previous", ""), f"signed preview row {row_id} previous"),
-            ]
+            (
+                row_order,
+                [
+                    _require_string(signed_display.get("label", ""), f"signed preview row {row_id} label"),
+                    _require_string(signed_display.get("current", ""), f"signed preview row {row_id} current"),
+                    _require_string(signed_display.get("previous", ""), f"signed preview row {row_id} previous"),
+                ],
+            )
         )
+        if note_number == 4:
+            role_current = "notes[4].rows[1].current"
+            role_previous = "notes[4].rows[1].previous"
+            if role_current in authority_roles or role_previous in authority_roles:
+                raise NotesRenderError("Note 4 fail-closed: duplicate authority for header row")
+            authority_roles.add(role_current)
+            authority_roles.add(role_previous)
+            display_field_authorities.append(
+                {
+                    "semanticRole": role_current,
+                    "authority": "signed_reference",
+                    "signedReferencePage": "12",
+                    "diagnosticCovered": _require_non_empty_string(row.get("diagnosticCovered"), "note4 header diagnosticCovered"),
+                    "displayedValue": _require_string(signed_display.get("current", ""), f"signed preview row {row_id} current"),
+                }
+            )
+            display_field_authorities.append(
+                {
+                    "semanticRole": role_previous,
+                    "authority": "signed_reference",
+                    "signedReferencePage": "12",
+                    "diagnosticCovered": _require_non_empty_string(row.get("diagnosticCovered"), "note4 header diagnosticCovered"),
+                    "displayedValue": _require_string(signed_display.get("previous", ""), f"signed preview row {row_id} previous"),
+                }
+            )
 
     if len(used_cells) != len(set(used_cells)):
         raise NotesRenderError(f"Hybrid workbook cells appear exactly once violation for note {note_number}")
 
-    lines.extend(_render_table_rows(table_rows))
+    ordered_table_rows = [cells for _, cells in sorted(table_rows, key=lambda item: item[0])]
+    lines.extend(_render_table_rows(ordered_table_rows))
     lines.append("")
 
     used_appendix_ids: List[str] = []
@@ -1185,7 +1630,35 @@ def _render_hybrid_note(
                         ),
                     }
                 )
-        lines.extend(_render_signed_reference_text_block(appendix, field_prefix=f"hybridNoteAppendixParagraphs[{appendix_id}]"))
+        resolved_appendix, binding_refs = _resolve_signed_block_with_workbook_bindings(
+            note_number=note_number,
+            block=appendix,
+            cell_lookup=cell_lookup,
+            cell_lookup_by_sheet=cell_lookup_by_sheet,
+            workbook_date_system=workbook_date_system,
+        )
+        lines.extend(_render_signed_reference_text_block(resolved_appendix, field_prefix=f"hybridNoteAppendixParagraphs[{appendix_id}]"))
+        if note_number == 4:
+            role = "note4.final_paragraph"
+            if role in authority_roles:
+                raise NotesRenderError("Note 4 fail-closed: duplicate authority for final paragraph")
+            authority_roles.add(role)
+            display_field_authorities.append(
+                {
+                    "semanticRole": role,
+                    "authority": "signed_reference",
+                    "signedReferencePage": "12",
+                    "diagnosticCovered": _require_non_empty_string(appendix.get("diagnosticCovered"), "note4 final diagnosticCovered"),
+                    "displayedValue": "Årets leasingkostnader avseende leasingavtal, uppgår till 5 924 000 kronor (6 310 759).",
+                }
+            )
+            for ref in binding_refs:
+                role_name = ref.get("semanticRole", "")
+                if role_name:
+                    if role_name in authority_roles:
+                        raise NotesRenderError("Note 4 fail-closed: duplicate authority role in workbook binding")
+                    authority_roles.add(role_name)
+                display_field_authorities.append(ref)
 
     covered_codes: List[str] = []
     for entry in row_overrides + field_overrides + label_mappings + appendix_blocks:
@@ -1198,10 +1671,13 @@ def _render_hybrid_note(
         "fieldOverridesUsed": used_field_ids,
         "rowOverridesUsed": used_row_ids,
         "labelMappingsUsed": used_label_ids,
+        "prefaceOverridesUsed": used_preface_ids,
+        "prefaceCoveredSourceRefs": preface_source_refs,
         "appendixOverridesUsed": used_appendix_ids,
         "appendixCoveredSourceRefs": appendix_source_refs,
         "workbookRenderedSourceCells": used_cells,
         "coveredDiagnostics": covered_codes,
+        "displayFieldAuthorities": display_field_authorities,
     }
 
 
@@ -1300,6 +1776,7 @@ def render_notes(
                     override_scope["rowOverrides"].get(note_number, []),
                     override_scope["fieldOverrides"].get(note_number, []),
                     override_scope["labelMappings"].get(note_number, []),
+                    override_scope["hybridNotePrefaceParagraphs"].get(note_number, []),
                     override_scope["hybridNoteAppendixParagraphs"].get(note_number, []),
                     continued,
                     workbook_date_system=workbook_date_system,
@@ -1330,11 +1807,14 @@ def render_notes(
                 "fieldOverridesUsed": mode_info["fieldOverridesUsed"],
                 "rowOverridesUsed": mode_info["rowOverridesUsed"],
                 "labelMappingsUsed": mode_info["labelMappingsUsed"],
+                "prefaceOverridesUsed": mode_info.get("prefaceOverridesUsed", []),
+                "prefaceCoveredSourceRefs": mode_info.get("prefaceCoveredSourceRefs", []),
                 "appendixOverridesUsed": mode_info.get("appendixOverridesUsed", []),
                 "appendixCoveredSourceRefs": mode_info.get("appendixCoveredSourceRefs", []),
                 "coveredDiagnostics": mode_info["coveredDiagnostics"],
                 "nonRenderedEvidenceReasons": accounting["nonRenderedEvidenceReasons"],
                 "physicalPage": note_pages[note_number],
+                "displayFieldAuthorities": mode_info.get("displayFieldAuthorities", []),
             }
 
     tex_lines.append("\\fussy")
