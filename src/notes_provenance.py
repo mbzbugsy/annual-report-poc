@@ -8,8 +8,8 @@ class NotesProvenanceError(ValueError):
     pass
 
 
-DIRECT_WORKBOOK_NOTES = {"4", "13", "14"}
-HYBRID_WORKBOOK_NOTES = {"17", "18", "19", "22", "23", "26"}
+DIRECT_WORKBOOK_NOTES = {"13", "14"}
+HYBRID_WORKBOOK_NOTES = {"4", "17", "18", "19", "22", "23", "26"}
 FULL_NOTE_OVERRIDE_NOTES = {
     "1", "2", "3", "5", "6", "7", "8", "9", "10", "11", "12", "15", "16", "20", "21", "24", "25", "27", "28"
 }
@@ -97,8 +97,13 @@ def validate_provenance_payload(payload: Dict[str, Any]) -> None:
             "fieldOverridesUsed",
             "rowOverridesUsed",
             "labelMappingsUsed",
+            "prefaceOverridesUsed",
+            "prefaceCoveredSourceRefs",
+            "appendixOverridesUsed",
+            "appendixCoveredSourceRefs",
             "coveredDiagnostics",
             "nonRenderedEvidenceReasons",
+            "displayFieldAuthorities",
         ):
             value = note_payload.get(list_field)
             if not isinstance(value, list):
